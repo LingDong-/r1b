@@ -1,0 +1,4 @@
+.DS_Store
+a.out
+*/__pycache__/
+*/*.o
