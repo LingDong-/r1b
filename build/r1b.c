@@ -10,10 +10,9 @@
 #ifndef R1B_HDR
 #define R1B_HDR
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-#include <float.h>
+// ---------------
+// CONFIGS
+// ---------------
 
 #ifndef R1B_CONFIG_LINE3D_EPSILON
   #define R1B_CONFIG_LINE3D_EPSILON 0.01
@@ -26,6 +25,17 @@
 #ifndef R1B_CONFIG_STBIW_PATH
   #define R1B_CONFIG_STBIW_PATH "external/stb_image_write.h"
 #endif
+
+// ---------------
+// MORE CONFIGS
+// ---------------
+// R1B_CONFIG_NO_FG8X12
+// R1B_CONFIG_NO_STBI
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#include <float.h>
 
 #define STB_IMAGE_IMPLEMENTATION
 
@@ -573,7 +583,7 @@ STBIDEF int   stbi_zlib_decode_noheader_buffer(char *obuffer, int olen, const ch
 #include <limits.h>
 
 #if !defined(STBI_NO_LINEAR) || !defined(STBI_NO_HDR)
-// #include <math.h>  // ldexp, pow
+#include <math.h>  // ldexp, pow
 #endif
 
 #ifndef STBI_NO_STDIO
@@ -7905,7 +7915,7 @@ STBIWDEF void stbi_flip_vertically_on_write(int flip_boolean);
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
-// #include <math.h>
+#include <math.h>
 
 #if defined(STBIW_MALLOC) && defined(STBIW_FREE) && (defined(STBIW_REALLOC) || defined(STBIW_REALLOC_SIZED))
 // ok
@@ -9358,6 +9368,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 
+
 #define R1B_INFER          0
 
 #define R1B_DTHR_ORD       1
@@ -9507,6 +9518,34 @@ r1b_im_t* r1b_pttn_CHESS = NULL; r1b_im_t* r1b_pttn_DMOND = NULL;
 
 #define R1B_DESTROY_PATTERN(x) if (r1b_pttn_ ## x) {free(r1b_pttn_ ## x);};
 
+#ifndef R1B_CONFIG_NO_FG8X12
+  // converted from freeglut/freeglut_font_data.c
+  static char     R1B_FG8X12_GLYPHS [] = {0,0,0,0,0,0,0,0,0,0,0,0,0,16,16,16,16,16,16,16,0,16,0,0,0,36,36,36,0,0,0,0,0,0,0,0,0,0,36,36,126,36,126,36,36,0,0,0,0,16,60,80,80,56,20,20,120,16,0,0,0,34,82,36,8,8,16,36,42,68,0,0,0,0,0,48,72,72,48,74,68,58,0,0,0,56,48,64,0,0,0,0,0,0,0,0,0,4,8,8,16,16,16,8,8,4,0,0,0,32,16,16,8,8,8,16,16,32,0,0,0,0,0,36,24,126,24,36,0,0,0,0,0,0,0,16,16,124,16,16,0,0,0,0,0,0,0,0,0,0,0,0,56,48,64,0,0,0,0,0,0,126,0,0,0,0,0,0,0,0,0,0,0,0,0,0,16,56,16,0,0,2,2,4,8,16,32,64,128,128,0,0,0,24,36,66,66,66,66,66,36,24,0,0,0,16,48,80,16,16,16,16,16,124,0,0,0,60,66,66,2,4,24,32,64,126,0,0,0,126,2,4,8,28,2,2,66,60,0,0,0,4,12,20,36,68,68,126,4,4,0,0,0,126,64,64,92,98,2,2,66,60,0,0,0,28,32,64,64,92,98,66,66,60,0,0,0,126,2,4,8,8,16,16,32,32,0,0,0,60,66,66,66,60,66,66,66,60,0,0,0,60,66,66,70,58,2,2,4,56,0,0,0,0,0,16,56,16,0,0,16,56,16,0,0,0,0,16,56,16,0,0,56,48,64,0,0,2,4,8,16,32,16,8,4,2,0,0,0,0,0,0,126,0,0,126,0,0,0,0,0,64,32,16,8,4,8,16,32,64,0,0,0,60,66,66,2,4,8,8,0,8,0,0,0,60,66,66,78,82,86,74,64,60,0,0,0,24,36,66,66,66,126,66,66,66,0,0,0,252,66,66,66,124,66,66,66,252,0,0,0,60,66,64,64,64,64,64,66,60,0,0,0,252,66,66,66,66,66,66,66,252,0,0,0,126,64,64,64,120,64,64,64,126,0,0,0,126,64,64,64,120,64,64,64,64,0,0,0,60,66,64,64,64,78,66,70,58,0,0,0,66,66,66,66,126,66,66,66,66,0,0,0,124,16,16,16,16,16,16,16,124,0,0,0,31,4,4,4,4,4,4,68,56,0,0,0,66,68,72,80,96,80,72,68,66,0,0,0,64,64,64,64,64,64,64,64,126,0,0,0,130,130,198,170,146,146,130,130,130,0,0,0,66,66,98,82,74,70,66,66,66,0,0,0,60,66,66,66,66,66,66,66,60,0,0,0,124,66,66,66,124,64,64,64,64,0,0,0,60,66,66,66,66,66,82,74,60,2,0,0,124,66,66,66,124,80,72,68,66,0,0,0,60,66,64,64,60,2,2,66,60,0,0,0,254,16,16,16,16,16,16,16,16,0,0,0,66,66,66,66,66,66,66,66,60,0,0,0,130,130,68,68,68,40,40,40,16,0,0,0,130,130,130,130,146,146,146,170,68,0,0,0,130,130,68,40,16,40,68,130,130,0,0,0,130,130,68,40,16,16,16,16,16,0,0,0,126,2,4,8,16,32,64,64,126,0,0,0,60,32,32,32,32,32,32,32,60,0,0,0,128,128,64,32,16,8,4,2,2,0,0,0,120,8,8,8,8,8,8,8,120,0,0,0,16,40,68,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,254,0,0,56,24,4,0,0,0,0,0,0,0,0,0,0,0,0,60,2,62,66,70,58,0,0,0,64,64,64,92,98,66,66,98,92,0,0,0,0,0,0,60,66,64,64,66,60,0,0,0,2,2,2,58,70,66,66,70,58,0,0,0,0,0,0,60,66,126,64,66,60,0,0,0,28,34,32,32,124,32,32,32,32,0,0,0,0,0,0,58,68,68,56,64,60,66,60,0,64,64,64,92,98,66,66,66,66,0,0,0,0,16,0,48,16,16,16,16,124,0,0,0,0,4,0,12,4,4,4,4,68,68,56,0,64,64,64,68,72,112,72,68,66,0,0,0,48,16,16,16,16,16,16,16,124,0,0,0,0,0,0,236,146,146,146,146,130,0,0,0,0,0,0,92,98,66,66,66,66,0,0,0,0,0,0,60,66,66,66,66,60,0,0,0,0,0,0,92,98,66,98,92,64,64,64,0,0,0,0,58,70,66,70,58,2,2,2,0,0,0,0,92,34,32,32,32,32,0,0,0,0,0,0,60,66,48,12,66,60,0,0,0,0,32,32,124,32,32,32,34,28,0,0,0,0,0,0,68,68,68,68,68,58,0,0,0,0,0,0,68,68,68,40,40,16,0,0,0,0,0,0,130,130,146,146,170,68,0,0,0,0,0,0,66,36,24,24,36,66,0,0,0,0,0,0,66,66,66,70,58,2,66,60,0,0,0,0,126,4,8,16,32,126,0,0,0,14,16,16,8,48,8,16,16,14,0,0,0,16,16,16,16,16,16,16,16,16,0,0,0,112,8,8,16,12,16,8,8,112,0,0,0,36,84,72,0,0,0,0,0,0,0,0};
+  static uint32_t R1B_FG8X12_OFFSETS[] = {0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40,42,44,46,48,50,52,54,56,58,60,62,64,66,68,70,72,74,76,78,80,82,84,86,88,90,92,94,96,98,100,102,104,106,108,110,112,114,116,118,120,122,124,126,128,130,132,134,136,138,140,142,144,146,148,150,152,154,156,158,160,162,164,166,168,170,172,174,176,178,180,182,184,186,188 };
+  static uint8_t  R1B_FG8X12_SIZES  [] = {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2 };
+  static uint16_t R1B_FG8X12_CMAP   [] = {32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,123,124,125,126};
+  r1b_font_t* r1b_font_fg8x12 = NULL;
+
+  #define R1B_FONT_FG8X12\
+    ((r1b_font_fg8x12) ? (r1b_font_fg8x12) : (\
+      r1b_font_fg8x12 = (r1b_font_t*)malloc(sizeof(r1b_font_t)),\
+      r1b_font_fg8x12 -> glyphs = R1B_FG8X12_GLYPHS ,\
+      r1b_font_fg8x12 -> offsets= R1B_FG8X12_OFFSETS,\
+      r1b_font_fg8x12 -> sizes  = R1B_FG8X12_SIZES  ,\
+      r1b_font_fg8x12 -> cmap   = R1B_FG8X12_CMAP   ,\
+      r1b_font_fg8x12 -> flags  = R1B_FLAG_SORTED   ,\
+      r1b_font_fg8x12 -> h = 12,\
+      r1b_font_fg8x12 -> n = 95,\
+      r1b_font_fg8x12 \
+    ))
+
+    // non-macro wrapper for swig etc.
+    r1b_font_t* r1b_get_font_fg8x12(){{
+      return R1B_FONT_FG8X12;
+    }}
+
+#endif /*R1B_CONFIG_NO_FG8X12*/
+
 float* r1b_tmp0 = NULL;
 int r1b_tmp0_size = 0;
 
@@ -9545,6 +9584,11 @@ void r1b_cleanup(){
     r1b_tmp1_size = 0;
     free(r1b_tmp1);
   }
+  #ifndef R1B_CONFIG_NO_FG8X12
+    if (r1b_font_fg8x12){
+      free(r1b_font_fg8x12);
+    }
+  #endif
   R1B_DESTROY_PATTERN(SOLID); R1B_DESTROY_PATTERN(GRAY5);
   R1B_DESTROY_PATTERN(GRAY4); R1B_DESTROY_PATTERN(GRAY3);
   R1B_DESTROY_PATTERN(GRAY2); R1B_DESTROY_PATTERN(GRAY1);
@@ -9559,27 +9603,49 @@ void r1b_cleanup(){
   R1B_DESTROY_PATTERN(CHESS); R1B_DESTROY_PATTERN(DMOND);
 }
 
-r1b_im_t r1b_read(const char* path){
-  int width, height, channels;
-  unsigned char *image = stbi_load(path,
-                                 &width,
-                                 &height,
-                                 &channels,
-                                 STBI_grey);
-  
-  float* data = (float*)malloc(width*height*sizeof(float));
-  for (int i = 0; i < height; i++){
-    for (int j = 0; j < width; j++){
-      data[i*width+j] = 1.0-(float)image[i*width+j]/255.0;
+#ifndef R1B_CONFIG_NO_STBI
+  r1b_im_t r1b_read(const char* path){  
+    int width, height, channels;
+    unsigned char *image = stbi_load(path,
+                                   &width,
+                                   &height,
+                                   &channels,
+                                   STBI_grey);
+    
+    float* data = (float*)malloc(width*height*sizeof(float));
+    for (int i = 0; i < height; i++){
+      for (int j = 0; j < width; j++){
+        data[i*width+j] = 1.0-(float)image[i*width+j]/255.0;
+      }
+    }
+    stbi_image_free(image);
+    r1b_im_t im;
+    im.w = width;
+    im.h = height;
+    im.data = data;
+    return im;
+  }
+  void r1b_snapshot(const char* path, r1b_im_t* im){
+    unsigned char *image = (unsigned char*)malloc(sizeof(unsigned char)*im->w*im->h);
+    for (int i = 0; i < im->h; i++ ){
+      for (int j = 0; j < im->w; j++ ){
+        image[i*im->w+j] = (unsigned char)(int) ((1.0-fmin(fmax(im->data[i*im->w+j],0.0),1.0)) * 255.0);
+      }
+    }
+    void* ext = (void*)path + strlen(path);
+    while (ext > (void*)path && *(char*)ext != '.') {
+        ext--;
+    }
+    ext ++;
+    if (strcmp(ext,"jpg")==0 || strcmp(ext,"jpeg")==0){
+      stbi_write_jpg(path, im->w, im->h, 1, image, 90);
+    }else if (strcmp(ext,"png")==0){
+      stbi_write_png(path, im->w, im->h, 1, image, im->w);
+    }else if (strcmp(ext,"bmp")==0){
+      stbi_write_bmp(path, im->w, im->h, 1, image);
     }
   }
-  stbi_image_free(image);
-  r1b_im_t im;
-  im.w = width;
-  im.h = height;
-  im.data = data;
-  return im;
-}
+#endif /*R1B_CONFIG_NO_STBI*/
 
 r1b_im_t r1b_zeros(int w, int h){
   r1b_im_t im;
@@ -9598,6 +9664,16 @@ r1b_im_t r1b_ones(int w, int h){
   for (int i = 0; i < l; i++){
     im.data[i] = 1.0;
   }
+  return im;
+}
+
+r1b_im_t r1b_from_array(int w, int h, float* arr){
+  int l = w*h;
+  r1b_im_t im;
+  im.w = w;
+  im.h = h;
+  im.data = (float*)malloc(l*sizeof(float));
+  memcpy(im.data, arr, l*sizeof(float));
   return im;
 }
 
@@ -9794,27 +9870,6 @@ void r1b_lpr(const char* printer, r1b_im_t* im){
   r1b_encode2file("r1b_tmp",im);
   sprintf(buf,"lpr -P%s -o raw r1b_tmp",printer);
   system(buf);
-}
-
-void r1b_snapshot(const char* path, r1b_im_t* im){
-  unsigned char *image = (unsigned char*)malloc(sizeof(unsigned char)*im->w*im->h);
-  for (int i = 0; i < im->h; i++ ){
-    for (int j = 0; j < im->w; j++ ){
-      image[i*im->w+j] = (unsigned char)(int) ((1.0-fmin(fmax(im->data[i*im->w+j],0.0),1.0)) * 255.0);
-    }
-  }
-  void* ext = (void*)path + strlen(path);
-  while (ext > (void*)path && *(char*)ext != '.') {
-      ext--;
-  }
-  ext ++;
-  if (strcmp(ext,"jpg")==0 || strcmp(ext,"jpeg")==0){
-    stbi_write_jpg(path, im->w, im->h, 1, image, 90);
-  }else if (strcmp(ext,"png")==0){
-    stbi_write_png(path, im->w, im->h, 1, image, im->w);
-  }else if (strcmp(ext,"bmp")==0){
-    stbi_write_bmp(path, im->w, im->h, 1, image);
-  }
 }
 
 
@@ -10193,6 +10248,66 @@ int r1b_putchar(r1b_im_t* im, int cp, int x, int y, r1b_font_t* font,float val, 
   return w;
 }
 
+// https://github.com/skeeto/branchless-utf8/blob/master/utf8.h
+// Branchless UTF-8 decoder
+//
+/* Decode the next character, C, from BUF, reporting errors in E.
+ *
+ * Since this is a branchless decoder, four bytes will be read from the
+ * buffer regardless of the actual length of the next character. This
+ * means the buffer _must_ have at least three bytes of zero padding
+ * following the end of the data stream.
+ *
+ * Errors are reported in E, which will be non-zero if the parsed
+ * character was somehow invalid: invalid byte sequence, non-canonical
+ * encoding, or a surrogate half.
+ *
+ * The function returns a pointer to the next character. When an error
+ * occurs, this pointer will be a guess that depends on the particular
+ * error, but it will always advance at least one byte.
+ */
+static void* r1b_utf8_decode(void *buf, uint32_t *c, int *e) {
+    static const char lengths[] = {
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 3, 3, 4, 0
+    };
+    static const int masks[]  = {0x00, 0x7f, 0x1f, 0x0f, 0x07};
+    static const uint32_t mins[] = {4194304, 0, 128, 2048, 65536};
+    static const int shiftc[] = {0, 18, 12, 6, 0};
+    static const int shifte[] = {0, 6, 4, 2, 0};
+
+    unsigned char *s = buf;
+    int len = lengths[s[0] >> 3];
+
+    /* Compute the pointer to the next character early so that the next
+     * iteration can start working on the next character. Neither Clang
+     * nor GCC figure out this reordering on their own.
+     */
+    unsigned char *next = s + len + !len;
+
+    /* Assume a four-byte character and load four bytes. Unused bits are
+     * shifted out.
+     */
+    *c  = (uint32_t)(s[0] & masks[len]) << 18;
+    *c |= (uint32_t)(s[1] & 0x3f) << 12;
+    *c |= (uint32_t)(s[2] & 0x3f) <<  6;
+    *c |= (uint32_t)(s[3] & 0x3f) <<  0;
+    *c >>= shiftc[len];
+
+    /* Accumulate the various error conditions. */
+    *e  = (*c < mins[len]) << 6; // non-canonical encoding
+    *e |= ((*c >> 11) == 0x1b) << 7;  // surrogate half?
+    *e |= (*c > 0x10FFFF) << 8;  // out of range?
+    *e |= (s[1] & 0xc0) >> 2;
+    *e |= (s[2] & 0xc0) >> 4;
+    *e |= (s[3]       ) >> 6;
+    *e ^= 0x2a; // top two bits of each tail byte correct?
+    *e >>= shifte[len];
+
+    return next;
+}
+
+
 void r1b_text(r1b_im_t* im, wchar_t* str, int x, int y, r1b_font_t* font, float val, int mode, int highlight){
   wchar_t c = 42;
   int i = 0;
@@ -10212,6 +10327,20 @@ void r1b_text(r1b_im_t* im, wchar_t* str, int x, int y, r1b_font_t* font, float 
     i ++;
   }
 }
+
+void r1b_text_utf8(r1b_im_t* im, char* str, int x, int y, r1b_font_t* font, float val, int mode, int highlight){
+  wchar_t wstr[strlen(str)];
+  void* next = (void*)str;
+  int e;
+  int idx = 0;
+  while(next <= (void*)str+strlen(str)){
+    next = r1b_utf8_decode(next, (uint32_t *)&wstr[idx], &e);
+    idx++;
+  }
+  wstr[idx] = 0;
+  r1b_text(im,wstr,x,y,font,val,mode,highlight);
+}
+
 void r1b_text_ascii(r1b_im_t* im, char* str, int x, int y, r1b_font_t* font, float val, int mode, int highlight){
   char c = 42;
   int i = 0;

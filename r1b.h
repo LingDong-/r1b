@@ -214,6 +214,11 @@ r1b_im_t* r1b_pttn_CHESS = NULL; r1b_im_t* r1b_pttn_DMOND = NULL;
       r1b_font_fg8x12 \
     ))
 
+    // non-macro wrapper for swig etc.
+    r1b_font_t* r1b_get_font_fg8x12(){{
+      return R1B_FONT_FG8X12;
+    }}
+
 #endif /*R1B_CONFIG_NO_FG8X12*/
 
 float* r1b_tmp0 = NULL;
@@ -334,6 +339,16 @@ r1b_im_t r1b_ones(int w, int h){
   for (int i = 0; i < l; i++){
     im.data[i] = 1.0;
   }
+  return im;
+}
+
+r1b_im_t r1b_from_array(int w, int h, float* arr){
+  int l = w*h;
+  r1b_im_t im;
+  im.w = w;
+  im.h = h;
+  im.data = (float*)malloc(l*sizeof(float));
+  memcpy(im.data, arr, l*sizeof(float));
   return im;
 }
 
@@ -908,6 +923,66 @@ int r1b_putchar(r1b_im_t* im, int cp, int x, int y, r1b_font_t* font,float val, 
   return w;
 }
 
+// https://github.com/skeeto/branchless-utf8/blob/master/utf8.h
+// Branchless UTF-8 decoder
+//
+/* Decode the next character, C, from BUF, reporting errors in E.
+ *
+ * Since this is a branchless decoder, four bytes will be read from the
+ * buffer regardless of the actual length of the next character. This
+ * means the buffer _must_ have at least three bytes of zero padding
+ * following the end of the data stream.
+ *
+ * Errors are reported in E, which will be non-zero if the parsed
+ * character was somehow invalid: invalid byte sequence, non-canonical
+ * encoding, or a surrogate half.
+ *
+ * The function returns a pointer to the next character. When an error
+ * occurs, this pointer will be a guess that depends on the particular
+ * error, but it will always advance at least one byte.
+ */
+static void* r1b_utf8_decode(void *buf, uint32_t *c, int *e) {
+    static const char lengths[] = {
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 3, 3, 4, 0
+    };
+    static const int masks[]  = {0x00, 0x7f, 0x1f, 0x0f, 0x07};
+    static const uint32_t mins[] = {4194304, 0, 128, 2048, 65536};
+    static const int shiftc[] = {0, 18, 12, 6, 0};
+    static const int shifte[] = {0, 6, 4, 2, 0};
+
+    unsigned char *s = buf;
+    int len = lengths[s[0] >> 3];
+
+    /* Compute the pointer to the next character early so that the next
+     * iteration can start working on the next character. Neither Clang
+     * nor GCC figure out this reordering on their own.
+     */
+    unsigned char *next = s + len + !len;
+
+    /* Assume a four-byte character and load four bytes. Unused bits are
+     * shifted out.
+     */
+    *c  = (uint32_t)(s[0] & masks[len]) << 18;
+    *c |= (uint32_t)(s[1] & 0x3f) << 12;
+    *c |= (uint32_t)(s[2] & 0x3f) <<  6;
+    *c |= (uint32_t)(s[3] & 0x3f) <<  0;
+    *c >>= shiftc[len];
+
+    /* Accumulate the various error conditions. */
+    *e  = (*c < mins[len]) << 6; // non-canonical encoding
+    *e |= ((*c >> 11) == 0x1b) << 7;  // surrogate half?
+    *e |= (*c > 0x10FFFF) << 8;  // out of range?
+    *e |= (s[1] & 0xc0) >> 2;
+    *e |= (s[2] & 0xc0) >> 4;
+    *e |= (s[3]       ) >> 6;
+    *e ^= 0x2a; // top two bits of each tail byte correct?
+    *e >>= shifte[len];
+
+    return next;
+}
+
+
 void r1b_text(r1b_im_t* im, wchar_t* str, int x, int y, r1b_font_t* font, float val, int mode, int highlight){
   wchar_t c = 42;
   int i = 0;
@@ -927,6 +1002,20 @@ void r1b_text(r1b_im_t* im, wchar_t* str, int x, int y, r1b_font_t* font, float 
     i ++;
   }
 }
+
+void r1b_text_utf8(r1b_im_t* im, char* str, int x, int y, r1b_font_t* font, float val, int mode, int highlight){
+  wchar_t wstr[strlen(str)];
+  void* next = (void*)str;
+  int e;
+  int idx = 0;
+  while(next <= (void*)str+strlen(str)){
+    next = r1b_utf8_decode(next, (uint32_t *)&wstr[idx], &e);
+    idx++;
+  }
+  wstr[idx] = 0;
+  r1b_text(im,wstr,x,y,font,val,mode,highlight);
+}
+
 void r1b_text_ascii(r1b_im_t* im, char* str, int x, int y, r1b_font_t* font, float val, int mode, int highlight){
   char c = 42;
   int i = 0;

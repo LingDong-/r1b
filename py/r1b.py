@@ -61,33 +61,57 @@ class _SwigNonDynamicMeta(type):
     __setattr__ = _swig_setattr_nondynamic_class_variable(type.__setattr__)
 
 
-class floatArray(object):
+class FloatArray(object):
     thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
     __repr__ = _swig_repr
 
     def __init__(self, nelements):
-        _r1b.floatArray_swiginit(self, _r1b.new_floatArray(nelements))
-    __swig_destroy__ = _r1b.delete_floatArray
+        _r1b.FloatArray_swiginit(self, _r1b.new_FloatArray(nelements))
+    __swig_destroy__ = _r1b.delete_FloatArray
 
     def __getitem__(self, index):
-        return _r1b.floatArray___getitem__(self, index)
+        return _r1b.FloatArray___getitem__(self, index)
 
     def __setitem__(self, index, value):
-        return _r1b.floatArray___setitem__(self, index, value)
+        return _r1b.FloatArray___setitem__(self, index, value)
 
     def cast(self):
-        return _r1b.floatArray_cast(self)
+        return _r1b.FloatArray_cast(self)
 
     @staticmethod
     def frompointer(t):
-        return _r1b.floatArray_frompointer(t)
+        return _r1b.FloatArray_frompointer(t)
 
-# Register floatArray in _r1b:
-_r1b.floatArray_swigregister(floatArray)
+# Register FloatArray in _r1b:
+_r1b.FloatArray_swigregister(FloatArray)
 
-def floatArray_frompointer(t):
-    return _r1b.floatArray_frompointer(t)
+def FloatArray_frompointer(t):
+    return _r1b.FloatArray_frompointer(t)
 
+R1B_INFER = _r1b.R1B_INFER
+R1B_DTHR_ORD = _r1b.R1B_DTHR_ORD
+R1B_DTHR_FS = _r1b.R1B_DTHR_FS
+R1B_SMPL_NN = _r1b.R1B_SMPL_NN
+R1B_SMPL_BILINEAR = _r1b.R1B_SMPL_BILINEAR
+R1B_BRDR_COPY = _r1b.R1B_BRDR_COPY
+R1B_BRDR_ZERO = _r1b.R1B_BRDR_ZERO
+R1B_BRDR_NONE = _r1b.R1B_BRDR_NONE
+R1B_BRDR_WRAP = _r1b.R1B_BRDR_WRAP
+R1B_FONT_HEX = _r1b.R1B_FONT_HEX
+R1B_BLIT_OR = _r1b.R1B_BLIT_OR
+R1B_BLIT_ADD = _r1b.R1B_BLIT_ADD
+R1B_BLIT_FLIP = _r1b.R1B_BLIT_FLIP
+R1B_BLIT_SET = _r1b.R1B_BLIT_SET
+R1B_POLY_CONVEX = _r1b.R1B_POLY_CONVEX
+R1B_POLY_CONCAVE = _r1b.R1B_POLY_CONCAVE
+R1B_WIRE_NONE = _r1b.R1B_WIRE_NONE
+R1B_WIRE_FRONT = _r1b.R1B_WIRE_FRONT
+R1B_WIRE_ALL = _r1b.R1B_WIRE_ALL
+R1B_SHDR_NONE = _r1b.R1B_SHDR_NONE
+R1B_SHDR_FLAT = _r1b.R1B_SHDR_FLAT
+R1B_SHDR_NDOTL = _r1b.R1B_SHDR_NDOTL
+R1B_SHDR_NDOTLF = _r1b.R1B_SHDR_NDOTLF
+R1B_FLAG_SORTED = _r1b.R1B_FLAG_SORTED
 class r1b_im_t(object):
     thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
     __repr__ = _swig_repr
@@ -139,6 +163,9 @@ class r1b_mesh_t(object):
 _r1b.r1b_mesh_t_swigregister(r1b_mesh_t)
 
 
+def r1b_get_font_fg8x12():
+    return _r1b.r1b_get_font_fg8x12()
+
 def r1b_make_tmp0(w, h):
     return _r1b.r1b_make_tmp0(w, h)
 
@@ -151,11 +178,17 @@ def r1b_cleanup():
 def r1b_read(path):
     return _r1b.r1b_read(path)
 
+def r1b_snapshot(path, im):
+    return _r1b.r1b_snapshot(path, im)
+
 def r1b_zeros(w, h):
     return _r1b.r1b_zeros(w, h)
 
 def r1b_ones(w, h):
     return _r1b.r1b_ones(w, h)
+
+def r1b_from_array(w, h, arr):
+    return _r1b.r1b_from_array(w, h, arr)
 
 def r1b_infs(w, h):
     return _r1b.r1b_infs(w, h)
@@ -198,9 +231,6 @@ def r1b_encode2file(path, im):
 
 def r1b_lpr(printer, im):
     return _r1b.r1b_lpr(printer, im)
-
-def r1b_snapshot(path, im):
-    return _r1b.r1b_snapshot(path, im)
 
 def r1b_resample_nearest(im, w, h):
     return _r1b.r1b_resample_nearest(im, w, h)
@@ -255,6 +285,9 @@ def r1b_putchar(im, cp, x, y, font, val, mode, highlight):
 
 def r1b_text(im, str, x, y, font, val, mode, highlight):
     return _r1b.r1b_text(im, str, x, y, font, val, mode, highlight)
+
+def r1b_text_utf8(im, str, x, y, font, val, mode, highlight):
+    return _r1b.r1b_text_utf8(im, str, x, y, font, val, mode, highlight)
 
 def r1b_text_ascii(im, str, x, y, font, val, mode, highlight):
     return _r1b.r1b_text_ascii(im, str, x, y, font, val, mode, highlight)
@@ -312,6 +345,150 @@ def r1b_compute_vertex_normals(mesh):
 
 def r1b_render_mesh(im, depth, mesh, f, pttn, light, wire_val, shdr, wire):
     return _r1b.r1b_render_mesh(im, depth, mesh, f, pttn, light, wire_val, shdr, wire)
+
+def nullptr():
+    return _r1b.nullptr()
+
+
+cleanup=r1b_cleanup
+read=r1b_read
+snapshot=r1b_snapshot
+zeros=r1b_zeros
+ones=r1b_ones
+from_array=r1b_from_array
+infs=r1b_infs
+free=r1b_free
+transpose=r1b_transpose
+transpose_flip=r1b_transpose_flip
+normalize=r1b_normalize
+copy_of=r1b_copy_of
+copy_to=r1b_copy_to
+dither=r1b_dither
+log=r1b_log
+encode=r1b_encode
+encode2file=r1b_encode2file
+lpr=r1b_lpr
+resample=r1b_resample
+get=r1b_get
+set=r1b_set
+conv2d=r1b_conv2d
+triangle=r1b_triangle
+rect=r1b_rect
+line=r1b_line
+thick_line=r1b_thick_line
+load_font_hex=r1b_load_font_hex
+destroy_font=r1b_destroy_font
+glyph_index=r1b_glyph_index
+putchar=r1b_putchar
+text_utf8=r1b_text_utf8
+text_ascii=r1b_text_ascii
+triangulate=r1b_triangulate
+ellipse=r1b_ellipse
+line_ellipse=r1b_line_ellipse
+blit=r1b_blit
+load_obj=r1b_load_obj
+normalize_mesh=r1b_normalize_mesh
+destroy_mesh=r1b_destroy_mesh
+triangle3d=r1b_triangle3d
+line3d=r1b_line3d
+compute_vertex_normals=r1b_compute_vertex_normals
+
+INFER=R1B_INFER
+DTHR_ORD=R1B_DTHR_ORD
+DTHR_FS=R1B_DTHR_FS
+SMPL_NN=R1B_SMPL_NN
+SMPL_BILINEAR=R1B_SMPL_BILINEAR
+BRDR_COPY=R1B_BRDR_COPY
+BRDR_ZERO=R1B_BRDR_ZERO
+BRDR_NONE=R1B_BRDR_NONE
+BRDR_WRAP=R1B_BRDR_WRAP
+FONT_HEX=R1B_FONT_HEX
+BLIT_OR=R1B_BLIT_OR
+BLIT_ADD=R1B_BLIT_ADD
+BLIT_FLIP=R1B_BLIT_FLIP
+BLIT_SET=R1B_BLIT_SET
+POLY_CONVEX=R1B_POLY_CONVEX
+POLY_CONCAVE=R1B_POLY_CONCAVE
+WIRE_NONE=R1B_WIRE_NONE
+WIRE_FRONT=R1B_WIRE_FRONT
+WIRE_ALL=R1B_WIRE_ALL
+SHDR_NONE=R1B_SHDR_NONE
+SHDR_FLAT=R1B_SHDR_FLAT
+SHDR_NDOTL=R1B_SHDR_NDOTL
+SHDR_NDOTLF=R1B_SHDR_NDOTLF
+FLAG_SORTED=R1B_FLAG_SORTED
+
+def from_list(lst):
+	h = len(lst)
+	w = len(lst[0])
+	arr = FloatArray(w*h)
+	for i in range(h):
+		for j in range(w):
+			arr[i*w+j] = lst[i][j]
+	return r1b_from_array(w,h,arr)
+
+def to_list(im):
+	lst = []
+	for i in range(im.h):
+		lst.append([])
+		for j in range(im.w):
+			lst[-1].append(get(im,j,i,BRDR_NONE))
+	return lst
+
+def float_array(lst):
+	arr = FloatArray(len(lst))
+	for i in range(len(lst)):
+		arr[i] = lst[i]
+	return arr
+
+def lines(im,pts,close,val,mode):
+	X,Y = zip(*pts)
+	return r1b_lines(im,float_array(X),float_array(Y),len(X),close,val,mode)
+
+def polygon(im,pts,pttn,mode):
+	X,Y = zip(*pts)
+	return r1b_polygon(im,float_array(X),float_array(Y),len(X),pttn,mode)
+
+def transform_mesh(mesh,mat):
+	return r1b_transform_mesh(mesh,float_array(mat))
+
+def render_mesh(im, depth, mesh, f, pttn, light, wire_val, shdr, wire):
+	if pttn == None:
+		pttn = nullptr()
+
+	if light != None:
+		return r1b_render_mesh(im, depth, mesh, f, nullptr(), float_array(light), wire_val, shdr, wire)
+	else:
+		return r1b_render_mesh(im, depth, mesh, f, pttn, nullptr(), wire_val, shdr, wire)
+
+PTTN_SOLID = r1b_from_array( 1, 1, float_array([1]))
+PTTN_GRAY5 = r1b_from_array( 4, 4, float_array([1,1,0,1,  1,1,1,1,  0,1,1,1,  1,1,1,1,  ]))
+PTTN_GRAY4 = r1b_from_array( 4, 4, float_array([1,1,0,1,  0,1,1,1,  1,1,0,1,  0,1,1,1,  ]))
+PTTN_GRAY3 = r1b_from_array( 2, 2, float_array([1,0,  0,1,  ]))
+PTTN_GRAY2 = r1b_from_array( 4, 4, float_array([0,0,1,0,  1,0,0,0,  0,0,1,0,  1,0,0,0,  ]))
+PTTN_GRAY1 = r1b_from_array( 4, 4, float_array([0,0,1,0,  0,0,0,0,  1,0,0,0,  0,0,0,0,  ]))
+PTTN_EMPTY = r1b_from_array( 1, 1, float_array([0]))
+PTTN_GRID1 = r1b_from_array( 2, 2, float_array([0,1,  1,1,  ]))
+PTTN_GRID2 = r1b_from_array( 4, 4, float_array([0,0,0,1,  0,0,0,1,  0,0,0,1,  1,1,1,1,  ]))
+PTTN_DOTS1 = r1b_from_array( 2, 2, float_array([1,0,  0,0,  ]))
+PTTN_DOTS2 = r1b_from_array( 4, 4, float_array([1,0,0,0,  0,0,0,0,  0,0,0,0,  0,0,0,0,  ]))
+PTTN_DOTSR = r1b_from_array(12,12, float_array([0,0,0,0,0,1,0,0,0,0,0,0,  0,0,0,0,0,0,0,0,0,0,0,0,  0,1,0,0,0,0,0,0,0,0,0,1,  0,0,0,0,0,0,0,0,0,0,0,0,  0,0,0,0,0,0,0,1,0,0,0,0,  0,0,0,0,0,0,0,0,0,0,0,0,  1,0,0,0,0,0,0,0,0,0,0,0,  0,0,0,0,0,0,0,0,0,0,0,0,  0,0,0,0,0,1,0,0,0,0,0,1,  0,0,0,0,0,0,0,0,0,0,0,0,  0,0,0,0,0,0,0,0,0,0,0,0,  0,0,1,0,0,0,0,0,0,1,0,0,  ]))
+PTTN_HRZL1 = r1b_from_array( 1, 2, float_array([1,  0,  ]))
+PTTN_VRTL1 = r1b_from_array( 2, 1, float_array([1,0,  ]))
+PTTN_HRZL2 = r1b_from_array( 1, 4, float_array([1,  0,  0,  0,  ]))
+PTTN_VRTL2 = r1b_from_array( 4, 1, float_array([1,0,0,0,  ]))
+PTTN_DGNLL = r1b_from_array( 4, 4, float_array([0,0,0,1,  0,0,1,0,  0,1,0,0,  1,0,0,0,  ]))
+PTTN_DGNLR = r1b_from_array( 4, 4, float_array([1,0,0,0,  0,1,0,0,  0,0,1,0,  0,0,0,1,  ]))
+PTTN_CROSS = r1b_from_array( 4, 4, float_array([1,0,0,0,  0,1,0,1,  0,0,1,0,  0,1,0,1,  ]))
+PTTN_BRICK = r1b_from_array( 8, 8, float_array([1,1,1,1,1,1,1,1,  0,0,0,0,1,0,0,0,  0,0,0,0,1,0,0,0,  0,0,0,0,1,0,0,0,  1,1,1,1,1,1,1,1,  1,0,0,0,0,0,0,0,  1,0,0,0,0,0,0,0,  1,0,0,0,0,0,0,0,  ]))
+PTTN_SCALE = r1b_from_array( 8, 8, float_array([0,0,0,0,1,0,0,0,  0,0,0,1,0,1,0,0,  1,1,1,0,0,0,1,1,  1,0,0,0,0,0,0,0,  1,0,0,0,0,0,0,0,  0,1,0,0,0,0,0,1,  0,0,1,1,1,1,1,0,  0,0,0,0,1,0,0,0,  ]))
+PTTN_WAVES = r1b_from_array( 8, 8, float_array([0,0,0,0,0,0,1,0,  0,0,0,0,0,1,0,1,  1,0,0,0,1,0,0,0,  1,0,0,0,1,0,0,0,  1,0,0,0,1,0,0,0,  1,0,0,0,1,0,0,0,  0,1,0,1,0,0,0,0,  0,0,1,0,0,0,0,0,  ]))
+PTTN_CHESS = r1b_from_array( 4, 4, float_array([1,1,0,0,  1,1,0,0,  0,0,1,1,  0,0,1,1,  ]))
+PTTN_DMOND = r1b_from_array( 8, 8, float_array([0,0,0,0,1,0,0,0,  0,0,0,1,0,1,0,0,  0,0,1,0,1,0,1,0,  0,1,0,1,0,1,0,1,  0,0,1,0,1,0,1,0,  0,0,0,1,0,1,0,0,  0,0,0,0,1,0,0,0,  0,0,0,0,0,0,0,0,  ]))
+
+FONT_FG8X12 = r1b_get_font_fg8x12()
+
+NULL = nullptr()
 
 
 

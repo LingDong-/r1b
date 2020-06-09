@@ -2633,9 +2633,9 @@ SWIGINTERN PyObject *SWIG_PyStaticMethod_New(PyObject *SWIGUNUSEDPARM(self), PyO
 
 /* -------- TYPES TABLE (BEGIN) -------- */
 
-#define SWIGTYPE_p_char swig_types[0]
-#define SWIGTYPE_p_float swig_types[1]
-#define SWIGTYPE_p_floatArray swig_types[2]
+#define SWIGTYPE_p_FloatArray swig_types[0]
+#define SWIGTYPE_p_char swig_types[1]
+#define SWIGTYPE_p_float swig_types[2]
 #define SWIGTYPE_p_int swig_types[3]
 #define SWIGTYPE_p_r1b_font_t swig_types[4]
 #define SWIGTYPE_p_r1b_im_t swig_types[5]
@@ -2643,9 +2643,10 @@ SWIGINTERN PyObject *SWIG_PyStaticMethod_New(PyObject *SWIGUNUSEDPARM(self), PyO
 #define SWIGTYPE_p_uint16_t swig_types[7]
 #define SWIGTYPE_p_uint32_t swig_types[8]
 #define SWIGTYPE_p_uint8_t swig_types[9]
-#define SWIGTYPE_p_wchar_t swig_types[10]
-static swig_type_info *swig_types[12];
-static swig_module_info swig_module = {swig_types, 11, 0, 0, 0, 0};
+#define SWIGTYPE_p_void swig_types[10]
+#define SWIGTYPE_p_wchar_t swig_types[11]
+static swig_type_info *swig_types[13];
+static swig_module_info swig_module = {swig_types, 12, 0, 0, 0, 0};
 #define SWIG_TypeQuery(name) SWIG_TypeQueryModule(&swig_module, &swig_module, name)
 #define SWIG_MangledTypeQuery(name) SWIG_MangledTypeQueryModule(&swig_module, &swig_module, name)
 
@@ -2676,7 +2677,7 @@ static swig_module_info swig_module = {swig_types, 11, 0, 0, 0, 0};
 #define SWIG_as_voidptrptr(a) ((void)SWIG_as_voidptr(*a),(void**)(a)) 
 
 
-typedef float floatArray;
+typedef float FloatArray;
 
 
 SWIGINTERN int
@@ -2885,13 +2886,13 @@ SWIG_AsVal_size_t (PyObject * obj, size_t *val)
   return res;
 }
 
-SWIGINTERN floatArray *new_floatArray(size_t nelements){
+SWIGINTERN FloatArray *new_FloatArray(size_t nelements){
     return (float *)calloc(nelements, sizeof(float));
   }
-SWIGINTERN void delete_floatArray(floatArray *self){
+SWIGINTERN void delete_FloatArray(FloatArray *self){
     free((char*)self);
   }
-SWIGINTERN float floatArray___getitem__(floatArray *self,size_t index){
+SWIGINTERN float FloatArray___getitem__(FloatArray *self,size_t index){
     return self[index];
   }
 
@@ -2964,48 +2965,53 @@ SWIG_AsVal_float (PyObject * obj, float *val)
   return res;
 }
 
-SWIGINTERN void floatArray___setitem__(floatArray *self,size_t index,float value){
+SWIGINTERN void FloatArray___setitem__(FloatArray *self,size_t index,float value){
     self[index] = value;
   }
-SWIGINTERN float *floatArray_cast(floatArray *self){
+SWIGINTERN float *FloatArray_cast(FloatArray *self){
     return self;
   }
-SWIGINTERN floatArray *floatArray_frompointer(float *t){
-    return (floatArray *)(t);
+SWIGINTERN FloatArray *FloatArray_frompointer(float *t){
+    return (FloatArray *)(t);
   }
 
-typedef struct {
-  int w;
-  int h;
-  float* data;
-} r1b_im_t;
 
-typedef struct {
-  int h;
-  char* glyphs;
-  int n;
-  uint32_t* offsets;
-  uint8_t*  sizes;
-  uint16_t* cmap;
-  int flags;
-} r1b_font_t;
-
-typedef struct {
-  float* X;
-  float* Y;
-  float* Z;
-  int* tris;
-  float* norms;
-  int n_vtx;
-  int n_tri;
-} r1b_mesh_t;
-
+#define R1B_INFER          0
+#define R1B_DTHR_ORD       1
+#define R1B_DTHR_FS        2
+#define R1B_SMPL_NN        11
+#define R1B_SMPL_BILINEAR  12
+#define R1B_BRDR_COPY      21
+#define R1B_BRDR_ZERO      22
+#define R1B_BRDR_NONE      23
+#define R1B_BRDR_WRAP      24
+#define R1B_FONT_HEX       31
+#define R1B_BLIT_OR        41
+#define R1B_BLIT_ADD       42
+#define R1B_BLIT_FLIP      43
+#define R1B_BLIT_SET       44
+#define R1B_POLY_CONVEX    51
+#define R1B_POLY_CONCAVE   52
+#define R1B_WIRE_NONE      61
+#define R1B_WIRE_FRONT     62
+#define R1B_WIRE_ALL       63
+#define R1B_SHDR_NONE      20
+#define R1B_SHDR_FLAT      21
+#define R1B_SHDR_NDOTL     22
+#define R1B_SHDR_NDOTLF    23
+#define R1B_FLAG_SORTED    1
+typedef struct {  int w;  int h;  float* data;} r1b_im_t;
+typedef struct {  int h;  char* glyphs;  int n;  uint32_t* offsets;  uint8_t*  sizes;  uint16_t* cmap;  int flags;} r1b_font_t;
+typedef struct {  float* X;  float* Y;  float* Z;  int* tris;  float* norms;  int n_vtx;  int n_tri;} r1b_mesh_t;
+r1b_font_t* r1b_get_font_fg8x12();;
 void r1b_make_tmp0(int w, int h);
 void r1b_make_tmp1(int w, int h);
 void r1b_cleanup();
 r1b_im_t r1b_read(const char* path);
+void r1b_snapshot(const char* path, r1b_im_t* im);
 r1b_im_t r1b_zeros(int w, int h);
 r1b_im_t r1b_ones(int w, int h);
+r1b_im_t r1b_from_array(int w, int h, float* arr);
 r1b_im_t r1b_infs(int w, int h);
 void r1b_free(r1b_im_t* im);
 void r1b_transpose(r1b_im_t* im);
@@ -3020,7 +3026,6 @@ void r1b_log(r1b_im_t* im);
 char* r1b_encode(r1b_im_t* im, int* n_bytes_written);
 void r1b_encode2file(const char* path, r1b_im_t* im);
 void r1b_lpr(const char* printer, r1b_im_t* im);
-void r1b_snapshot(const char* path, r1b_im_t* im);
 void r1b_resample_nearest(r1b_im_t* im, int w, int h);
 void r1b_resample_bilinear(r1b_im_t* im, int w, int h);
 void r1b_resample(r1b_im_t* im, int w, int h, int mode);
@@ -3039,6 +3044,7 @@ int r1b_glyph_index_bin_search(r1b_font_t* font, int cp, int i0, int i1);
 int r1b_glyph_index(r1b_font_t* font, int cp);
 int r1b_putchar(r1b_im_t* im, int cp, int x, int y, r1b_font_t* font,float val, int mode, int highlight);
 void r1b_text(r1b_im_t* im, wchar_t* str, int x, int y, r1b_font_t* font, float val, int mode, int highlight);
+void r1b_text_utf8(r1b_im_t* im, char* str, int x, int y, r1b_font_t* font, float val, int mode, int highlight);
 void r1b_text_ascii(r1b_im_t* im, char* str, int x, int y, r1b_font_t* font, float val, int mode, int highlight);
 float r1b_area(float* X, float* Y, int n) ;
 int r1b_triangulate_snip(float* X, float* Y,int u,int v,int w,int n,int *V ) ;
@@ -3059,6 +3065,18 @@ void r1b_transform_mesh(r1b_mesh_t* mesh, float* mat);
 void r1b_compute_vertex_normals(r1b_mesh_t* mesh);
 void r1b_render_mesh(r1b_im_t* im, r1b_im_t* depth, r1b_mesh_t* mesh, float f, r1b_im_t* pttn, float* light, int wire_val, int shdr, int wire);
 
+void* nullptr(){
+ 	return NULL;
+}
+
+
+
+
+SWIGINTERNINLINE PyObject*
+  SWIG_From_int  (int value)
+{
+  return PyInt_FromLong((long) value);
+}
 
 
 SWIGINTERN int
@@ -3117,13 +3135,6 @@ SWIG_AsVal_int (PyObject * obj, int *val)
     }
   }  
   return res;
-}
-
-
-SWIGINTERNINLINE PyObject*
-  SWIG_From_int  (int value)
-{
-  return PyInt_FromLong((long) value);
 }
 
 
@@ -3284,44 +3295,44 @@ SWIG_FromCharPtr(const char *cptr)
 #ifdef __cplusplus
 extern "C" {
 #endif
-SWIGINTERN PyObject *_wrap_new_floatArray(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_new_FloatArray(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   size_t arg1 ;
   size_t val1 ;
   int ecode1 = 0 ;
   PyObject *swig_obj[1] ;
-  floatArray *result = 0 ;
+  FloatArray *result = 0 ;
   
   if (!args) SWIG_fail;
   swig_obj[0] = args;
   ecode1 = SWIG_AsVal_size_t(swig_obj[0], &val1);
   if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "new_floatArray" "', argument " "1"" of type '" "size_t""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "new_FloatArray" "', argument " "1"" of type '" "size_t""'");
   } 
   arg1 = (size_t)(val1);
-  result = (floatArray *)new_floatArray(arg1);
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_floatArray, SWIG_POINTER_NEW |  0 );
+  result = (FloatArray *)new_FloatArray(arg1);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_FloatArray, SWIG_POINTER_NEW |  0 );
   return resultobj;
 fail:
   return NULL;
 }
 
 
-SWIGINTERN PyObject *_wrap_delete_floatArray(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_delete_FloatArray(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  floatArray *arg1 = (floatArray *) 0 ;
+  FloatArray *arg1 = (FloatArray *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject *swig_obj[1] ;
   
   if (!args) SWIG_fail;
   swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_floatArray, SWIG_POINTER_DISOWN |  0 );
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_FloatArray, SWIG_POINTER_DISOWN |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_floatArray" "', argument " "1"" of type '" "floatArray *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_FloatArray" "', argument " "1"" of type '" "FloatArray *""'"); 
   }
-  arg1 = (floatArray *)(argp1);
-  delete_floatArray(arg1);
+  arg1 = (FloatArray *)(argp1);
+  delete_FloatArray(arg1);
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -3329,9 +3340,9 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_floatArray___getitem__(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_FloatArray___getitem__(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  floatArray *arg1 = (floatArray *) 0 ;
+  FloatArray *arg1 = (FloatArray *) 0 ;
   size_t arg2 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
@@ -3340,18 +3351,18 @@ SWIGINTERN PyObject *_wrap_floatArray___getitem__(PyObject *SWIGUNUSEDPARM(self)
   PyObject *swig_obj[2] ;
   float result;
   
-  if (!SWIG_Python_UnpackTuple(args, "floatArray___getitem__", 2, 2, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_floatArray, 0 |  0 );
+  if (!SWIG_Python_UnpackTuple(args, "FloatArray___getitem__", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_FloatArray, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "floatArray___getitem__" "', argument " "1"" of type '" "floatArray *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "FloatArray___getitem__" "', argument " "1"" of type '" "FloatArray *""'"); 
   }
-  arg1 = (floatArray *)(argp1);
+  arg1 = (FloatArray *)(argp1);
   ecode2 = SWIG_AsVal_size_t(swig_obj[1], &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "floatArray___getitem__" "', argument " "2"" of type '" "size_t""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "FloatArray___getitem__" "', argument " "2"" of type '" "size_t""'");
   } 
   arg2 = (size_t)(val2);
-  result = (float)floatArray___getitem__(arg1,arg2);
+  result = (float)FloatArray___getitem__(arg1,arg2);
   resultobj = SWIG_From_float((float)(result));
   return resultobj;
 fail:
@@ -3359,9 +3370,9 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_floatArray___setitem__(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_FloatArray___setitem__(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  floatArray *arg1 = (floatArray *) 0 ;
+  FloatArray *arg1 = (FloatArray *) 0 ;
   size_t arg2 ;
   float arg3 ;
   void *argp1 = 0 ;
@@ -3372,23 +3383,23 @@ SWIGINTERN PyObject *_wrap_floatArray___setitem__(PyObject *SWIGUNUSEDPARM(self)
   int ecode3 = 0 ;
   PyObject *swig_obj[3] ;
   
-  if (!SWIG_Python_UnpackTuple(args, "floatArray___setitem__", 3, 3, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_floatArray, 0 |  0 );
+  if (!SWIG_Python_UnpackTuple(args, "FloatArray___setitem__", 3, 3, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_FloatArray, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "floatArray___setitem__" "', argument " "1"" of type '" "floatArray *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "FloatArray___setitem__" "', argument " "1"" of type '" "FloatArray *""'"); 
   }
-  arg1 = (floatArray *)(argp1);
+  arg1 = (FloatArray *)(argp1);
   ecode2 = SWIG_AsVal_size_t(swig_obj[1], &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "floatArray___setitem__" "', argument " "2"" of type '" "size_t""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "FloatArray___setitem__" "', argument " "2"" of type '" "size_t""'");
   } 
   arg2 = (size_t)(val2);
   ecode3 = SWIG_AsVal_float(swig_obj[2], &val3);
   if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "floatArray___setitem__" "', argument " "3"" of type '" "float""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "FloatArray___setitem__" "', argument " "3"" of type '" "float""'");
   } 
   arg3 = (float)(val3);
-  floatArray___setitem__(arg1,arg2,arg3);
+  FloatArray___setitem__(arg1,arg2,arg3);
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -3396,9 +3407,9 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_floatArray_cast(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_FloatArray_cast(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  floatArray *arg1 = (floatArray *) 0 ;
+  FloatArray *arg1 = (FloatArray *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject *swig_obj[1] ;
@@ -3406,12 +3417,12 @@ SWIGINTERN PyObject *_wrap_floatArray_cast(PyObject *SWIGUNUSEDPARM(self), PyObj
   
   if (!args) SWIG_fail;
   swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_floatArray, 0 |  0 );
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_FloatArray, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "floatArray_cast" "', argument " "1"" of type '" "floatArray *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "FloatArray_cast" "', argument " "1"" of type '" "FloatArray *""'"); 
   }
-  arg1 = (floatArray *)(argp1);
-  result = (float *)floatArray_cast(arg1);
+  arg1 = (FloatArray *)(argp1);
+  result = (float *)FloatArray_cast(arg1);
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_float, 0 |  0 );
   return resultobj;
 fail:
@@ -3419,37 +3430,37 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_floatArray_frompointer(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_FloatArray_frompointer(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   float *arg1 = (float *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject *swig_obj[1] ;
-  floatArray *result = 0 ;
+  FloatArray *result = 0 ;
   
   if (!args) SWIG_fail;
   swig_obj[0] = args;
   res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_float, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "floatArray_frompointer" "', argument " "1"" of type '" "float *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "FloatArray_frompointer" "', argument " "1"" of type '" "float *""'"); 
   }
   arg1 = (float *)(argp1);
-  result = (floatArray *)floatArray_frompointer(arg1);
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_floatArray, 0 |  0 );
+  result = (FloatArray *)FloatArray_frompointer(arg1);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_FloatArray, 0 |  0 );
   return resultobj;
 fail:
   return NULL;
 }
 
 
-SWIGINTERN PyObject *floatArray_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *FloatArray_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *obj;
   if (!SWIG_Python_UnpackTuple(args, "swigregister", 1, 1, &obj)) return NULL;
-  SWIG_TypeNewClientData(SWIGTYPE_p_floatArray, SWIG_NewClientData(obj));
+  SWIG_TypeNewClientData(SWIGTYPE_p_FloatArray, SWIG_NewClientData(obj));
   return SWIG_Py_Void();
 }
 
-SWIGINTERN PyObject *floatArray_swiginit(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *FloatArray_swiginit(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   return SWIG_Python_InitShadowInstance(args);
 }
 
@@ -4484,6 +4495,19 @@ SWIGINTERN PyObject *r1b_mesh_t_swiginit(PyObject *SWIGUNUSEDPARM(self), PyObjec
   return SWIG_Python_InitShadowInstance(args);
 }
 
+SWIGINTERN PyObject *_wrap_r1b_get_font_fg8x12(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  r1b_font_t *result = 0 ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "r1b_get_font_fg8x12", 0, 0, 0)) SWIG_fail;
+  result = (r1b_font_t *)r1b_get_font_fg8x12();
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_r1b_font_t, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_r1b_make_tmp0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   int arg1 ;
@@ -4580,6 +4604,38 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_r1b_snapshot(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  char *arg1 = (char *) 0 ;
+  r1b_im_t *arg2 = (r1b_im_t *) 0 ;
+  int res1 ;
+  char *buf1 = 0 ;
+  int alloc1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "r1b_snapshot", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_AsCharPtrAndSize(swig_obj[0], &buf1, NULL, &alloc1);
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "r1b_snapshot" "', argument " "1"" of type '" "char const *""'");
+  }
+  arg1 = (char *)(buf1);
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_r1b_im_t, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "r1b_snapshot" "', argument " "2"" of type '" "r1b_im_t *""'"); 
+  }
+  arg2 = (r1b_im_t *)(argp2);
+  r1b_snapshot((char const *)arg1,arg2);
+  resultobj = SWIG_Py_Void();
+  if (alloc1 == SWIG_NEWOBJ) free((char*)buf1);
+  return resultobj;
+fail:
+  if (alloc1 == SWIG_NEWOBJ) free((char*)buf1);
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_r1b_zeros(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   int arg1 ;
@@ -4633,6 +4689,44 @@ SWIGINTERN PyObject *_wrap_r1b_ones(PyObject *SWIGUNUSEDPARM(self), PyObject *ar
   } 
   arg2 = (int)(val2);
   result = r1b_ones(arg1,arg2);
+  resultobj = SWIG_NewPointerObj((r1b_im_t *)memcpy((r1b_im_t *)calloc(1,sizeof(r1b_im_t)),&result,sizeof(r1b_im_t)), SWIGTYPE_p_r1b_im_t, SWIG_POINTER_OWN |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_r1b_from_array(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  int arg1 ;
+  int arg2 ;
+  float *arg3 = (float *) 0 ;
+  int val1 ;
+  int ecode1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
+  PyObject *swig_obj[3] ;
+  r1b_im_t result;
+  
+  if (!SWIG_Python_UnpackTuple(args, "r1b_from_array", 3, 3, swig_obj)) SWIG_fail;
+  ecode1 = SWIG_AsVal_int(swig_obj[0], &val1);
+  if (!SWIG_IsOK(ecode1)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "r1b_from_array" "', argument " "1"" of type '" "int""'");
+  } 
+  arg1 = (int)(val1);
+  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "r1b_from_array" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = (int)(val2);
+  res3 = SWIG_ConvertPtr(swig_obj[2], &argp3,SWIGTYPE_p_float, 0 |  0 );
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "r1b_from_array" "', argument " "3"" of type '" "float *""'"); 
+  }
+  arg3 = (float *)(argp3);
+  result = r1b_from_array(arg1,arg2,arg3);
   resultobj = SWIG_NewPointerObj((r1b_im_t *)memcpy((r1b_im_t *)calloc(1,sizeof(r1b_im_t)),&result,sizeof(r1b_im_t)), SWIGTYPE_p_r1b_im_t, SWIG_POINTER_OWN |  0 );
   return resultobj;
 fail:
@@ -5005,38 +5099,6 @@ SWIGINTERN PyObject *_wrap_r1b_lpr(PyObject *SWIGUNUSEDPARM(self), PyObject *arg
   }
   arg2 = (r1b_im_t *)(argp2);
   r1b_lpr((char const *)arg1,arg2);
-  resultobj = SWIG_Py_Void();
-  if (alloc1 == SWIG_NEWOBJ) free((char*)buf1);
-  return resultobj;
-fail:
-  if (alloc1 == SWIG_NEWOBJ) free((char*)buf1);
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_r1b_snapshot(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  char *arg1 = (char *) 0 ;
-  r1b_im_t *arg2 = (r1b_im_t *) 0 ;
-  int res1 ;
-  char *buf1 = 0 ;
-  int alloc1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  PyObject *swig_obj[2] ;
-  
-  if (!SWIG_Python_UnpackTuple(args, "r1b_snapshot", 2, 2, swig_obj)) SWIG_fail;
-  res1 = SWIG_AsCharPtrAndSize(swig_obj[0], &buf1, NULL, &alloc1);
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "r1b_snapshot" "', argument " "1"" of type '" "char const *""'");
-  }
-  arg1 = (char *)(buf1);
-  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_r1b_im_t, 0 |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "r1b_snapshot" "', argument " "2"" of type '" "r1b_im_t *""'"); 
-  }
-  arg2 = (r1b_im_t *)(argp2);
-  r1b_snapshot((char const *)arg1,arg2);
   resultobj = SWIG_Py_Void();
   if (alloc1 == SWIG_NEWOBJ) free((char*)buf1);
   return resultobj;
@@ -6006,6 +6068,86 @@ SWIGINTERN PyObject *_wrap_r1b_text(PyObject *SWIGUNUSEDPARM(self), PyObject *ar
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_r1b_text_utf8(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  r1b_im_t *arg1 = (r1b_im_t *) 0 ;
+  char *arg2 = (char *) 0 ;
+  int arg3 ;
+  int arg4 ;
+  r1b_font_t *arg5 = (r1b_font_t *) 0 ;
+  float arg6 ;
+  int arg7 ;
+  int arg8 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int res2 ;
+  char *buf2 = 0 ;
+  int alloc2 = 0 ;
+  int val3 ;
+  int ecode3 = 0 ;
+  int val4 ;
+  int ecode4 = 0 ;
+  void *argp5 = 0 ;
+  int res5 = 0 ;
+  float val6 ;
+  int ecode6 = 0 ;
+  int val7 ;
+  int ecode7 = 0 ;
+  int val8 ;
+  int ecode8 = 0 ;
+  PyObject *swig_obj[8] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "r1b_text_utf8", 8, 8, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_r1b_im_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "r1b_text_utf8" "', argument " "1"" of type '" "r1b_im_t *""'"); 
+  }
+  arg1 = (r1b_im_t *)(argp1);
+  res2 = SWIG_AsCharPtrAndSize(swig_obj[1], &buf2, NULL, &alloc2);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "r1b_text_utf8" "', argument " "2"" of type '" "char *""'");
+  }
+  arg2 = (char *)(buf2);
+  ecode3 = SWIG_AsVal_int(swig_obj[2], &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "r1b_text_utf8" "', argument " "3"" of type '" "int""'");
+  } 
+  arg3 = (int)(val3);
+  ecode4 = SWIG_AsVal_int(swig_obj[3], &val4);
+  if (!SWIG_IsOK(ecode4)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "r1b_text_utf8" "', argument " "4"" of type '" "int""'");
+  } 
+  arg4 = (int)(val4);
+  res5 = SWIG_ConvertPtr(swig_obj[4], &argp5,SWIGTYPE_p_r1b_font_t, 0 |  0 );
+  if (!SWIG_IsOK(res5)) {
+    SWIG_exception_fail(SWIG_ArgError(res5), "in method '" "r1b_text_utf8" "', argument " "5"" of type '" "r1b_font_t *""'"); 
+  }
+  arg5 = (r1b_font_t *)(argp5);
+  ecode6 = SWIG_AsVal_float(swig_obj[5], &val6);
+  if (!SWIG_IsOK(ecode6)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode6), "in method '" "r1b_text_utf8" "', argument " "6"" of type '" "float""'");
+  } 
+  arg6 = (float)(val6);
+  ecode7 = SWIG_AsVal_int(swig_obj[6], &val7);
+  if (!SWIG_IsOK(ecode7)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode7), "in method '" "r1b_text_utf8" "', argument " "7"" of type '" "int""'");
+  } 
+  arg7 = (int)(val7);
+  ecode8 = SWIG_AsVal_int(swig_obj[7], &val8);
+  if (!SWIG_IsOK(ecode8)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode8), "in method '" "r1b_text_utf8" "', argument " "8"" of type '" "int""'");
+  } 
+  arg8 = (int)(val8);
+  r1b_text_utf8(arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8);
+  resultobj = SWIG_Py_Void();
+  if (alloc2 == SWIG_NEWOBJ) free((char*)buf2);
+  return resultobj;
+fail:
+  if (alloc2 == SWIG_NEWOBJ) free((char*)buf2);
   return NULL;
 }
 
@@ -7215,16 +7357,29 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_nullptr(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  void *result = 0 ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "nullptr", 0, 0, 0)) SWIG_fail;
+  result = (void *)nullptr();
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_void, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 static PyMethodDef SwigMethods[] = {
 	 { "SWIG_PyInstanceMethod_New", SWIG_PyInstanceMethod_New, METH_O, NULL},
-	 { "new_floatArray", _wrap_new_floatArray, METH_O, NULL},
-	 { "delete_floatArray", _wrap_delete_floatArray, METH_O, NULL},
-	 { "floatArray___getitem__", _wrap_floatArray___getitem__, METH_VARARGS, NULL},
-	 { "floatArray___setitem__", _wrap_floatArray___setitem__, METH_VARARGS, NULL},
-	 { "floatArray_cast", _wrap_floatArray_cast, METH_O, NULL},
-	 { "floatArray_frompointer", _wrap_floatArray_frompointer, METH_O, NULL},
-	 { "floatArray_swigregister", floatArray_swigregister, METH_O, NULL},
-	 { "floatArray_swiginit", floatArray_swiginit, METH_VARARGS, NULL},
+	 { "new_FloatArray", _wrap_new_FloatArray, METH_O, NULL},
+	 { "delete_FloatArray", _wrap_delete_FloatArray, METH_O, NULL},
+	 { "FloatArray___getitem__", _wrap_FloatArray___getitem__, METH_VARARGS, NULL},
+	 { "FloatArray___setitem__", _wrap_FloatArray___setitem__, METH_VARARGS, NULL},
+	 { "FloatArray_cast", _wrap_FloatArray_cast, METH_O, NULL},
+	 { "FloatArray_frompointer", _wrap_FloatArray_frompointer, METH_O, NULL},
+	 { "FloatArray_swigregister", FloatArray_swigregister, METH_O, NULL},
+	 { "FloatArray_swiginit", FloatArray_swiginit, METH_VARARGS, NULL},
 	 { "r1b_im_t_w_set", _wrap_r1b_im_t_w_set, METH_VARARGS, NULL},
 	 { "r1b_im_t_w_get", _wrap_r1b_im_t_w_get, METH_O, NULL},
 	 { "r1b_im_t_h_set", _wrap_r1b_im_t_h_set, METH_VARARGS, NULL},
@@ -7271,12 +7426,15 @@ static PyMethodDef SwigMethods[] = {
 	 { "delete_r1b_mesh_t", _wrap_delete_r1b_mesh_t, METH_O, NULL},
 	 { "r1b_mesh_t_swigregister", r1b_mesh_t_swigregister, METH_O, NULL},
 	 { "r1b_mesh_t_swiginit", r1b_mesh_t_swiginit, METH_VARARGS, NULL},
+	 { "r1b_get_font_fg8x12", _wrap_r1b_get_font_fg8x12, METH_NOARGS, NULL},
 	 { "r1b_make_tmp0", _wrap_r1b_make_tmp0, METH_VARARGS, NULL},
 	 { "r1b_make_tmp1", _wrap_r1b_make_tmp1, METH_VARARGS, NULL},
 	 { "r1b_cleanup", _wrap_r1b_cleanup, METH_NOARGS, NULL},
 	 { "r1b_read", _wrap_r1b_read, METH_O, NULL},
+	 { "r1b_snapshot", _wrap_r1b_snapshot, METH_VARARGS, NULL},
 	 { "r1b_zeros", _wrap_r1b_zeros, METH_VARARGS, NULL},
 	 { "r1b_ones", _wrap_r1b_ones, METH_VARARGS, NULL},
+	 { "r1b_from_array", _wrap_r1b_from_array, METH_VARARGS, NULL},
 	 { "r1b_infs", _wrap_r1b_infs, METH_VARARGS, NULL},
 	 { "r1b_free", _wrap_r1b_free, METH_O, NULL},
 	 { "r1b_transpose", _wrap_r1b_transpose, METH_O, NULL},
@@ -7291,7 +7449,6 @@ static PyMethodDef SwigMethods[] = {
 	 { "r1b_encode", _wrap_r1b_encode, METH_VARARGS, NULL},
 	 { "r1b_encode2file", _wrap_r1b_encode2file, METH_VARARGS, NULL},
 	 { "r1b_lpr", _wrap_r1b_lpr, METH_VARARGS, NULL},
-	 { "r1b_snapshot", _wrap_r1b_snapshot, METH_VARARGS, NULL},
 	 { "r1b_resample_nearest", _wrap_r1b_resample_nearest, METH_VARARGS, NULL},
 	 { "r1b_resample_bilinear", _wrap_r1b_resample_bilinear, METH_VARARGS, NULL},
 	 { "r1b_resample", _wrap_r1b_resample, METH_VARARGS, NULL},
@@ -7310,6 +7467,7 @@ static PyMethodDef SwigMethods[] = {
 	 { "r1b_glyph_index", _wrap_r1b_glyph_index, METH_VARARGS, NULL},
 	 { "r1b_putchar", _wrap_r1b_putchar, METH_VARARGS, NULL},
 	 { "r1b_text", _wrap_r1b_text, METH_VARARGS, NULL},
+	 { "r1b_text_utf8", _wrap_r1b_text_utf8, METH_VARARGS, NULL},
 	 { "r1b_text_ascii", _wrap_r1b_text_ascii, METH_VARARGS, NULL},
 	 { "r1b_area", _wrap_r1b_area, METH_VARARGS, NULL},
 	 { "r1b_triangulate_snip", _wrap_r1b_triangulate_snip, METH_VARARGS, NULL},
@@ -7329,6 +7487,7 @@ static PyMethodDef SwigMethods[] = {
 	 { "r1b_transform_mesh", _wrap_r1b_transform_mesh, METH_VARARGS, NULL},
 	 { "r1b_compute_vertex_normals", _wrap_r1b_compute_vertex_normals, METH_O, NULL},
 	 { "r1b_render_mesh", _wrap_r1b_render_mesh, METH_VARARGS, NULL},
+	 { "nullptr", _wrap_nullptr, METH_NOARGS, NULL},
 	 { NULL, NULL, 0, NULL }
 };
 
@@ -7339,12 +7498,12 @@ static PyMethodDef SwigMethods_proxydocs[] = {
 
 /* -------- TYPE CONVERSION AND EQUIVALENCE RULES (BEGIN) -------- */
 
-static void *_p_floatArrayTo_p_float(void *x, int *SWIGUNUSEDPARM(newmemory)) {
-    return (void *)((float *)  ((floatArray *) x));
+static void *_p_FloatArrayTo_p_float(void *x, int *SWIGUNUSEDPARM(newmemory)) {
+    return (void *)((float *)  ((FloatArray *) x));
 }
+static swig_type_info _swigt__p_FloatArray = {"_p_FloatArray", "FloatArray *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_char = {"_p_char", "char *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_float = {"_p_float", "float *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_floatArray = {"_p_floatArray", "floatArray *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_int = {"_p_int", "int *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_r1b_font_t = {"_p_r1b_font_t", "r1b_font_t *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_r1b_im_t = {"_p_r1b_im_t", "r1b_im_t *", 0, 0, (void*)0, 0};
@@ -7352,12 +7511,13 @@ static swig_type_info _swigt__p_r1b_mesh_t = {"_p_r1b_mesh_t", "r1b_mesh_t *", 0
 static swig_type_info _swigt__p_uint16_t = {"_p_uint16_t", "uint16_t *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_uint32_t = {"_p_uint32_t", "uint32_t *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_uint8_t = {"_p_uint8_t", "uint8_t *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_void = {"_p_void", "void *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_wchar_t = {"_p_wchar_t", "wchar_t *", 0, 0, (void*)0, 0};
 
 static swig_type_info *swig_type_initial[] = {
+  &_swigt__p_FloatArray,
   &_swigt__p_char,
   &_swigt__p_float,
-  &_swigt__p_floatArray,
   &_swigt__p_int,
   &_swigt__p_r1b_font_t,
   &_swigt__p_r1b_im_t,
@@ -7365,12 +7525,13 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_uint16_t,
   &_swigt__p_uint32_t,
   &_swigt__p_uint8_t,
+  &_swigt__p_void,
   &_swigt__p_wchar_t,
 };
 
+static swig_cast_info _swigc__p_FloatArray[] = {  {&_swigt__p_FloatArray, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_char[] = {  {&_swigt__p_char, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_float[] = {  {&_swigt__p_float, 0, 0, 0},  {&_swigt__p_floatArray, _p_floatArrayTo_p_float, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_floatArray[] = {  {&_swigt__p_floatArray, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_float[] = {  {&_swigt__p_float, 0, 0, 0},  {&_swigt__p_FloatArray, _p_FloatArrayTo_p_float, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_int[] = {  {&_swigt__p_int, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_r1b_font_t[] = {  {&_swigt__p_r1b_font_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_r1b_im_t[] = {  {&_swigt__p_r1b_im_t, 0, 0, 0},{0, 0, 0, 0}};
@@ -7378,12 +7539,13 @@ static swig_cast_info _swigc__p_r1b_mesh_t[] = {  {&_swigt__p_r1b_mesh_t, 0, 0, 
 static swig_cast_info _swigc__p_uint16_t[] = {  {&_swigt__p_uint16_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_uint32_t[] = {  {&_swigt__p_uint32_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_uint8_t[] = {  {&_swigt__p_uint8_t, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_void[] = {  {&_swigt__p_void, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_wchar_t[] = {  {&_swigt__p_wchar_t, 0, 0, 0},{0, 0, 0, 0}};
 
 static swig_cast_info *swig_cast_initial[] = {
+  _swigc__p_FloatArray,
   _swigc__p_char,
   _swigc__p_float,
-  _swigc__p_floatArray,
   _swigc__p_int,
   _swigc__p_r1b_font_t,
   _swigc__p_r1b_im_t,
@@ -7391,6 +7553,7 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_uint16_t,
   _swigc__p_uint32_t,
   _swigc__p_uint8_t,
+  _swigc__p_void,
   _swigc__p_wchar_t,
 };
 
@@ -8121,6 +8284,30 @@ SWIG_init(void) {
   
   SWIG_InstallConstants(d,swig_const_table);
   
+  SWIG_Python_SetConstant(d, "R1B_INFER",SWIG_From_int((int)(0)));
+  SWIG_Python_SetConstant(d, "R1B_DTHR_ORD",SWIG_From_int((int)(1)));
+  SWIG_Python_SetConstant(d, "R1B_DTHR_FS",SWIG_From_int((int)(2)));
+  SWIG_Python_SetConstant(d, "R1B_SMPL_NN",SWIG_From_int((int)(11)));
+  SWIG_Python_SetConstant(d, "R1B_SMPL_BILINEAR",SWIG_From_int((int)(12)));
+  SWIG_Python_SetConstant(d, "R1B_BRDR_COPY",SWIG_From_int((int)(21)));
+  SWIG_Python_SetConstant(d, "R1B_BRDR_ZERO",SWIG_From_int((int)(22)));
+  SWIG_Python_SetConstant(d, "R1B_BRDR_NONE",SWIG_From_int((int)(23)));
+  SWIG_Python_SetConstant(d, "R1B_BRDR_WRAP",SWIG_From_int((int)(24)));
+  SWIG_Python_SetConstant(d, "R1B_FONT_HEX",SWIG_From_int((int)(31)));
+  SWIG_Python_SetConstant(d, "R1B_BLIT_OR",SWIG_From_int((int)(41)));
+  SWIG_Python_SetConstant(d, "R1B_BLIT_ADD",SWIG_From_int((int)(42)));
+  SWIG_Python_SetConstant(d, "R1B_BLIT_FLIP",SWIG_From_int((int)(43)));
+  SWIG_Python_SetConstant(d, "R1B_BLIT_SET",SWIG_From_int((int)(44)));
+  SWIG_Python_SetConstant(d, "R1B_POLY_CONVEX",SWIG_From_int((int)(51)));
+  SWIG_Python_SetConstant(d, "R1B_POLY_CONCAVE",SWIG_From_int((int)(52)));
+  SWIG_Python_SetConstant(d, "R1B_WIRE_NONE",SWIG_From_int((int)(61)));
+  SWIG_Python_SetConstant(d, "R1B_WIRE_FRONT",SWIG_From_int((int)(62)));
+  SWIG_Python_SetConstant(d, "R1B_WIRE_ALL",SWIG_From_int((int)(63)));
+  SWIG_Python_SetConstant(d, "R1B_SHDR_NONE",SWIG_From_int((int)(20)));
+  SWIG_Python_SetConstant(d, "R1B_SHDR_FLAT",SWIG_From_int((int)(21)));
+  SWIG_Python_SetConstant(d, "R1B_SHDR_NDOTL",SWIG_From_int((int)(22)));
+  SWIG_Python_SetConstant(d, "R1B_SHDR_NDOTLF",SWIG_From_int((int)(23)));
+  SWIG_Python_SetConstant(d, "R1B_FLAG_SORTED",SWIG_From_int((int)(1)));
 #if PY_VERSION_HEX >= 0x03000000
   return m;
 #else
