@@ -86,7 +86,7 @@ and 1504 by the\nItalian artist\nMichelangelo. 大衛像是文\n藝復興時代�
     r1b_blit(&canvas,&dst3,R1B_PATTERN(SOLID),180,src.h*3,src.w+180,src.h*4,0,430,R1B_BRDR_WRAP,R1B_BLIT_OR);
     r1b_blit(&canvas,&dst4,R1B_PATTERN(SOLID),180,src.h*4,src.w+180,src.h*5,200,1200,R1B_BRDR_WRAP,R1B_BLIT_OR);
     
-    r1b_text_ascii(&canvas,"Top left to Bottom Right:\nCanny Edge\nOtsu Threshold\nCanny + Ordered dither\nBedstead Upscale 2X\nSobel + FS Dither\nDilate + Sobel + Thresh\nOtsu Thresh + Pattern fill\nGaussin Blur + FS Dither\nAdaptive threshold\nBedstead 8X + Erosion\nFloyd Steinburg Dither",180,1075,R1B_FONT_FG8X12,1,R1B_BLIT_SET,0);
+    r1b_text_ascii(&canvas,"Top left to Bottom Right:\nCanny Edge\nOtsu Threshold\nCanny + Ordered dither\nBedstead Upscale 2X\nSobel + FS Dither\nDilate + Sobel + Thresh\nOtsu Thresh + Pattern fill\nGaussin Blur + FS Dither\nAdaptive threshold\nBedstead 8X + Erosion\nFloyd Steinberg Dither",180,1075,R1B_FONT_FG8X12,1,R1B_BLIT_SET,0);
 
     r1b_free(&dst1); r1b_free(&dst2); r1b_free(&dst3 );
     r1b_free(&dst4); r1b_free(&kern); r1b_free(&kern2);
