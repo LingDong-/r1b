@@ -32,6 +32,9 @@
 // R1B_CONFIG_NO_FG8X12
 // R1B_CONFIG_NO_STBI
 
+#define _GNU_SOURCE // for getline
+// TODO: cvsweb.netbsd.org/bsdweb.cgi/pkgsrc/pkgtools/libnbcompat/files/getdelim.c
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -9613,8 +9616,8 @@ void r1b_cleanup(){
                                    STBI_grey);
     
     float* data = (float*)malloc(width*height*sizeof(float));
-    for (int i = 0; i < height; i++){
-      for (int j = 0; j < width; j++){
+    int i; for (i= 0; i < height; i++){
+      int j; for (j= 0; j < width; j++){
         data[i*width+j] = 1.0-(float)image[i*width+j]/255.0;
       }
     }
@@ -9627,8 +9630,8 @@ void r1b_cleanup(){
   }
   void r1b_snapshot(const char* path, r1b_im_t* im){
     unsigned char *image = (unsigned char*)malloc(sizeof(unsigned char)*im->w*im->h);
-    for (int i = 0; i < im->h; i++ ){
-      for (int j = 0; j < im->w; j++ ){
+    int i; for (i= 0; i < im->h; i++ ){
+      int j; for (j= 0; j < im->w; j++ ){
         image[i*im->w+j] = (unsigned char)(int) ((1.0-fmin(fmax(im->data[i*im->w+j],0.0),1.0)) * 255.0);
       }
     }
@@ -9661,7 +9664,7 @@ r1b_im_t r1b_ones(int w, int h){
   im.w = w;
   im.h = h;
   im.data = (float*)malloc(l*sizeof(float));
-  for (int i = 0; i < l; i++){
+  int i; for (i= 0; i < l; i++){
     im.data[i] = 1.0;
   }
   return im;
@@ -9683,7 +9686,7 @@ r1b_im_t r1b_infs(int w, int h){
   im.w = w;
   im.h = h;
   im.data = (float*)malloc(l*sizeof(float));
-  for (int i = 0; i < l; i++){
+  int i; for (i= 0; i < l; i++){
     im.data[i] = FLT_MAX;
   }
   return im;
@@ -9698,8 +9701,8 @@ void r1b_free(r1b_im_t* im){
 void r1b_transpose(r1b_im_t* im){
   // TODO: cache friendly
   r1b_make_tmp0(im->w,im->h);
-  for (int i = 0; i < im->h; i++){
-    for (int j = 0; j < im->w; j++){
+  int i; for (i= 0; i < im->h; i++){
+    int j; for (j= 0; j < im->w; j++){
       r1b_tmp0[j*im->h+i] = im->data[i*im->w+j];
     }
   }
@@ -9712,8 +9715,8 @@ void r1b_transpose(r1b_im_t* im){
 void r1b_transpose_flip(r1b_im_t* im){
   // TODO: cache friendly
   r1b_make_tmp0(im->w,im->h);
-  for (int i = 0; i < im->h; i++){
-    for (int j = 0; j < im->w; j++){
+  int i; for (i= 0; i < im->h; i++){
+    int j; for (j= 0; j < im->w; j++){
       r1b_tmp0[j*im->h+i] = im->data[i*im->w+im->w-1-j];
     }
   }
@@ -9761,8 +9764,8 @@ void r1b_dither_fs(r1b_im_t* im) {
 
   memset(r1b_tmp1,0,im->w*im->h*sizeof(float));
 
-  for (int i = 0; i < im->h; i++) {
-    for (int j = 0; j < im->w; j++) {
+  int i; for (i= 0; i < im->h; i++) {
+    int j; for (j= 0; j < im->w; j++) {
       float o = im->data[i*im->w+j] + r1b_tmp1[i*im->w+j];
       float n = round(o);
       float qe = o - n;
@@ -9781,8 +9784,8 @@ void r1b_dither_fs(r1b_im_t* im) {
 void r1b_dither_ord(r1b_im_t* im){
   r1b_make_tmp0(im->w,im->h);
 
-  for (int i = 0; i < im->h; i++ ){
-    for (int j = 0; j < im->w; j++ ){
+  int i; for (i= 0; i < im->h; i++ ){
+    int j; for (j= 0; j < im->w; j++ ){
 
       float o = im->data[i*im->w+j];
       float n = round(o);
@@ -9810,8 +9813,8 @@ void r1b_dither(r1b_im_t* im, int mode){
 }
 
 void r1b_log(r1b_im_t* im){
-  for (int i = 0; i < im->h; i++) {
-    for (int j = 0; j < im->w; j++) {
+  int i; for (i= 0; i < im->h; i++) {
+    int j; for (j= 0; j < im->w; j++) {
       if (im->data[i*im->w+j]>=0.5){
         printf("* ");
       }else{
@@ -9834,13 +9837,13 @@ char* r1b_encode(r1b_im_t* im, int* n_bytes_written){
 
   R1B_PUT8(0x1b); R1B_PUT8(0x40);
 
-  for (int r = 0; r < im->h; r+= 24){
+  int r; for (r= 0; r < im->h; r+= 24){
     //ESC * m nL nH
     R1B_PUT8(0x1b);R1B_PUT8(0x2a);R1B_PUT8(33);R1B_PUT8((char)l0);R1B_PUT8((char)ll);
-    for (int c = 0; c < im->w; c ++ ){
-      for (int n = 0; n < 3; n++ ){
+    int c; for (c= 0; c < im->w; c ++ ){
+      int n; for (n= 0; n < 3; n++ ){
         char x = 0;
-        for (int h = 0; h < 8; h++ ){
+        int h; for (h= 0; h < 8; h++ ){
           x = x << 1;
           if ( (r+n*8+h)<=im->h-1 && im->data[R1B_MIN(r+n*8+h,im->h-1)*im->w+c]>=0.5 ){
             x = x | 1;
@@ -9879,8 +9882,8 @@ void r1b_resample_nearest(r1b_im_t* im, int w, int h){
   float hs = (float)im->h/(float)h;
   float ws = (float)im->w/(float)w;
 
-  for (int i = 0; i < h; i++){
-    for (int j = 0; j < w; j++){
+  int i; for (i= 0; i < h; i++){
+    int j; for (j= 0; j < w; j++){
     
       int ii = R1B_MIN( im->h-1, (int)round((float)i*hs) );
       int jj = R1B_MIN( im->w-1, (int)round((float)j*ws) );
@@ -9901,8 +9904,8 @@ void r1b_resample_bilinear(r1b_im_t* im, int w, int h){
   float hs = (float)im->h/(float)h;
   float ws = (float)im->w/(float)w;
 
-  for (int i = 0; i < h; i++){
-    for (int j = 0; j < w; j++){
+  int i; for (i= 0; i < h; i++){
+    int j; for (j= 0; j < w; j++){
     
       float ii = (float)i*hs;
       float jj = (float)j*ws;
@@ -9996,11 +9999,11 @@ void r1b_conv2d(r1b_im_t* im, r1b_im_t* kern, int border) {
   int khw = kern->w/2;
   int khh = kern->h/2;
 
-  for (int i = 0; i < im->h; i++ ){
-    for (int j = 0; j < im->w; j++ ){
+  int i; for (i= 0; i < im->h; i++ ){
+    int j; for (j= 0; j < im->w; j++ ){
       float sum = 0;
-      for (int ki = 0; ki < kern->h; ki ++ ){
-        for (int kj = 0; kj < kern->w; kj ++ ){
+      int ki; for (ki= 0; ki < kern->h; ki ++ ){
+        int kj; for (kj= 0; kj < kern->w; kj ++ ){
           sum += r1b_get(im,j-khw+kj, i-khh+ki, border) * kern->data[ki*kern->w+kj];
         }
       }
@@ -10028,8 +10031,8 @@ void r1b_triangle(r1b_im_t* im,float x0 ,float y0 ,float x1 ,float y1 ,float x2 
   int ymin = (int)floor(fmin(fmin(y0,y1),y2));
   int ymax = (int) ceil(fmax(fmax(y0,y1),y2));
 
-  for (int y=ymin; y <= ymax; y++){
-    for (int x=xmin; x <= xmax; x++){
+  int y; for (y=ymin; y <= ymax; y++){
+    int x; for (x=xmin; x <= xmax; x++){
       if (R1B_PT_IN_TRI((float)x+0.5,(float)y+0.5,x0,y0,x1,y1,x2,y2)){
         float v = pttn->data[(y % pttn->h) * pttn->w + (x % pttn->w)];
         r1b_set(im,x,y,v,mode);
@@ -10044,8 +10047,8 @@ void r1b_rect(r1b_im_t* im,float x0 ,float y0 ,float x1 ,float y1 , r1b_im_t* pt
   int ymin = (int)round(fmin(y0,y1));
   int ymax = (int)round(fmax(y0,y1));
 
-  for (int y=ymin; y <= ymax; y++){
-    for (int x=xmin; x <= xmax; x++){
+  int y; for (y=ymin; y <= ymax; y++){
+    int x; for (x=xmin; x <= xmax; x++){
       float v = pttn->data[(y % pttn->h) * pttn->w + (x % pttn->w)];
       r1b_set(im,x,y,v,mode);
     }
@@ -10083,7 +10086,7 @@ void r1b_line(r1b_im_t* im, float x0 ,float y0 ,float x1 ,float y1, float val, i
 
 void r1b_lines(r1b_im_t* im, float* Xs, float* Ys, int n, int close, float val, int mode){
   int m = n - 1 + (close & 1);
-  for (int i=0; i < m; i++ ){
+  int i; for (i=0; i < m; i++ ){
     r1b_line(im, Xs[i], Ys[i], Xs[(i+1)%n], Ys[(i+1)%n], val, mode);
   }
 }
@@ -10093,7 +10096,7 @@ void r1b_thick_line(r1b_im_t* im, float x0, float y0, float x1, float y1, float 
   int dy = y1 > y0 ? 1 : -1;
   r1b_line(im,x0,y0,x1,y1,val,mode);
 
-  for (int i = 1; i <= thick; i++) {
+  int i; for (i= 1; i <= thick; i++) {
     float dxi = (float)(i*dx);
     float dyi = (float)(i*dy);
     r1b_line(im,x0+dxi,y0,x1,y1-dyi,val,mode);
@@ -10172,7 +10175,7 @@ r1b_font_t r1b_load_font_hex(const char* path, int h, int cp0, int cp1, int flag
     line[4] = 0;
     int cp = (int)strtol(line, NULL, 16);
     if (cp0 <= cp && cp <= cp1){
-      for (int j = 5; j < linelen; j+=2){
+      int j; for (j= 5; j < linelen; j+=2){
         char buf[3];
         buf[0] = line[j]; buf[1] = line[j+1]; buf[2] = 0;
         unsigned char b = (unsigned char)strtol(buf,NULL,16);
@@ -10195,7 +10198,7 @@ void r1b_destroy_font(r1b_font_t* font){
 }
 
 int r1b_glyph_index_lin_search(r1b_font_t* font, int cp){
-  for (int i = 0; i < font->n; i++){
+  int i; for (i= 0; i < font->n; i++){
     if (font->cmap[i] == cp){
       return i;
     }
@@ -10234,8 +10237,8 @@ int r1b_putchar(r1b_im_t* im, int cp, int x, int y, r1b_font_t* font,float val, 
   int off = (font->offsets[idx]*font->h)/2;
   int w = font->sizes[idx]*4;
 
-  for (int r = 0; r < font->h; r ++) {
-    for (int c = 0; c < w; c ++ ){
+  int r; for (r= 0; r < font->h; r ++) {
+    int c; for (c= 0; c < w; c ++ ){
       int bb = font->glyphs[off+r*w/8+c/8];
       int b = (bb >> (7-c%8)) & 1;
       if (b > 0){
@@ -10365,7 +10368,7 @@ void r1b_text_ascii(r1b_im_t* im, char* str, int x, int y, r1b_font_t* font, flo
 float r1b_area(float* X, float* Y, int n) {
   // ported from https://github.com/cmu462/DrawSVG
   float a = 0.0f;
-  for(int p=n-1,q=0; q<n; p=q++) {
+  int p,q; for (p=n-1,q=0; q<n; p=q++) {
     a += X[p] * Y[q] - X[q] * Y[p];
   }
   return a * 0.5f;
@@ -10398,15 +10401,15 @@ int r1b_triangulate(float* X, float* Y, int n, int* triangles) {
   int* V = (int*)alloca(n*sizeof(int));
   // we want a counter-clockwise polygon in V
   if ( 0.0f < r1b_area(X,Y,n) ) {
-    for (int v=0; v<n; v++) V[v] = v;
+    int v; for (v=0; v<n; v++) V[v] = v;
   } else {
-    for(int v=0; v<n; v++) V[v] = (n-1)-v;
+    int v; for (v=0; v<n; v++) V[v] = (n-1)-v;
   }
   int nv = n;
   // remove nv-2 Vertices, creating 1 triangle every time
   int count = 2*nv;   // error detection 
   int m = 0;
-  for(int v = nv - 1; nv > 2;) {
+  int v; for (v= nv - 1; nv > 2;) {
     // if we loop, it is probably a non-simple polygon
     if (0 >= (count--)) {
       // Triangulate: ERROR - probable bad polygon!
@@ -10436,7 +10439,7 @@ int r1b_triangulate(float* X, float* Y, int n, int* triangles) {
 }
 
 void r1b_polygon_convex(r1b_im_t* im, float* Xs, float* Ys, int n, r1b_im_t* pttn, int mode){
-  for (int i = 1; i < n-1; i++ ){
+  int i; for (i= 1; i < n-1; i++ ){
     r1b_triangle(im,
       Xs[0],  Ys[0],
       Xs[i],  Ys[i],
@@ -10447,7 +10450,7 @@ void r1b_polygon_convex(r1b_im_t* im, float* Xs, float* Ys, int n, r1b_im_t* ptt
 void r1b_polygon_concave(r1b_im_t* im, float* Xs, float* Ys, int n, r1b_im_t* pttn, int mode){
   int tris[n*3];
   int n_tris = r1b_triangulate(Xs,Ys,n,tris);
-  for (int i = 0; i < n_tris; i++) {
+  int i; for (i= 0; i < n_tris; i++) {
     r1b_triangle(im,
       Xs[tris[i*3  ]],Ys[tris[i*3  ]],
       Xs[tris[i*3+1]],Ys[tris[i*3+1]],
@@ -10486,8 +10489,8 @@ void r1b_ellipse(r1b_im_t* im, float cx, float cy, float rx, float ry, float ang
   float costh = cos(ang);
   float sinth = sin(ang);
 
-  for (int y = ymin; y <= ymax; y ++ ){
-    for (int x = xmin; x <= xmax; x ++ ){
+  int y; for (y= ymin; y <= ymax; y ++ ){
+    int x; for (x= xmin; x <= xmax; x ++ ){
       float fx = (float)x;
       float fy = (float)y;
       if (ang != 0){
@@ -10510,7 +10513,7 @@ void r1b_line_ellipse(r1b_im_t* im, float cx, float cy, float rx, float ry, floa
   float sinth = sin(ang);
   float px, py;
 
-  for (int i=0; i < detail+1; i ++){
+  int i; for (i=0; i < detail+1; i ++){
     float a = (float)i/(float)detail*M_PI*2;
     float x = cos(a)*rx;
     float y = sin(a)*ry;
@@ -10539,8 +10542,8 @@ void r1b_blit(r1b_im_t* dst, r1b_im_t* src, r1b_im_t* msk, float x0, float y0, f
   int ix0 = (int)round(x0);
   int iy0 = (int)round(y0);
 
-  for (int y=ymin; y <= ymax; y++){
-    for (int x=xmin; x <= xmax; x++){
+  int y; for (y=ymin; y <= ymax; y++){
+    int x; for (x=xmin; x <= xmax; x++){
       int j = ix0 + dx * (x-xmin) +isx;
       int i = iy0 + dy * (y-ymin) +isy;
       int u = r1b_get(msk,j,i,bdmode);
@@ -10603,7 +10606,7 @@ r1b_mesh_t r1b_load_obj(const char* path){
       float x, y, z /*-Wall*/ = 0.0 /**/;
       int xyz = 0;
       int xi = 2; int yi = 2; int zi = 2;
-      for (int i = 2; i < linelen+1; i++){
+      int i; for (i= 2; i < linelen+1; i++){
         if (line[i] == ' ' || i == linelen){
           line[i] = 0;
           if (xyz == 0){
@@ -10628,7 +10631,7 @@ r1b_mesh_t r1b_load_obj(const char* path){
       int a,b,c /*-Wall*/ = 0.0 /**/;
       int abc = 0;
       int ai = 2; int bi = 2; int ci = 2;
-      for (int i = 2; i < linelen+1; i++){
+      int i; for (i= 2; i < linelen+1; i++){
         if (line[i] == '/'){
           line[i] = 0;
         }if (line[i] == ' ' || i == linelen){
@@ -10666,7 +10669,7 @@ void r1b_mesh_bbox(r1b_mesh_t* mesh, float* xmin, float* ymin, float* zmin, floa
   *xmax = -FLT_MAX;
   *ymax = -FLT_MAX;
   *zmax = -FLT_MAX;
-  for (int i = 0; i < mesh->n_vtx; i++){
+  int i; for (i= 0; i < mesh->n_vtx; i++){
     *xmin = fmin(*xmin,mesh->X[i]);
     *ymin = fmin(*ymin,mesh->Y[i]);
     *zmin = fmin(*zmin,mesh->Z[i]);
@@ -10684,7 +10687,7 @@ void r1b_normalize_mesh(r1b_mesh_t* mesh){
   float px = (s - (xmax-xmin)) / 2;
   float py = (s - (ymax-ymin)) / 2;
   float pz = (s - (zmax-zmin)) / 2;
-  for (int i = 0; i < mesh->n_vtx; i++){
+  int i; for (i= 0; i < mesh->n_vtx; i++){
     mesh->X[i] = (mesh->X[i]-xmin+px)*(2/s)-1;
     mesh->Y[i] = (mesh->Y[i]-ymin+py)*(2/s)-1;
     mesh->Z[i] = (mesh->Z[i]-zmin+pz)*(2/s)-1;
@@ -10745,8 +10748,8 @@ void r1b_triangle3d(r1b_im_t* im, r1b_im_t* depth, float f, float x0, float y0, 
   int ymin = (int)floor(fmin(fmin(yy0,yy1),yy2));
   int ymax = (int) ceil(fmax(fmax(yy0,yy1),yy2));
 
-  for (int y=ymin; y <= ymax; y++){
-    for (int x=xmin; x <= xmax; x++){
+  int y; for (y=ymin; y <= ymax; y++){
+    int x; for (x=xmin; x <= xmax; x++){
 
       float det= R1B_BARY_DET(x+0.5,y+0.5,xx0,yy0,xx1,yy1,xx2,yy2);
       float u  = R1B_BARY_U(  x+0.5,y+0.5,xx0,yy0,xx1,yy1,xx2,yy2)/det;
@@ -10839,7 +10842,7 @@ void r1b_line3d(r1b_im_t* im, r1b_im_t* depth, int depth_read, float f, float x0
 }
 
 void r1b_transform_mesh(r1b_mesh_t* mesh, float* mat){
-  for (int i = 0; i < mesh->n_vtx; i++){
+  int i; for (i= 0; i < mesh->n_vtx; i++){
     float u[3] = {mesh->X[i],mesh->Y[i],mesh->Z[i]};
     float v[] = R1B_MAT_TFRM(mat,u);
     mesh->X[i] = v[0];
@@ -10902,7 +10905,7 @@ void r1b_compute_vertex_normals(r1b_mesh_t* mesh){
 
 void r1b_render_mesh(r1b_im_t* im, r1b_im_t* depth, r1b_mesh_t* mesh, float f, r1b_im_t* pttn, float* light, int wire_val, int shdr, int wire){
 
-  for (int i = 0; i < mesh->n_tri; i++){
+  int i; for (i= 0; i < mesh->n_tri; i++){
     int a = mesh->tris[i*3  ];
     int b = mesh->tris[i*3+1];
     int c = mesh->tris[i*3+2];
