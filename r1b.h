@@ -51,7 +51,7 @@
 #include R1B_CONFIG_STBIW_PATH
 
 
-#define R1B_INFER          0
+#define R1B_INFER         -42
 
 #define R1B_DTHR_ORD       1
 #define R1B_DTHR_FS        2
@@ -87,6 +87,15 @@
 #define R1B_UP2X_EPX       82
 #define R1B_UP2X_EAGLE     83
 #define R1B_UP2X_HQX       84
+
+#define R1B_KERN_ELLIPSE   91
+#define R1B_KERN_GAUSS     92
+#define R1B_KERN_GAUSS1D   93
+#define R1B_KERN_CROSS     94
+#define R1B_KERN_RECT      95
+
+#define R1B_BLUR_GAUSS     111
+#define R1B_BLUR_BOX       112
 
 #define R1B_FLAG_SORTED    1
 
@@ -759,8 +768,8 @@ void r1b_upsample2x_epx(r1b_im_t* im){
       int CeqD = fabs(D-C)<ep;
       int BeqD = fabs(B-D)<ep;
 
-      r1b_tmp0[i*2    *(im->w*2)+j*2  ] = (AeqC & (!CeqD) & (!AeqB)) ? A : P;
-      r1b_tmp0[i*2    *(im->w*2)+j*2+1] = (AeqB & (!AeqC) & (!BeqD)) ? B : P;
+      r1b_tmp0[ i*2   *(im->w*2)+j*2  ] = (AeqC & (!CeqD) & (!AeqB)) ? A : P;
+      r1b_tmp0[ i*2   *(im->w*2)+j*2+1] = (AeqB & (!AeqC) & (!BeqD)) ? B : P;
       r1b_tmp0[(i*2+1)*(im->w*2)+j*2  ] = (CeqD & (!BeqD) & (!AeqC)) ? C : P;
       r1b_tmp0[(i*2+1)*(im->w*2)+j*2+1] = (BeqD & (!AeqB) & (!CeqD)) ? D : P;
     }
@@ -820,6 +829,7 @@ void r1b_upsample2x_eagle(r1b_im_t* im){
   im->data = r1b_tmp0;
   r1b_tmp0 = tmp;
 }
+
 
 // hq2x algorithm
 // original public domain c++ version with YUV tables by byuu: 
@@ -968,25 +978,113 @@ void r1b_upsample2x(r1b_im_t* im, int mode){
 }
 
 
-void r1b_conv2d(r1b_im_t* im, r1b_im_t* kern, int border) {
-  r1b_make_tmp0(im->w,im->h);
+// algorithm used by the bedstead font (public domain)
+// basically a nicer saa5050
+// https://bjh21.me.uk/bedstead/
+// https://bjh21.me.uk/bedstead/bedstead.c
+// here modified to work with raster
+void r1b_bedstead(r1b_im_t* im, int n){
+  int po2 = pow(2,n);
+  float w = (float)po2;
+  float w4 = w/4;
+  float w4w2 = w4+w/2;
 
-  int khw = kern->w/2;
-  int khh = kern->h/2;
+  r1b_make_tmp0(im->w*po2,im->h*po2);
+  
+  int y;for (y = 0; y < im->h; y++) {
+    int x;for (x = 0; x < im->w; x++) {
+      int L  = 0.5<r1b_get(im,x-1, y  ,R1B_BRDR_ZERO);
+      int R  = 0.5<r1b_get(im,x+1, y  ,R1B_BRDR_ZERO);
+      int U  = 0.5<r1b_get(im,x, y-1  ,R1B_BRDR_ZERO);
+      int D  = 0.5<r1b_get(im,x, y+1  ,R1B_BRDR_ZERO);
+      int UL = 0.5<r1b_get(im,x-1, y-1,R1B_BRDR_ZERO);
+      int UR = 0.5<r1b_get(im,x+1, y-1,R1B_BRDR_ZERO);
+      int DL = 0.5<r1b_get(im,x-1, y+1,R1B_BRDR_ZERO);
+      int DR = 0.5<r1b_get(im,x+1, y+1,R1B_BRDR_ZERO);
 
-  int i; for (i= 0; i < im->h; i++ ){
-    int j; for (j= 0; j < im->w; j++ ){
-      float sum = 0;
-      int ki; for (ki= 0; ki < kern->h; ki ++ ){
-        int kj; for (kj= 0; kj < kern->w; kj ++ ){
-          sum += r1b_get(im,j-khw+kj, i-khh+ki, border) * kern->data[ki*kern->w+kj];
+      int tl, tr, bl, br;
+
+      if (im->data[y*im->w+x]>0.5) {
+        /* Assume filled in */
+        tl = tr = bl = br = 1;
+        /* Check for diagonals */
+        if ((UL && !U && !L) || (DR && !D && !R))
+          tr = bl = 0;
+        if ((UR && !U && !R) || (DL && !D && !L))
+          tl = br = 0;
+        /* Avoid odd gaps */
+        if (L || UL || U) tl = 1;
+        if (R || UR || U) tr = 1;
+        if (L || DL || D) bl = 1;
+        if (R || DR || D) br = 1;
+        
+
+        int i;for (i = 0; i < po2; i++){
+          int j;for (j = 0; j < po2; j++){
+            int ii = y*po2+i;
+            int jj = x*po2+j;
+            int idx = ii*im->w*po2+jj;
+            r1b_tmp0[idx] = 1;
+            if (!bl && i >= j+w4w2){
+              r1b_tmp0[idx] = 0;
+            }
+            if (!tr && i+w4w2 <= j){
+              r1b_tmp0[idx] = 0;
+            }
+            if (!tl && po2-i > j+ceil(w4w2)){
+              r1b_tmp0[idx] = 0;
+            }
+            if (!br && po2-i-1+w4w2 <= j){
+              r1b_tmp0[idx] = 0;
+            }
+          }
         }
+
+      } else {
+        /* Assume clear */
+        tl = tr = bl = br = 0;
+        /* white pixel -- just diagonals */
+        if (L && U && !UL) tl = 1;
+        if (R && U && !UR) tr = 1;
+        if (L && D && !DL) bl = 1;
+        if (R && D && !DR) br = 1;
+
+        int i;for (i = 0; i < po2; i++){
+          int j;for (j = 0; j < po2; j++){
+            int ii = y*po2+i;
+            int jj = x*po2+j;
+            int idx = ii*im->w*po2+jj;
+            r1b_tmp0[idx] = 0;
+            if (bl && i > j+w4){
+              r1b_tmp0[idx] = 1;
+            }
+            if (tr && i+w4 < j){
+              r1b_tmp0[idx] = 1;
+            }
+            if (tl && po2-i-1 > j+w4){
+              r1b_tmp0[idx] = 1;
+            }
+            if (br && po2-i <= ceil(j-w4)){
+              r1b_tmp0[idx] = 1;
+            }
+          }
+        }
+
       }
-      r1b_tmp0[i*im->w+j] = sum;
+      
     }
   }
-  memcpy(im->data, r1b_tmp0, im->w*im->h*sizeof(float));
+  // swap
+  r1b_tmp0_size = im->w*im->h;
+  float* tmp = im->data;
+
+  im->w *=po2;
+  im->h *=po2;
+  im->data = r1b_tmp0;
+  r1b_tmp0 = tmp;
 }
+
+
 
 #define R1B_PT_IN_PL(x,y,x0,y0,x1,y1) ((((x)-(x0))*((y1)-(y0)) - ((y)-(y0))*((x1)-(x0)))<=0)
 #define R1B_PT_IN_TRI(x,y,x0,y0,x1,y1,x2,y2) ( R1B_PT_IN_PL(x,y,x0,y0,x1,y1) && R1B_PT_IN_PL(x,y,x1,y1,x2,y2) && R1B_PT_IN_PL(x,y,x2,y2,x0,y0) )
@@ -1951,5 +2049,320 @@ void r1b_render_mesh(r1b_im_t* im, r1b_im_t* depth, r1b_mesh_t* mesh, float f, r
 }
 
 
+
+r1b_im_t r1b_make_kernel(int ksize, int mode){
+  if (!(ksize % 2)){
+    ksize ++;
+  }
+  if (mode == R1B_KERN_RECT){
+    return r1b_ones(ksize,ksize);
+  }
+  if (mode == R1B_KERN_GAUSS1D){
+    r1b_im_t im = r1b_zeros(ksize,1);
+    float sigma = 0.3*((float)(ksize-1)*0.5 - 1) + 0.8;
+    float ss2 = sigma*sigma*2;
+    int i; for (i = 0; i < ksize; i++){
+      float x = (float)(i-ksize/2);
+      float z = exp(-(x*x)/(ss2))/(2.5066282746*sigma);
+      im.data[i]=z;
+    }
+    return im;
+  }
+  r1b_im_t im = r1b_zeros(ksize,ksize);
+  
+  if (mode == R1B_KERN_GAUSS){
+    // sigma: https://docs.opencv.org/2.4/modules/imgproc/doc/filtering.html
+    float sigma = 0.3*((float)(ksize-1)*0.5 - 1) + 0.8;
+    float ss2 = sigma*sigma*2;
+    int i; for (i = 0; i < ksize; i++){
+      int j; for (j = 0; j < ksize; j++){
+        float x = (float)(j-ksize/2);
+        float y = (float)(i-ksize/2);
+        float z = exp(-(x*x+y*y)/(ss2))/(M_PI*ss2);
+        im.data[i*ksize+j]=z;
+      }
+    }
+  }else if (mode == R1B_KERN_ELLIPSE){
+    r1b_ellipse(&im, (ksize-1)/2+0.5, (ksize-1)/2+0.5, (ksize-1)/2+0.5, (ksize-1)/2+0.5, 0, R1B_PATTERN(SOLID), R1B_BLIT_SET);
+  }else if (mode == R1B_KERN_CROSS){
+    int i; for (i = 0; i < ksize; i++){
+      im.data[i*ksize+ksize/2]=1;
+      im.data[(ksize/2)*ksize+i]=1;
+    }
+  }
+  return im;
+}
+
+void r1b_conv2d(r1b_im_t* im, r1b_im_t* kern, int border) {
+  r1b_make_tmp0(im->w,im->h);
+
+  int khw = kern->w/2;
+  int khh = kern->h/2;
+
+  int i; for (i= 0; i < im->h; i++ ){
+    int j; for (j= 0; j < im->w; j++ ){
+      float sum = 0;
+      int ki; for (ki= 0; ki < kern->h; ki ++ ){
+        int kj; for (kj= 0; kj < kern->w; kj ++ ){
+          sum += r1b_get(im,j-khw+kj, i-khh+ki, border) * kern->data[ki*kern->w+kj];
+        }
+      }
+      r1b_tmp0[i*im->w+j] = sum;
+    }
+  }
+  memcpy(im->data, r1b_tmp0, im->w*im->h*sizeof(float));
+}
+
+void r1b_dilate(r1b_im_t* im, r1b_im_t* kern){
+  r1b_make_tmp0(im->w,im->h);
+
+  int khw = kern->w/2;
+  int khh = kern->h/2;
+
+  int i; for (i= 0; i < im->h; i++ ){
+    int j; for (j= 0; j < im->w; j++ ){
+      float m = 0;
+      int ki; for (ki= 0; ki < kern->h; ki ++ ){
+        int kj; for (kj= 0; kj < kern->w; kj ++ ){
+          m = fmax(m, r1b_get(im,j-khw+kj, i-khh+ki, R1B_BRDR_COPY) * kern->data[ki*kern->w+kj]);
+        }
+      }
+      r1b_tmp0[i*im->w+j] = m;
+    }
+  }
+  memcpy(im->data, r1b_tmp0, im->w*im->h*sizeof(float));
+}
+
+void r1b_erode(r1b_im_t* im, r1b_im_t* kern){
+  r1b_make_tmp0(im->w,im->h);
+
+  int khw = kern->w/2;
+  int khh = kern->h/2;
+
+  int i; for (i= 0; i < im->h; i++ ){
+    int j; for (j= 0; j < im->w; j++ ){
+      float m = 1;
+      int ki; for (ki= 0; ki < kern->h; ki ++ ){
+        int kj; for (kj= 0; kj < kern->w; kj ++ ){
+          if (kern->data[ki*kern->w+kj] > 0.5){
+            m = fmin(m, r1b_get(im,j-khw+kj, i-khh+ki, R1B_BRDR_COPY));
+          }
+        }
+      }
+      r1b_tmp0[i*im->w+j] = m;
+    }
+  }
+  memcpy(im->data, r1b_tmp0, im->w*im->h*sizeof(float));
+}
+
+void r1b_sobel(r1b_im_t* im, float* out_gradient_directions){
+  r1b_make_tmp1(im->w,im->h);
+
+  r1b_im_t gx = r1b_copy_of(im);
+
+  r1b_im_t gy;
+  gy.w = im->w;
+  gy.h = im->h;
+  gy.data = r1b_tmp1;
+  memcpy(gy.data, im->data, im->w*im->h*sizeof(float));
+
+  float kdat0[3] = {1,2, 1};
+  float kdat1[3] = {1,0,-1};
+
+  r1b_im_t k1; k1.w = 1; k1.h = 3; k1.data = kdat0;
+  r1b_im_t k2; k2.w = 3; k2.h = 1; k2.data = kdat1;
+  r1b_im_t k3; k3.w = 1; k3.h = 3; k3.data = kdat1;
+  r1b_im_t k4; k4.w = 3; k4.h = 1; k4.data = kdat0;
+
+  r1b_conv2d(&gx,&k1,R1B_BRDR_COPY);
+  r1b_conv2d(&gx,&k2,R1B_BRDR_COPY);
+
+  r1b_conv2d(&gy,&k3,R1B_BRDR_COPY);
+  r1b_conv2d(&gy,&k4,R1B_BRDR_COPY);
+
+  int i; for (i = 0; i < im->w*im->h; i++){
+    im->data[i] = hypot(gx.data[i],gy.data[i]);
+  }
+  if (out_gradient_directions){
+    int i; for (i = 0; i < im->w*im->h; i++){
+      out_gradient_directions[i] = atan2(gy.data[i],gx.data[i]);
+    }
+  }
+  free(gx.data);
+}
+
+void r1b_blur(r1b_im_t* im, int rad, int mode){
+  r1b_im_t k1;
+  if (mode == R1B_BLUR_GAUSS){
+    k1 = r1b_make_kernel(rad*2+1,R1B_KERN_GAUSS1D);
+  }else{
+    k1 = r1b_zeros(rad*2+1,1);
+    for (int i = 0; i < k1.w; i++){
+      k1.data[i]=1.0/(float)k1.w;
+    }
+  }
+  r1b_im_t k2 = r1b_copy_of(&k1);
+  r1b_transpose(&k2);
+
+  r1b_conv2d(im,&k1,R1B_BRDR_COPY);
+  r1b_conv2d(im,&k2,R1B_BRDR_COPY);
+  free(k1.data);
+  free(k2.data);
+
+}
+
+
+void r1b_canny(r1b_im_t* im, int blur_rad, float thresh_lo, float thresh_hi){
+  blur_rad  = ((int)blur_rad  == (int)R1B_INFER) ? 3   : blur_rad ;
+  float th0 = ((int)thresh_lo == (int)R1B_INFER) ? 0.1 : thresh_lo;
+  float th1 = ((int)thresh_hi == (int)R1B_INFER) ? 0.2 : thresh_hi;
+
+  r1b_blur(im,blur_rad,R1B_BLUR_GAUSS);
+  float* gdir = malloc(sizeof(float)*im->w*im->h);
+  r1b_sobel(im,gdir);
+
+  int i,j;
+  float PI8 = M_PI/8;
+
+  r1b_make_tmp0(im->w,im->h);
+
+  for (i = 0; i < im->h; i++){
+    for (j = 0; j < im->w; j++){
+      int dx = 0;
+      int dy = 0;
+      float th = gdir[i*im->w+j];
+      if (      -PI8 <= th && th <   PI8){ dx = 1;dy = 0;}
+      else if (  PI8 <= th && th < 3*PI8){ dx = 1;dy = 1;}
+      else if (3*PI8 <= th && th < 5*PI8){ dx = 0;dy = 1;}
+      else if (5*PI8 <= th && th < 7*PI8){ dx =-1;dy = 1;}
+      else if (7*PI8 <= th || th <-7*PI8){ dx =-1;dy = 0;}
+      else if(-7*PI8 <= th && th <-5*PI8){ dx =-1;dy =-1;}
+      else if(-5*PI8 <= th && th <-3*PI8){ dx = 0;dy =-1;}
+      else if(-3*PI8 <= th && th <  -PI8){ dx = 1;dy =-1;}
+
+      int o = i*im->w+j;
+      if (im->data[o] <= r1b_get(im,j+dx,i+dy,R1B_BRDR_ZERO)){
+        r1b_tmp0[o] = 0;
+      }else if (im->data[i*im->w+j] < r1b_get(im,j-dx,i-dy,R1B_BRDR_ZERO)){
+        r1b_tmp0[o] = 0;
+      }else{
+        r1b_tmp0[o] = im->data[o];
+      }
+    }
+  }
+
+  for (i = 0; i < im->h; i++){
+    for (j = 0; j < im->w; j++){
+      if (r1b_tmp0[i*im->w+j] >= th1){
+        im->data[i*im->w+j] = 1;
+      }else if (r1b_tmp0[i*im->w+j] < th0){
+        im->data[i*im->w+j] = 0;
+      }else{
+        float p1 = im->data[R1B_MAX(i-1,0)      *im->w+R1B_MAX(j-1,0)      ];
+        float p2 = im->data[R1B_MAX(i-1,0)      *im->w+j                   ];
+        float p3 = im->data[R1B_MAX(i-1,0)      *im->w+R1B_MIN(j+1,im->w-1)];
+        float p4 = im->data[       i            *im->w+R1B_MAX(j-1,0)      ];
+        float p5 = im->data[       i            *im->w+R1B_MIN(j+1,im->w-1)];
+        float p6 = im->data[R1B_MIN(i+1,im->h-1)*im->w+R1B_MAX(j-1,0)      ];
+        float p7 = im->data[R1B_MIN(i+1,im->h-1)*im->w+j                   ];
+        float p8 = im->data[R1B_MIN(i+1,im->h-1)*im->w+R1B_MIN(j+1,im->w-1)];
+
+        if (p1 >= th1 || p2 >= th1 || p3 >= th1 || p4 >= th1 || p5 >= th1 || p6 >= th1 || p7 >= th1 || p8 >= th1){
+          im->data[i*im->w+j] = 1;
+        }else{
+          im->data[i*im->w+j] = 0;
+        }
+        
+      }
+    }
+  }
+}
+
+void r1b_threshold(r1b_im_t* im, float th){
+
+  int i;
+  if ((int)th == (int)R1B_INFER){
+    // Otsu's method
+
+    int nbin = 64;
+    int hist[nbin];
+    memset(hist,0,sizeof(int)*nbin);
+
+    float vmin =  FLT_MAX;
+    float vmax = -FLT_MAX;
+    for (i= 0; i < im->h*im->w; i++ ){
+      vmin = fmin(vmin,im->data[i]);
+      vmax = fmax(vmax,im->data[i]); 
+    }
+    vmin-=0.01;
+    vmax+=0.01;
+
+    float bsize = (vmax-vmin)/(float)nbin;
+    for (i= 0; i < im->h*im->w; i++ ){
+      int n = (int)((im->data[i]-vmin)/bsize);
+      hist[n]++;
+    }
+
+    float sum = 0;
+    for (i=0; i<nbin; i++){sum += i * hist[i];}
+
+    float sumB = 0;
+    int wB = 0;
+    int wF = 0;
+    float varMax = 0;
+
+    int threshold = 0;
+
+    // http://www.labbookpages.co.uk/software/imgProc/otsuThreshold.html
+    for (i=0 ; i<nbin; i++) {
+       wB += hist[i];               // Weight Background
+       if (wB == 0) continue;
+
+       wF = im->w*im->h - wB;       // Weight Foreground
+       if (wF == 0) break;
+
+       sumB += (float) (i * hist[i]);
+
+       float mB = sumB / wB;            // Mean Background
+       float mF = (sum - sumB) / wF;    // Mean Foreground
+
+       // Calculate Between Class Variance
+       float varBetween = (float)wB * (float)wF * (mB - mF) * (mB - mF);
+
+       // Check if new maximum found
+       if (varBetween > varMax) {
+          varMax = varBetween;
+          threshold = i;
+       }
+    }
+    th = vmin + ((float)threshold+0.5) * bsize;
+    // printf("%d %f\n",threshold,th);
+  }
+
+  for (i= 0; i < im->h*im->w; i++ ){
+    im->data[i] = (im->data[i]>=th);
+  }
+}
+
+
+void r1b_threshold_adaptive(r1b_im_t* im, int rad, float bias, int blur_mode){
+  int i;
+  r1b_make_tmp0(im->w,im->h);
+  r1b_im_t tmp;
+  tmp.w = im->w;
+  tmp.h = im->h;
+  tmp.data = r1b_tmp0;
+  memcpy(r1b_tmp0, im->data, im->w*im->h*sizeof(float));
+
+  r1b_blur(&tmp,rad,blur_mode);
+
+  for (i= 0; i < im->h*im->w; i++ ){
+    if (im->data[i]<r1b_tmp0[i]-bias*r1b_tmp0[i]){
+      im->data[i] = 0;
+    }else{
+      im->data[i] = 1;
+    }
+  }
+}
 
 #endif // include guard
