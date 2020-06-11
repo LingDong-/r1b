@@ -111,6 +111,17 @@ R1B_SHDR_NONE = _r1b.R1B_SHDR_NONE
 R1B_SHDR_FLAT = _r1b.R1B_SHDR_FLAT
 R1B_SHDR_NDOTL = _r1b.R1B_SHDR_NDOTL
 R1B_SHDR_NDOTLF = _r1b.R1B_SHDR_NDOTLF
+R1B_UP2X_SAA5050 = _r1b.R1B_UP2X_SAA5050
+R1B_UP2X_EPX = _r1b.R1B_UP2X_EPX
+R1B_UP2X_EAGLE = _r1b.R1B_UP2X_EAGLE
+R1B_UP2X_HQX = _r1b.R1B_UP2X_HQX
+R1B_KERN_ELLIPSE = _r1b.R1B_KERN_ELLIPSE
+R1B_KERN_GAUSS = _r1b.R1B_KERN_GAUSS
+R1B_KERN_GAUSS1D = _r1b.R1B_KERN_GAUSS1D
+R1B_KERN_CROSS = _r1b.R1B_KERN_CROSS
+R1B_KERN_RECT = _r1b.R1B_KERN_RECT
+R1B_BLUR_GAUSS = _r1b.R1B_BLUR_GAUSS
+R1B_BLUR_BOX = _r1b.R1B_BLUR_BOX
 R1B_FLAG_SORTED = _r1b.R1B_FLAG_SORTED
 class r1b_im_t(object):
     thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
@@ -247,8 +258,26 @@ def r1b_get(im, x, y, mode):
 def r1b_set(im, x, y, val, mode):
     return _r1b.r1b_set(im, x, y, val, mode)
 
-def r1b_conv2d(im, kern, border):
-    return _r1b.r1b_conv2d(im, kern, border)
+def r1b_upsample2x_saa5050(im):
+    return _r1b.r1b_upsample2x_saa5050(im)
+
+def r1b_upsample2x_epx(im):
+    return _r1b.r1b_upsample2x_epx(im)
+
+def r1b_upsample2x_eagle(im):
+    return _r1b.r1b_upsample2x_eagle(im)
+
+def r1b_hq2x_blend(rule, E, A, B, D, F, H):
+    return _r1b.r1b_hq2x_blend(rule, E, A, B, D, F, H)
+
+def r1b_upsample2x_hqx(im):
+    return _r1b.r1b_upsample2x_hqx(im)
+
+def r1b_upsample2x(im, mode):
+    return _r1b.r1b_upsample2x(im, mode)
+
+def r1b_bedstead(im, n):
+    return _r1b.r1b_bedstead(im, n)
 
 def r1b_triangle(im, x0, y0, x1, y1, x2, y2, pttn, mode):
     return _r1b.r1b_triangle(im, x0, y0, x1, y1, x2, y2, pttn, mode)
@@ -319,6 +348,9 @@ def r1b_line_ellipse(im, cx, cy, rx, ry, ang, detail, val, mode):
 def r1b_blit(dst, src, msk, x0, y0, x1, y1, sx, sy, bdmode, mode):
     return _r1b.r1b_blit(dst, src, msk, x0, y0, x1, y1, sx, sy, bdmode, mode)
 
+def r1b_paste(dst, src, x, y):
+    return _r1b.r1b_paste(dst, src, x, y)
+
 def r1b_load_obj(path):
     return _r1b.r1b_load_obj(path)
 
@@ -346,6 +378,33 @@ def r1b_compute_vertex_normals(mesh):
 def r1b_render_mesh(im, depth, mesh, f, pttn, light, wire_val, shdr, wire):
     return _r1b.r1b_render_mesh(im, depth, mesh, f, pttn, light, wire_val, shdr, wire)
 
+def r1b_make_kernel(ksize, mode):
+    return _r1b.r1b_make_kernel(ksize, mode)
+
+def r1b_conv2d(im, kern, border):
+    return _r1b.r1b_conv2d(im, kern, border)
+
+def r1b_dilate(im, kern):
+    return _r1b.r1b_dilate(im, kern)
+
+def r1b_erode(im, kern):
+    return _r1b.r1b_erode(im, kern)
+
+def r1b_sobel(im, out_gradient_directions):
+    return _r1b.r1b_sobel(im, out_gradient_directions)
+
+def r1b_blur(im, rad, mode):
+    return _r1b.r1b_blur(im, rad, mode)
+
+def r1b_canny(im, blur_rad, thresh_lo, thresh_hi):
+    return _r1b.r1b_canny(im, blur_rad, thresh_lo, thresh_hi)
+
+def r1b_threshold(im, th):
+    return _r1b.r1b_threshold(im, th)
+
+def r1b_threshold_adaptive(im, rad, bias, blur_mode):
+    return _r1b.r1b_threshold_adaptive(im, rad, bias, blur_mode)
+
 def nullptr():
     return _r1b.nullptr()
 
@@ -371,7 +430,13 @@ lpr=r1b_lpr
 resample=r1b_resample
 get=r1b_get
 set=r1b_set
-conv2d=r1b_conv2d
+upsample2x_saa5050=r1b_upsample2x_saa5050
+upsample2x_epx=r1b_upsample2x_epx
+upsample2x_eagle=r1b_upsample2x_eagle
+hq2x_blend=r1b_hq2x_blend
+upsample2x_hqx=r1b_upsample2x_hqx
+upsample2x=r1b_upsample2x
+bedstead=r1b_bedstead
 triangle=r1b_triangle
 rect=r1b_rect
 line=r1b_line
@@ -386,12 +451,22 @@ triangulate=r1b_triangulate
 ellipse=r1b_ellipse
 line_ellipse=r1b_line_ellipse
 blit=r1b_blit
+paste=r1b_paste
 load_obj=r1b_load_obj
 normalize_mesh=r1b_normalize_mesh
 destroy_mesh=r1b_destroy_mesh
 triangle3d=r1b_triangle3d
 line3d=r1b_line3d
 compute_vertex_normals=r1b_compute_vertex_normals
+make_kernel=r1b_make_kernel
+conv2d=r1b_conv2d
+dilate=r1b_dilate
+erode=r1b_erode
+sobel=r1b_sobel
+blur=r1b_blur
+canny=r1b_canny
+threshold=r1b_threshold
+threshold_adaptive=r1b_threshold_adaptive
 
 INFER=R1B_INFER
 DTHR_ORD=R1B_DTHR_ORD
@@ -416,6 +491,17 @@ SHDR_NONE=R1B_SHDR_NONE
 SHDR_FLAT=R1B_SHDR_FLAT
 SHDR_NDOTL=R1B_SHDR_NDOTL
 SHDR_NDOTLF=R1B_SHDR_NDOTLF
+UP2X_SAA5050=R1B_UP2X_SAA5050
+UP2X_EPX=R1B_UP2X_EPX
+UP2X_EAGLE=R1B_UP2X_EAGLE
+UP2X_HQX=R1B_UP2X_HQX
+KERN_ELLIPSE=R1B_KERN_ELLIPSE
+KERN_GAUSS=R1B_KERN_GAUSS
+KERN_GAUSS1D=R1B_KERN_GAUSS1D
+KERN_CROSS=R1B_KERN_CROSS
+KERN_RECT=R1B_KERN_RECT
+BLUR_GAUSS=R1B_BLUR_GAUSS
+BLUR_BOX=R1B_BLUR_BOX
 FLAG_SORTED=R1B_FLAG_SORTED
 
 def from_list(lst):

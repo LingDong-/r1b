@@ -18,6 +18,10 @@
   #define R1B_CONFIG_LINE3D_EPSILON 0.01
 #endif
 
+#ifndef R1B_CONFIG_UP2X_FLOAT_EPSILON
+  #define R1B_CONFIG_UP2X_FLOAT_EPSILON 0.1
+#endif
+
 #ifndef R1B_CONFIG_STBI_PATH
   #define R1B_CONFIG_STBI_PATH "external/stb_image.h"
 #endif
@@ -9372,7 +9376,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
 
-#define R1B_INFER          0
+#define R1B_INFER         -42
 
 #define R1B_DTHR_ORD       1
 #define R1B_DTHR_FS        2
@@ -9399,10 +9403,24 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define R1B_WIRE_FRONT     62
 #define R1B_WIRE_ALL       63
 
-#define R1B_SHDR_NONE      20
-#define R1B_SHDR_FLAT      21
-#define R1B_SHDR_NDOTL     22
-#define R1B_SHDR_NDOTLF    23
+#define R1B_SHDR_NONE      70
+#define R1B_SHDR_FLAT      71
+#define R1B_SHDR_NDOTL     72
+#define R1B_SHDR_NDOTLF    73
+
+#define R1B_UP2X_SAA5050   81
+#define R1B_UP2X_EPX       82
+#define R1B_UP2X_EAGLE     83
+#define R1B_UP2X_HQX       84
+
+#define R1B_KERN_ELLIPSE   91
+#define R1B_KERN_GAUSS     92
+#define R1B_KERN_GAUSS1D   93
+#define R1B_KERN_CROSS     94
+#define R1B_KERN_RECT      95
+
+#define R1B_BLUR_GAUSS     111
+#define R1B_BLUR_BOX       112
 
 #define R1B_FLAG_SORTED    1
 
@@ -9519,7 +9537,7 @@ r1b_im_t* r1b_pttn_CHESS = NULL; r1b_im_t* r1b_pttn_DMOND = NULL;
     r1b_pttn_ ## x \
   ))
 
-#define R1B_DESTROY_PATTERN(x) if (r1b_pttn_ ## x) {free(r1b_pttn_ ## x);};
+#define R1B_DESTROY_PATTERN(x) if (r1b_pttn_ ## x) {free(r1b_pttn_ ## x); r1b_pttn_ ## x = NULL;};
 
 #ifndef R1B_CONFIG_NO_FG8X12
   // converted from freeglut/freeglut_font_data.c
@@ -9635,8 +9653,8 @@ void r1b_cleanup(){
         image[i*im->w+j] = (unsigned char)(int) ((1.0-fmin(fmax(im->data[i*im->w+j],0.0),1.0)) * 255.0);
       }
     }
-    void* ext = (void*)path + strlen(path);
-    while (ext > (void*)path && *(char*)ext != '.') {
+    char* ext = (char*)path + strlen(path);
+    while (ext > (char*)path && *(char*)ext != '.') {
         ext--;
     }
     ext ++;
@@ -9890,12 +9908,14 @@ void r1b_resample_nearest(r1b_im_t* im, int w, int h){
       r1b_tmp0[i*w+j] = im->data[ii*im->w+jj];
     }
   }
+  // swap
+  r1b_tmp0_size = im->w*im->h;
+  float* tmp = im->data;
+
   im->w = w;
   im->h = h;
   im->data = r1b_tmp0;
-
-  r1b_tmp0_size = 0;
-  r1b_tmp0 = NULL;
+  r1b_tmp0 = tmp;
 }
 
 void r1b_resample_bilinear(r1b_im_t* im, int w, int h){
@@ -9926,16 +9946,25 @@ void r1b_resample_bilinear(r1b_im_t* im, int w, int h){
       r1b_tmp0[i*w+j] = (x00*(1-jt)+x01*jt)*(1-it)+(x10*(1-jt)+x11*jt)*it;
     }
   }
+  // swap
+  r1b_tmp0_size = im->w*im->h;
+  float* tmp = im->data;
+
   im->w = w;
   im->h = h;
   im->data = r1b_tmp0;
-
-  r1b_tmp0_size = 0;
-  r1b_tmp0 = NULL;
+  r1b_tmp0 = tmp;
 }
 
 
 void r1b_resample(r1b_im_t* im, int w, int h, int mode){
+  if (w == R1B_INFER){
+    w = (int)round((float)h*(float)(im->w)/(float)(im->h));
+  }
+  if (h == R1B_INFER){
+    h = (int)round((float)w*(float)(im->h)/(float)(im->w));
+  }
+
   switch(mode){
     case R1B_SMPL_BILINEAR:
       r1b_resample_bilinear(im,w,h);
@@ -9945,6 +9974,7 @@ void r1b_resample(r1b_im_t* im, int w, int h, int mode){
       r1b_resample_nearest(im,w,h);
   }
 }
+
 
 float r1b_get(r1b_im_t* im, int x, int y, int mode){
   if (mode == R1B_BRDR_ZERO){
@@ -9993,25 +10023,393 @@ void r1b_set(r1b_im_t* im, int x, int y, float val, int mode){
   }
 }
 
-void r1b_conv2d(r1b_im_t* im, r1b_im_t* kern, int border) {
-  r1b_make_tmp0(im->w,im->h);
 
-  int khw = kern->w/2;
-  int khh = kern->h/2;
+void r1b_upsample2x_saa5050(r1b_im_t* im){
+  //wikipedia.org/wiki/Pixel-art_scaling_algorithms#SAA5050_'diagonal_smoothing'
 
-  int i; for (i= 0; i < im->h; i++ ){
-    int j; for (j= 0; j < im->w; j++ ){
-      float sum = 0;
-      int ki; for (ki= 0; ki < kern->h; ki ++ ){
-        int kj; for (kj= 0; kj < kern->w; kj ++ ){
-          sum += r1b_get(im,j-khw+kj, i-khh+ki, border) * kern->data[ki*kern->w+kj];
-        }
-      }
-      r1b_tmp0[i*im->w+j] = sum;
+  r1b_make_tmp0(im->w*2,im->h*2);
+
+  int i; for (i= 0; i < im->h; i++) {
+    int _i  = (i-1)*im->w;
+    int  i_ = i*im->w;
+
+    int j; for (j= 0; j < im->w; j++) {
+
+      // readable version:
+      // int A = 0.5 < r1b_get(im,j-1,i-1,R1B_BRDR_ZERO);
+      // int B = 0.5 < r1b_get(im,j,  i-1,R1B_BRDR_ZERO);
+      // int C = 0.5 < r1b_get(im,j+1,i-1,R1B_BRDR_ZERO);
+      // int D = 0.5 < r1b_get(im,j-1,i,  R1B_BRDR_ZERO);
+      // int E = 0.5 < r1b_get(im,j,  i,  R1B_BRDR_ZERO);
+      // int F = 0.5 < r1b_get(im,j+1,i,  R1B_BRDR_ZERO);
+
+      int _j  = j-1;
+      int  j_ = j+1;
+
+      int bi =  i == 0;
+      int bj0 = j == 0;
+      int bj1 = j == im->w-1;
+
+      int A = 0.5<((bi||bj0)?0:im->data[_i + _j ]);
+      int B = 0.5<((bi)     ?0:im->data[_i +  j ]);
+      int C = 0.5<((bi||bj1)?0:im->data[_i +  j_]);
+      int D = 0.5<((    bj0)?0:im->data[ i_+ _j ]);
+      int E = 0.5<(            im->data[ i_+  j ]);
+      int F = 0.5<((    bj1)?0:im->data[ i_+  j_]);
+
+      r1b_tmp0[i*2    *(im->w*2)+j*2  ] = B | (A & E & !B & !D);
+      r1b_tmp0[i*2    *(im->w*2)+j*2+1] = B | (C & E & !B & !F);
+      r1b_tmp0[(i*2+1)*(im->w*2)+j*2  ] = E | (!A & !E & B & D);
+      r1b_tmp0[(i*2+1)*(im->w*2)+j*2+1] = E | (!C & !E & B & F);
     }
   }
-  memcpy(im->data, r1b_tmp0, im->w*im->h*sizeof(float));
+  // swap
+  r1b_tmp0_size = im->w*im->h;
+  float* tmp = im->data;
+
+  im->w *=2;
+  im->h *=2;
+  im->data = r1b_tmp0;
+  r1b_tmp0 = tmp;
 }
+
+void r1b_upsample2x_epx(r1b_im_t* im){
+  //wikipedia.org/wiki/Pixel-art_scaling_algorithms#EPX
+  r1b_make_tmp0(im->w*2,im->h*2);
+
+  float ep = R1B_CONFIG_UP2X_FLOAT_EPSILON;
+
+  int i; for (i= 0; i < im->h; i++) {
+    int j; for (j= 0; j < im->w; j++) {
+      float P = im->data[i*im->w+j];
+
+      float A = (i==0      )?P:im->data[(i-1)*im->w+j  ];
+      float B = (j==im->w-1)?P:im->data[(i  )*im->w+j+1];
+      float C = (j==0      )?P:im->data[(i  )*im->w+j-1];
+      float D = (i==im->h-1)?P:im->data[(i+1)*im->w+j  ];
+
+      int AeqC = fabs(C-A)<ep;
+      int AeqB = fabs(A-B)<ep;
+      int CeqD = fabs(D-C)<ep;
+      int BeqD = fabs(B-D)<ep;
+
+      r1b_tmp0[ i*2   *(im->w*2)+j*2  ] = (AeqC & (!CeqD) & (!AeqB)) ? A : P;
+      r1b_tmp0[ i*2   *(im->w*2)+j*2+1] = (AeqB & (!AeqC) & (!BeqD)) ? B : P;
+      r1b_tmp0[(i*2+1)*(im->w*2)+j*2  ] = (CeqD & (!BeqD) & (!AeqC)) ? C : P;
+      r1b_tmp0[(i*2+1)*(im->w*2)+j*2+1] = (BeqD & (!AeqB) & (!CeqD)) ? D : P;
+    }
+  }
+  // swap
+  r1b_tmp0_size = im->w*im->h;
+  float* tmp = im->data;
+
+  im->w *=2;
+  im->h *=2;
+  im->data = r1b_tmp0;
+  r1b_tmp0 = tmp;
+}
+
+void r1b_upsample2x_eagle(r1b_im_t* im){
+  //wikipedia.org/wiki/Pixel-art_scaling_algorithms#Eagle
+  r1b_make_tmp0(im->w*2,im->h*2);
+
+  float ep = R1B_CONFIG_UP2X_FLOAT_EPSILON;
+
+  int i; for (i= 0; i < im->h; i++) {
+    int _i  = (i-1)*im->w;
+    int  i_ = (i+1)*im->w;
+    int _i_ = i    *im->w;
+
+    int j; for (j= 0; j < im->w; j++) {
+      int _j  = j-1;
+      int  j_ = j+1;
+
+      int bi0 = i == 0;
+      int bi1 = i == im->h-1;
+      int bj0 = j == 0;
+      int bj1 = j == im->w-1;
+
+      float C =              im->data[_i_+ j ];
+      float S = (bi0||bj0)?C:im->data[_i +_j ];
+      float T = (bi0)     ?C:im->data[_i + j ];
+      float U = (bi0||bj1)?C:im->data[_i + j_];
+      float V = (     bj0)?C:im->data[_i_+_j ];
+      float W = (     bj1)?C:im->data[_i_+ j_];
+      float X = (bi1||bj0)?C:im->data[ i_+_j ];
+      float Y = (bi1)     ?C:im->data[ i_+ j ];
+      float Z = (bi1||bj1)?C:im->data[ i_+ j_];
+
+      r1b_tmp0[i*2    *(im->w*2)+j*2  ] = (fabs(V-S)<ep && fabs(S-T)<ep) ? S : C;
+      r1b_tmp0[i*2    *(im->w*2)+j*2+1] = (fabs(T-U)<ep && fabs(U-W)<ep) ? U : C;
+      r1b_tmp0[(i*2+1)*(im->w*2)+j*2  ] = (fabs(V-X)<ep && fabs(X-Y)<ep) ? X : C;
+      r1b_tmp0[(i*2+1)*(im->w*2)+j*2+1] = (fabs(W-Z)<ep && fabs(Z-Y)<ep) ? Z : C;
+    }
+  }
+  // swap
+  r1b_tmp0_size = im->w*im->h;
+  float* tmp = im->data;
+
+  im->w *=2;
+  im->h *=2;
+  im->data = r1b_tmp0;
+  r1b_tmp0 = tmp;
+}
+
+
+// hq2x algorithm
+// original public domain c++ version with YUV tables by byuu: 
+// http://forums.nesdev.com/viewtopic.php?p=82770#82770 https://pastebin.com/YXpmqvW5
+// here modified to work with 1-channel floating points
+uint8_t r1b_hq2x_rotate[256] = {0,32,8,40,1,33,9,41,64,96,72,104,65,97,73,105,2,34,10,42,3,35,11,43,66,98,74,106,67,99,75,107,128,160,136,168,129,161,137,169,192,224,200,232,193,225,201,233,130,162,138,170,131,163,139,171,194,226,202,234,195,227,203,235,16,48,24,56,17,49,25,57,80,112,88,120,81,113,89,121,18,50,26,58,19,51,27,59,82,114,90,122,83,115,91,123,144,176,152,184,145,177,153,185,208,240,216,248,209,241,217,249,146,178,154,186,147,179,155,187,210,242,218,250,211,243,219,251,4,36,12,44,5,37,13,45,68,100,76,108,69,101,77,109,6,38,14,46,7,39,15,47,70,102,78,110,71,103,79,111,132,164,140,172,133,165,141,173,196,228,204,236,197,229,205,237,134,166,142,174,135,167,143,175,198,230,206,238,199,231,207,239,20,52,28,60,21,53,29,61,84,116,92,124,85,117,93,125,22,54,30,62,23,55,31,63,86,118,94,126,87,119,95,127,148,180,156,188,149,181,157,189,212,244,220,252,213,245,221,253,150,182,158,190,151,183,159,191,214,246,222,254,215,247,223,255};
+uint8_t r1b_hq2x_table [256] = {
+  4, 4, 6,  2, 4, 4, 6,  2, 5,  3, 15, 12, 5,  3, 17, 13,
+  4, 4, 6, 18, 4, 4, 6, 18, 5,  3, 12, 12, 5,  3,  1, 12,
+  4, 4, 6,  2, 4, 4, 6,  2, 5,  3, 17, 13, 5,  3, 16, 14,
+  4, 4, 6, 18, 4, 4, 6, 18, 5,  3, 16, 12, 5,  3,  1, 14,
+  4, 4, 6,  2, 4, 4, 6,  2, 5, 19, 12, 12, 5, 19, 16, 12,
+  4, 4, 6,  2, 4, 4, 6,  2, 5,  3, 16, 12, 5,  3, 16, 12,
+  4, 4, 6,  2, 4, 4, 6,  2, 5, 19,  1, 12, 5, 19,  1, 14,
+  4, 4, 6,  2, 4, 4, 6, 18, 5,  3, 16, 12, 5, 19,  1, 14,
+  4, 4, 6,  2, 4, 4, 6,  2, 5,  3, 15, 12, 5,  3, 17, 13,
+  4, 4, 6,  2, 4, 4, 6,  2, 5,  3, 16, 12, 5,  3, 16, 12,
+  4, 4, 6,  2, 4, 4, 6,  2, 5,  3, 17, 13, 5,  3, 16, 14,
+  4, 4, 6,  2, 4, 4, 6,  2, 5,  3, 16, 13, 5,  3,  1, 14,
+  4, 4, 6,  2, 4, 4, 6,  2, 5,  3, 16, 12, 5,  3, 16, 13,
+  4, 4, 6,  2, 4, 4, 6,  2, 5,  3, 16, 12, 5,  3,  1, 12,
+  4, 4, 6,  2, 4, 4, 6,  2, 5,  3, 16, 12, 5,  3,  1, 14,
+  4, 4, 6,  2, 4, 4, 6,  2, 5,  3,  1, 12, 5,  3,  1, 14,
+};
+
+#define R1B_HQ2X_BLEND1(A,B  ) (((A)*3 +(B)        )/4 )
+#define R1B_HQ2X_BLEND2(A,B,C) (((A)*2 +(B)  +(C)  )/4 )
+#define R1B_HQ2X_BLEND3(A,B,C) (((A)*5 +(B)*2+(C)  )/8 )
+#define R1B_HQ2X_BLEND4(A,B,C) (((A)*6 +(B)  +(C)  )/8 )
+#define R1B_HQ2X_BLEND5(A,B,C) (((A)*2 +(B)*3+(C)*3)/8 )
+#define R1B_HQ2X_BLEND6(A,B,C) (((A)*14+(B)  +(C)  )/16)
+
+float r1b_hq2x_blend(unsigned rule, float E, float A, float B, float D, float F, float H) {
+  float ep = R1B_CONFIG_UP2X_FLOAT_EPSILON;
+  switch(rule) { default:
+    case  0: return E;
+    case  1: return R1B_HQ2X_BLEND1(E, A   );
+    case  2: return R1B_HQ2X_BLEND1(E, D   );
+    case  3: return R1B_HQ2X_BLEND1(E, B   );
+    case  4: return R1B_HQ2X_BLEND2(E, D, B);
+    case  5: return R1B_HQ2X_BLEND2(E, A, B);
+    case  6: return R1B_HQ2X_BLEND2(E, A, D);
+    case  7: return R1B_HQ2X_BLEND3(E, B, D);
+    case  8: return R1B_HQ2X_BLEND3(E, D, B);
+    case  9: return R1B_HQ2X_BLEND4(E, D, B);
+    case 10: return R1B_HQ2X_BLEND5(E, D, B);
+    case 11: return R1B_HQ2X_BLEND6(E, D, B);
+    case 12: return (fabs(B-D)<ep) ? R1B_HQ2X_BLEND2(E, D, B) : E;
+    case 13: return (fabs(B-D)<ep) ? R1B_HQ2X_BLEND5(E, D, B) : E;
+    case 14: return (fabs(B-D)<ep) ? R1B_HQ2X_BLEND6(E, D, B) : E;
+    case 15: return (fabs(B-D)<ep) ? R1B_HQ2X_BLEND2(E, D, B) : R1B_HQ2X_BLEND1(E, A);
+    case 16: return (fabs(B-D)<ep) ? R1B_HQ2X_BLEND4(E, D, B) : R1B_HQ2X_BLEND1(E, A);
+    case 17: return (fabs(B-D)<ep) ? R1B_HQ2X_BLEND5(E, D, B) : R1B_HQ2X_BLEND1(E, A);
+    case 18: return (fabs(B-F)<ep) ? R1B_HQ2X_BLEND3(E, B, D) : R1B_HQ2X_BLEND1(E, D);
+    case 19: return (fabs(D-H)<ep) ? R1B_HQ2X_BLEND3(E, D, B) : R1B_HQ2X_BLEND1(E, B);
+  }
+}
+
+void r1b_upsample2x_hqx(r1b_im_t* im){
+  r1b_make_tmp0(im->w*2,im->h*2);
+
+  float* input = im->data;
+  float* output = r1b_tmp0;
+  int width = im->w;
+  int height = im->h;
+  int outwidth = im->w*2;
+  float ep = R1B_CONFIG_UP2X_FLOAT_EPSILON;
+
+  int y; for (y = 0; y < height; y++) {
+    const float *in = input + y * width;
+    float *out0 = output + y * outwidth * 2;
+    float *out1 = output + y * outwidth * 2 + outwidth;
+
+    int prevline = (y == 0 ? 0 : width);
+    int nextline = (y == height - 1 ? 0 : width);
+
+    
+    *out0++ = *in; *out0++ = *in;
+    *out1++ = *in; *out1++ = *in;
+    in++;
+
+    int x; for(x = 1; x < width-1; x++) {
+      float A = *(in - prevline - 1);
+      float B = *(in - prevline + 0);
+      float C = *(in - prevline + 1);
+      float D = *(in - 1);
+      float E = *(in + 0);
+      float F = *(in + 1);
+      float G = *(in + nextline - 1);
+      float H = *(in + nextline + 0);
+      float I = *(in + nextline + 1);
+      float e = E;
+
+      uint8_t pattern;
+      pattern  = (fabs(e - A)>ep) << 0;
+      pattern |= (fabs(e - B)>ep) << 1;
+      pattern |= (fabs(e - C)>ep) << 2;
+      pattern |= (fabs(e - D)>ep) << 3;
+      pattern |= (fabs(e - F)>ep) << 4;
+      pattern |= (fabs(e - G)>ep) << 5;
+      pattern |= (fabs(e - H)>ep) << 6;
+      pattern |= (fabs(e - I)>ep) << 7;
+
+      *(out0 + 0) = r1b_hq2x_blend(r1b_hq2x_table[pattern], E, A, B, D, F, H); pattern = r1b_hq2x_rotate[pattern];
+      *(out0 + 1) = r1b_hq2x_blend(r1b_hq2x_table[pattern], E, C, F, B, H, D); pattern = r1b_hq2x_rotate[pattern];
+      *(out1 + 1) = r1b_hq2x_blend(r1b_hq2x_table[pattern], E, I, H, F, D, B); pattern = r1b_hq2x_rotate[pattern];
+      *(out1 + 0) = r1b_hq2x_blend(r1b_hq2x_table[pattern], E, G, D, H, B, F);
+
+      in++;
+      out0 += 2;
+      out1 += 2;
+    }
+    
+    *out0++ = *in; *out0++ = *in;
+    *out1++ = *in; *out1++ = *in;
+
+    in++;
+  }
+
+  // swap
+  r1b_tmp0_size = im->w*im->h;
+  float* tmp = im->data;
+
+  im->w *=2;
+  im->h *=2;
+  im->data = r1b_tmp0;
+  r1b_tmp0 = tmp;
+
+}
+
+void r1b_upsample2x(r1b_im_t* im, int mode){
+  switch(mode){
+    case R1B_UP2X_SAA5050:
+      r1b_upsample2x_saa5050(im);
+      break;
+    case R1B_UP2X_EAGLE:
+      r1b_upsample2x_eagle(im);
+      break;
+    case R1B_UP2X_HQX:
+      r1b_upsample2x_hqx(im);
+      break;
+    case R1B_UP2X_EPX:
+    default:
+      r1b_upsample2x_epx(im);
+  }
+}
+
+
+// algorithm used by the bedstead font (public domain)
+// basically a nicer saa5050
+// https://bjh21.me.uk/bedstead/
+// https://bjh21.me.uk/bedstead/bedstead.c
+// here modified to work with raster
+void r1b_bedstead(r1b_im_t* im, int n){
+  int po2 = pow(2,n);
+  float w = (float)po2;
+  float w4 = w/4;
+  float w4w2 = w4+w/2;
+
+  r1b_make_tmp0(im->w*po2,im->h*po2);
+  
+  int y;for (y = 0; y < im->h; y++) {
+    int x;for (x = 0; x < im->w; x++) {
+      int L  = 0.5<r1b_get(im,x-1, y  ,R1B_BRDR_ZERO);
+      int R  = 0.5<r1b_get(im,x+1, y  ,R1B_BRDR_ZERO);
+      int U  = 0.5<r1b_get(im,x, y-1  ,R1B_BRDR_ZERO);
+      int D  = 0.5<r1b_get(im,x, y+1  ,R1B_BRDR_ZERO);
+      int UL = 0.5<r1b_get(im,x-1, y-1,R1B_BRDR_ZERO);
+      int UR = 0.5<r1b_get(im,x+1, y-1,R1B_BRDR_ZERO);
+      int DL = 0.5<r1b_get(im,x-1, y+1,R1B_BRDR_ZERO);
+      int DR = 0.5<r1b_get(im,x+1, y+1,R1B_BRDR_ZERO);
+
+      int tl, tr, bl, br;
+
+      if (im->data[y*im->w+x]>0.5) {
+        /* Assume filled in */
+        tl = tr = bl = br = 1;
+        /* Check for diagonals */
+        if ((UL && !U && !L) || (DR && !D && !R))
+          tr = bl = 0;
+        if ((UR && !U && !R) || (DL && !D && !L))
+          tl = br = 0;
+        /* Avoid odd gaps */
+        if (L || UL || U) tl = 1;
+        if (R || UR || U) tr = 1;
+        if (L || DL || D) bl = 1;
+        if (R || DR || D) br = 1;
+        
+
+        int i;for (i = 0; i < po2; i++){
+          int j;for (j = 0; j < po2; j++){
+            int ii = y*po2+i;
+            int jj = x*po2+j;
+            int idx = ii*im->w*po2+jj;
+            r1b_tmp0[idx] = 1;
+            if (!bl && i >= j+w4w2){
+              r1b_tmp0[idx] = 0;
+            }
+            if (!tr && i+w4w2 <= j){
+              r1b_tmp0[idx] = 0;
+            }
+            if (!tl && po2-i > j+ceil(w4w2)){
+              r1b_tmp0[idx] = 0;
+            }
+            if (!br && po2-i-1+w4w2 <= j){
+              r1b_tmp0[idx] = 0;
+            }
+          }
+        }
+
+      } else {
+        /* Assume clear */
+        tl = tr = bl = br = 0;
+        /* white pixel -- just diagonals */
+        if (L && U && !UL) tl = 1;
+        if (R && U && !UR) tr = 1;
+        if (L && D && !DL) bl = 1;
+        if (R && D && !DR) br = 1;
+
+        int i;for (i = 0; i < po2; i++){
+          int j;for (j = 0; j < po2; j++){
+            int ii = y*po2+i;
+            int jj = x*po2+j;
+            int idx = ii*im->w*po2+jj;
+            r1b_tmp0[idx] = 0;
+            if (bl && i > j+w4){
+              r1b_tmp0[idx] = 1;
+            }
+            if (tr && i+w4 < j){
+              r1b_tmp0[idx] = 1;
+            }
+            if (tl && po2-i-1 > j+w4){
+              r1b_tmp0[idx] = 1;
+            }
+            if (br && po2-i <= ceil(j-w4)){
+              r1b_tmp0[idx] = 1;
+            }
+          }
+        }
+
+      }
+      
+    }
+  }
+  // swap
+  r1b_tmp0_size = im->w*im->h;
+  float* tmp = im->data;
+
+  im->w *=po2;
+  im->h *=po2;
+  im->data = r1b_tmp0;
+  r1b_tmp0 = tmp;
+}
+
+
 
 #define R1B_PT_IN_PL(x,y,x0,y0,x1,y1) ((((x)-(x0))*((y1)-(y0)) - ((y)-(y0))*((x1)-(x0)))<=0)
 #define R1B_PT_IN_TRI(x,y,x0,y0,x1,y1,x2,y2) ( R1B_PT_IN_PL(x,y,x0,y0,x1,y1) && R1B_PT_IN_PL(x,y,x1,y1,x2,y2) && R1B_PT_IN_PL(x,y,x2,y2,x0,y0) )
@@ -10279,7 +10677,7 @@ static void* r1b_utf8_decode(void *buf, uint32_t *c, int *e) {
     static const int shiftc[] = {0, 18, 12, 6, 0};
     static const int shifte[] = {0, 6, 4, 2, 0};
 
-    unsigned char *s = buf;
+    unsigned char *s = (unsigned char *)buf;
     int len = lengths[s[0] >> 3];
 
     /* Compute the pointer to the next character early so that the next
@@ -10336,7 +10734,7 @@ void r1b_text_utf8(r1b_im_t* im, char* str, int x, int y, r1b_font_t* font, floa
   void* next = (void*)str;
   int e;
   int idx = 0;
-  while(next <= (void*)str+strlen(str)){
+  while((char*)next <= (char*)str+strlen(str)){
     next = r1b_utf8_decode(next, (uint32_t *)&wstr[idx], &e);
     idx++;
   }
@@ -10542,10 +10940,10 @@ void r1b_blit(r1b_im_t* dst, r1b_im_t* src, r1b_im_t* msk, float x0, float y0, f
   int ix0 = (int)round(x0);
   int iy0 = (int)round(y0);
 
-  int y; for (y=ymin; y <= ymax; y++){
-    int x; for (x=xmin; x <= xmax; x++){
-      int j = ix0 + dx * (x-xmin) +isx;
-      int i = iy0 + dy * (y-ymin) +isy;
+  int y; for (y=ymin; y < ymax; y++){
+    int x; for (x=xmin; x < xmax; x++){
+      int j = dx * (x-xmin) +isx;
+      int i = dy * (y-ymin) +isy;
       int u = r1b_get(msk,j,i,bdmode);
       if (u >= 0.5){
         float v = r1b_get(src,j,i,bdmode);
@@ -10553,6 +10951,10 @@ void r1b_blit(r1b_im_t* dst, r1b_im_t* src, r1b_im_t* msk, float x0, float y0, f
       }
     }
   }
+}
+
+void r1b_paste(r1b_im_t* dst, r1b_im_t* src, float x, float y){
+  r1b_blit(dst,src,R1B_PATTERN(SOLID),x,y,x+src->w,y+src->h,0,0,R1B_BRDR_WRAP,R1B_BLIT_SET);
 }
 
 
@@ -10583,11 +10985,11 @@ r1b_mesh_t r1b_load_obj(const char* path){
   obj.n_tri = nf;
   obj.n_vtx = nv;
 
-  obj.X = malloc(sizeof(float)*nv);
-  obj.Y = malloc(sizeof(float)*nv);
-  obj.Z = malloc(sizeof(float)*nv);
+  obj.X = (float*)malloc(sizeof(float)*nv);
+  obj.Y = (float*)malloc(sizeof(float)*nv);
+  obj.Z = (float*)malloc(sizeof(float)*nv);
 
-  obj.tris = malloc(sizeof(int)*nf*3);
+  obj.tris = (int*)malloc(sizeof(int)*nf*3);
   obj.norms = NULL;
 
   rewind(fp);
@@ -10972,5 +11374,320 @@ void r1b_render_mesh(r1b_im_t* im, r1b_im_t* depth, r1b_mesh_t* mesh, float f, r
 }
 
 
+
+r1b_im_t r1b_make_kernel(int ksize, int mode){
+  if (!(ksize % 2)){
+    ksize ++;
+  }
+  if (mode == R1B_KERN_RECT){
+    return r1b_ones(ksize,ksize);
+  }
+  if (mode == R1B_KERN_GAUSS1D){
+    r1b_im_t im = r1b_zeros(ksize,1);
+    float sigma = 0.3*((float)(ksize-1)*0.5 - 1) + 0.8;
+    float ss2 = sigma*sigma*2;
+    int i; for (i = 0; i < ksize; i++){
+      float x = (float)(i-ksize/2);
+      float z = exp(-(x*x)/(ss2))/(2.5066282746*sigma);
+      im.data[i]=z;
+    }
+    return im;
+  }
+  r1b_im_t im = r1b_zeros(ksize,ksize);
+  
+  if (mode == R1B_KERN_GAUSS){
+    // sigma: https://docs.opencv.org/2.4/modules/imgproc/doc/filtering.html
+    float sigma = 0.3*((float)(ksize-1)*0.5 - 1) + 0.8;
+    float ss2 = sigma*sigma*2;
+    int i; for (i = 0; i < ksize; i++){
+      int j; for (j = 0; j < ksize; j++){
+        float x = (float)(j-ksize/2);
+        float y = (float)(i-ksize/2);
+        float z = exp(-(x*x+y*y)/(ss2))/(M_PI*ss2);
+        im.data[i*ksize+j]=z;
+      }
+    }
+  }else if (mode == R1B_KERN_ELLIPSE){
+    r1b_ellipse(&im, (ksize-1)/2+0.5, (ksize-1)/2+0.5, (ksize-1)/2+0.5, (ksize-1)/2+0.5, 0, R1B_PATTERN(SOLID), R1B_BLIT_SET);
+  }else if (mode == R1B_KERN_CROSS){
+    int i; for (i = 0; i < ksize; i++){
+      im.data[i*ksize+ksize/2]=1;
+      im.data[(ksize/2)*ksize+i]=1;
+    }
+  }
+  return im;
+}
+
+void r1b_conv2d(r1b_im_t* im, r1b_im_t* kern, int border) {
+  r1b_make_tmp0(im->w,im->h);
+
+  int khw = kern->w/2;
+  int khh = kern->h/2;
+
+  int i; for (i= 0; i < im->h; i++ ){
+    int j; for (j= 0; j < im->w; j++ ){
+      float sum = 0;
+      int ki; for (ki= 0; ki < kern->h; ki ++ ){
+        int kj; for (kj= 0; kj < kern->w; kj ++ ){
+          sum += r1b_get(im,j-khw+kj, i-khh+ki, border) * kern->data[ki*kern->w+kj];
+        }
+      }
+      r1b_tmp0[i*im->w+j] = sum;
+    }
+  }
+  memcpy(im->data, r1b_tmp0, im->w*im->h*sizeof(float));
+}
+
+void r1b_dilate(r1b_im_t* im, r1b_im_t* kern){
+  r1b_make_tmp0(im->w,im->h);
+
+  int khw = kern->w/2;
+  int khh = kern->h/2;
+
+  int i; for (i= 0; i < im->h; i++ ){
+    int j; for (j= 0; j < im->w; j++ ){
+      float m = 0;
+      int ki; for (ki= 0; ki < kern->h; ki ++ ){
+        int kj; for (kj= 0; kj < kern->w; kj ++ ){
+          m = fmax(m, r1b_get(im,j-khw+kj, i-khh+ki, R1B_BRDR_COPY) * kern->data[ki*kern->w+kj]);
+        }
+      }
+      r1b_tmp0[i*im->w+j] = m;
+    }
+  }
+  memcpy(im->data, r1b_tmp0, im->w*im->h*sizeof(float));
+}
+
+void r1b_erode(r1b_im_t* im, r1b_im_t* kern){
+  r1b_make_tmp0(im->w,im->h);
+
+  int khw = kern->w/2;
+  int khh = kern->h/2;
+
+  int i; for (i= 0; i < im->h; i++ ){
+    int j; for (j= 0; j < im->w; j++ ){
+      float m = 1;
+      int ki; for (ki= 0; ki < kern->h; ki ++ ){
+        int kj; for (kj= 0; kj < kern->w; kj ++ ){
+          if (kern->data[ki*kern->w+kj] > 0.5){
+            m = fmin(m, r1b_get(im,j-khw+kj, i-khh+ki, R1B_BRDR_COPY));
+          }
+        }
+      }
+      r1b_tmp0[i*im->w+j] = m;
+    }
+  }
+  memcpy(im->data, r1b_tmp0, im->w*im->h*sizeof(float));
+}
+
+void r1b_sobel(r1b_im_t* im, float* out_gradient_directions){
+  r1b_make_tmp1(im->w,im->h);
+
+  r1b_im_t gx = r1b_copy_of(im);
+
+  r1b_im_t gy;
+  gy.w = im->w;
+  gy.h = im->h;
+  gy.data = r1b_tmp1;
+  memcpy(gy.data, im->data, im->w*im->h*sizeof(float));
+
+  float kdat0[3] = {1,2, 1};
+  float kdat1[3] = {1,0,-1};
+
+  r1b_im_t k1; k1.w = 1; k1.h = 3; k1.data = kdat0;
+  r1b_im_t k2; k2.w = 3; k2.h = 1; k2.data = kdat1;
+  r1b_im_t k3; k3.w = 1; k3.h = 3; k3.data = kdat1;
+  r1b_im_t k4; k4.w = 3; k4.h = 1; k4.data = kdat0;
+
+  r1b_conv2d(&gx,&k1,R1B_BRDR_COPY);
+  r1b_conv2d(&gx,&k2,R1B_BRDR_COPY);
+
+  r1b_conv2d(&gy,&k3,R1B_BRDR_COPY);
+  r1b_conv2d(&gy,&k4,R1B_BRDR_COPY);
+
+  int i; for (i = 0; i < im->w*im->h; i++){
+    im->data[i] = hypot(gx.data[i],gy.data[i]);
+  }
+  if (out_gradient_directions){
+    int i; for (i = 0; i < im->w*im->h; i++){
+      out_gradient_directions[i] = atan2(gy.data[i],gx.data[i]);
+    }
+  }
+  free(gx.data);
+}
+
+void r1b_blur(r1b_im_t* im, int rad, int mode){
+  r1b_im_t k1;
+  if (mode == R1B_BLUR_GAUSS){
+    k1 = r1b_make_kernel(rad*2+1,R1B_KERN_GAUSS1D);
+  }else{
+    k1 = r1b_zeros(rad*2+1,1);
+    for (int i = 0; i < k1.w; i++){
+      k1.data[i]=1.0/(float)k1.w;
+    }
+  }
+  r1b_im_t k2 = r1b_copy_of(&k1);
+  r1b_transpose(&k2);
+
+  r1b_conv2d(im,&k1,R1B_BRDR_COPY);
+  r1b_conv2d(im,&k2,R1B_BRDR_COPY);
+  free(k1.data);
+  free(k2.data);
+
+}
+
+
+void r1b_canny(r1b_im_t* im, int blur_rad, float thresh_lo, float thresh_hi){
+  blur_rad  = ((int)blur_rad  == (int)R1B_INFER) ? 3   : blur_rad ;
+  float th0 = ((int)thresh_lo == (int)R1B_INFER) ? 0.1 : thresh_lo;
+  float th1 = ((int)thresh_hi == (int)R1B_INFER) ? 0.2 : thresh_hi;
+
+  r1b_blur(im,blur_rad,R1B_BLUR_GAUSS);
+  float* gdir = malloc(sizeof(float)*im->w*im->h);
+  r1b_sobel(im,gdir);
+
+  int i,j;
+  float PI8 = M_PI/8;
+
+  r1b_make_tmp0(im->w,im->h);
+
+  for (i = 0; i < im->h; i++){
+    for (j = 0; j < im->w; j++){
+      int dx = 0;
+      int dy = 0;
+      float th = gdir[i*im->w+j];
+      if (      -PI8 <= th && th <   PI8){ dx = 1;dy = 0;}
+      else if (  PI8 <= th && th < 3*PI8){ dx = 1;dy = 1;}
+      else if (3*PI8 <= th && th < 5*PI8){ dx = 0;dy = 1;}
+      else if (5*PI8 <= th && th < 7*PI8){ dx =-1;dy = 1;}
+      else if (7*PI8 <= th || th <-7*PI8){ dx =-1;dy = 0;}
+      else if(-7*PI8 <= th && th <-5*PI8){ dx =-1;dy =-1;}
+      else if(-5*PI8 <= th && th <-3*PI8){ dx = 0;dy =-1;}
+      else if(-3*PI8 <= th && th <  -PI8){ dx = 1;dy =-1;}
+
+      int o = i*im->w+j;
+      if (im->data[o] <= r1b_get(im,j+dx,i+dy,R1B_BRDR_ZERO)){
+        r1b_tmp0[o] = 0;
+      }else if (im->data[i*im->w+j] < r1b_get(im,j-dx,i-dy,R1B_BRDR_ZERO)){
+        r1b_tmp0[o] = 0;
+      }else{
+        r1b_tmp0[o] = im->data[o];
+      }
+    }
+  }
+
+  for (i = 0; i < im->h; i++){
+    for (j = 0; j < im->w; j++){
+      if (r1b_tmp0[i*im->w+j] >= th1){
+        im->data[i*im->w+j] = 1;
+      }else if (r1b_tmp0[i*im->w+j] < th0){
+        im->data[i*im->w+j] = 0;
+      }else{
+        float p1 = im->data[R1B_MAX(i-1,0)      *im->w+R1B_MAX(j-1,0)      ];
+        float p2 = im->data[R1B_MAX(i-1,0)      *im->w+j                   ];
+        float p3 = im->data[R1B_MAX(i-1,0)      *im->w+R1B_MIN(j+1,im->w-1)];
+        float p4 = im->data[       i            *im->w+R1B_MAX(j-1,0)      ];
+        float p5 = im->data[       i            *im->w+R1B_MIN(j+1,im->w-1)];
+        float p6 = im->data[R1B_MIN(i+1,im->h-1)*im->w+R1B_MAX(j-1,0)      ];
+        float p7 = im->data[R1B_MIN(i+1,im->h-1)*im->w+j                   ];
+        float p8 = im->data[R1B_MIN(i+1,im->h-1)*im->w+R1B_MIN(j+1,im->w-1)];
+
+        if (p1 >= th1 || p2 >= th1 || p3 >= th1 || p4 >= th1 || p5 >= th1 || p6 >= th1 || p7 >= th1 || p8 >= th1){
+          im->data[i*im->w+j] = 1;
+        }else{
+          im->data[i*im->w+j] = 0;
+        }
+        
+      }
+    }
+  }
+}
+
+void r1b_threshold(r1b_im_t* im, float th){
+
+  int i;
+  if ((int)th == (int)R1B_INFER){
+    // Otsu's method
+
+    int nbin = 64;
+    int hist[nbin];
+    memset(hist,0,sizeof(int)*nbin);
+
+    float vmin =  FLT_MAX;
+    float vmax = -FLT_MAX;
+    for (i= 0; i < im->h*im->w; i++ ){
+      vmin = fmin(vmin,im->data[i]);
+      vmax = fmax(vmax,im->data[i]); 
+    }
+    vmin-=0.01;
+    vmax+=0.01;
+
+    float bsize = (vmax-vmin)/(float)nbin;
+    for (i= 0; i < im->h*im->w; i++ ){
+      int n = (int)((im->data[i]-vmin)/bsize);
+      hist[n]++;
+    }
+
+    float sum = 0;
+    for (i=0; i<nbin; i++){sum += i * hist[i];}
+
+    float sumB = 0;
+    int wB = 0;
+    int wF = 0;
+    float varMax = 0;
+
+    int threshold = 0;
+
+    // http://www.labbookpages.co.uk/software/imgProc/otsuThreshold.html
+    for (i=0 ; i<nbin; i++) {
+       wB += hist[i];               // Weight Background
+       if (wB == 0) continue;
+
+       wF = im->w*im->h - wB;       // Weight Foreground
+       if (wF == 0) break;
+
+       sumB += (float) (i * hist[i]);
+
+       float mB = sumB / wB;            // Mean Background
+       float mF = (sum - sumB) / wF;    // Mean Foreground
+
+       // Calculate Between Class Variance
+       float varBetween = (float)wB * (float)wF * (mB - mF) * (mB - mF);
+
+       // Check if new maximum found
+       if (varBetween > varMax) {
+          varMax = varBetween;
+          threshold = i;
+       }
+    }
+    th = vmin + ((float)threshold+0.5) * bsize;
+    // printf("%d %f\n",threshold,th);
+  }
+
+  for (i= 0; i < im->h*im->w; i++ ){
+    im->data[i] = (im->data[i]>=th);
+  }
+}
+
+
+void r1b_threshold_adaptive(r1b_im_t* im, int rad, float bias, int blur_mode){
+  int i;
+  r1b_make_tmp0(im->w,im->h);
+  r1b_im_t tmp;
+  tmp.w = im->w;
+  tmp.h = im->h;
+  tmp.data = r1b_tmp0;
+  memcpy(r1b_tmp0, im->data, im->w*im->h*sizeof(float));
+
+  r1b_blur(&tmp,rad,blur_mode);
+
+  for (i= 0; i < im->h*im->w; i++ ){
+    if (im->data[i]<r1b_tmp0[i]-bias*r1b_tmp0[i]){
+      im->data[i] = 0;
+    }else{
+      im->data[i] = 1;
+    }
+  }
+}
 
 #endif // include guard

@@ -21,7 +21,7 @@ for l in lines:
 		continue
 
 	ll = l.split(" ");
-	if ll[1].startswith("r1b_") and ll[0] != "}" and l.strip().endswith("{"):
+	if ll[1].startswith("r1b_") and ll[0] != "}" and l.strip().endswith("{") and "=" not in l:
 		funcs.append(l.replace("{",";"))
 
 iface = "\n".join(macros+structs+funcs)

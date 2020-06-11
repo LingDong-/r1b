@@ -2976,7 +2976,7 @@ SWIGINTERN FloatArray *FloatArray_frompointer(float *t){
   }
 
 
-#define R1B_INFER          0
+#define R1B_INFER         -42
 #define R1B_DTHR_ORD       1
 #define R1B_DTHR_FS        2
 #define R1B_SMPL_NN        11
@@ -2995,10 +2995,21 @@ SWIGINTERN FloatArray *FloatArray_frompointer(float *t){
 #define R1B_WIRE_NONE      61
 #define R1B_WIRE_FRONT     62
 #define R1B_WIRE_ALL       63
-#define R1B_SHDR_NONE      20
-#define R1B_SHDR_FLAT      21
-#define R1B_SHDR_NDOTL     22
-#define R1B_SHDR_NDOTLF    23
+#define R1B_SHDR_NONE      70
+#define R1B_SHDR_FLAT      71
+#define R1B_SHDR_NDOTL     72
+#define R1B_SHDR_NDOTLF    73
+#define R1B_UP2X_SAA5050   81
+#define R1B_UP2X_EPX       82
+#define R1B_UP2X_EAGLE     83
+#define R1B_UP2X_HQX       84
+#define R1B_KERN_ELLIPSE   91
+#define R1B_KERN_GAUSS     92
+#define R1B_KERN_GAUSS1D   93
+#define R1B_KERN_CROSS     94
+#define R1B_KERN_RECT      95
+#define R1B_BLUR_GAUSS     111
+#define R1B_BLUR_BOX       112
 #define R1B_FLAG_SORTED    1
 typedef struct {  int w;  int h;  float* data;} r1b_im_t;
 typedef struct {  int h;  char* glyphs;  int n;  uint32_t* offsets;  uint8_t*  sizes;  uint16_t* cmap;  int flags;} r1b_font_t;
@@ -3031,7 +3042,13 @@ void r1b_resample_bilinear(r1b_im_t* im, int w, int h);
 void r1b_resample(r1b_im_t* im, int w, int h, int mode);
 float r1b_get(r1b_im_t* im, int x, int y, int mode);
 void r1b_set(r1b_im_t* im, int x, int y, float val, int mode);
-void r1b_conv2d(r1b_im_t* im, r1b_im_t* kern, int border) ;
+void r1b_upsample2x_saa5050(r1b_im_t* im);
+void r1b_upsample2x_epx(r1b_im_t* im);
+void r1b_upsample2x_eagle(r1b_im_t* im);
+float r1b_hq2x_blend(unsigned rule, float E, float A, float B, float D, float F, float H) ;
+void r1b_upsample2x_hqx(r1b_im_t* im);
+void r1b_upsample2x(r1b_im_t* im, int mode);
+void r1b_bedstead(r1b_im_t* im, int n);
 void r1b_triangle(r1b_im_t* im,float x0 ,float y0 ,float x1 ,float y1 ,float x2 ,float y2 , r1b_im_t* pttn, int mode );
 void r1b_rect(r1b_im_t* im,float x0 ,float y0 ,float x1 ,float y1 , r1b_im_t* pttn, int mode);
 void r1b_line(r1b_im_t* im, float x0 ,float y0 ,float x1 ,float y1, float val, int mode);
@@ -3055,6 +3072,7 @@ void r1b_polygon(r1b_im_t* im, float* Xs, float* Ys, int n, r1b_im_t* pttn, int 
 void r1b_ellipse(r1b_im_t* im, float cx, float cy, float rx, float ry, float ang, r1b_im_t* pttn, int mode);
 void r1b_line_ellipse(r1b_im_t* im, float cx, float cy, float rx, float ry, float ang, int detail, float val, int mode);
 void r1b_blit(r1b_im_t* dst, r1b_im_t* src, r1b_im_t* msk, float x0, float y0, float x1, float y1, float sx, float sy, int bdmode, int mode);
+void r1b_paste(r1b_im_t* dst, r1b_im_t* src, float x, float y);
 r1b_mesh_t r1b_load_obj(const char* path);
 void r1b_mesh_bbox(r1b_mesh_t* mesh, float* xmin, float* ymin, float* zmin, float* xmax, float* ymax, float* zmax);
 void r1b_normalize_mesh(r1b_mesh_t* mesh);
@@ -3064,6 +3082,15 @@ void r1b_line3d(r1b_im_t* im, r1b_im_t* depth, int depth_read, float f, float x0
 void r1b_transform_mesh(r1b_mesh_t* mesh, float* mat);
 void r1b_compute_vertex_normals(r1b_mesh_t* mesh);
 void r1b_render_mesh(r1b_im_t* im, r1b_im_t* depth, r1b_mesh_t* mesh, float f, r1b_im_t* pttn, float* light, int wire_val, int shdr, int wire);
+r1b_im_t r1b_make_kernel(int ksize, int mode);
+void r1b_conv2d(r1b_im_t* im, r1b_im_t* kern, int border) ;
+void r1b_dilate(r1b_im_t* im, r1b_im_t* kern);
+void r1b_erode(r1b_im_t* im, r1b_im_t* kern);
+void r1b_sobel(r1b_im_t* im, float* out_gradient_directions);
+void r1b_blur(r1b_im_t* im, int rad, int mode);
+void r1b_canny(r1b_im_t* im, int blur_rad, float thresh_lo, float thresh_hi);
+void r1b_threshold(r1b_im_t* im, float th);
+void r1b_threshold_adaptive(r1b_im_t* im, int rad, float bias, int blur_mode);
 
 void* nullptr(){
  	return NULL;
@@ -3290,6 +3317,22 @@ SWIGINTERNINLINE PyObject *
 SWIG_FromCharPtr(const char *cptr)
 { 
   return SWIG_FromCharPtrAndSize(cptr, (cptr ? strlen(cptr) : 0));
+}
+
+
+SWIGINTERN int
+SWIG_AsVal_unsigned_SS_int (PyObject * obj, unsigned int *val)
+{
+  unsigned long v;
+  int res = SWIG_AsVal_unsigned_SS_long (obj, &v);
+  if (SWIG_IsOK(res)) {
+    if ((v > UINT_MAX)) {
+      return SWIG_OverflowError;
+    } else {
+      if (val) *val = (unsigned int)(v);
+    }
+  }  
+  return res;
 }
 
 #ifdef __cplusplus
@@ -5326,36 +5369,215 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_r1b_conv2d(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_r1b_upsample2x_saa5050(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   r1b_im_t *arg1 = (r1b_im_t *) 0 ;
-  r1b_im_t *arg2 = (r1b_im_t *) 0 ;
-  int arg3 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  int val3 ;
-  int ecode3 = 0 ;
-  PyObject *swig_obj[3] ;
+  PyObject *swig_obj[1] ;
   
-  if (!SWIG_Python_UnpackTuple(args, "r1b_conv2d", 3, 3, swig_obj)) SWIG_fail;
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
   res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_r1b_im_t, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "r1b_conv2d" "', argument " "1"" of type '" "r1b_im_t *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "r1b_upsample2x_saa5050" "', argument " "1"" of type '" "r1b_im_t *""'"); 
   }
   arg1 = (r1b_im_t *)(argp1);
-  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_r1b_im_t, 0 |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "r1b_conv2d" "', argument " "2"" of type '" "r1b_im_t *""'"); 
+  r1b_upsample2x_saa5050(arg1);
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_r1b_upsample2x_epx(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  r1b_im_t *arg1 = (r1b_im_t *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_r1b_im_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "r1b_upsample2x_epx" "', argument " "1"" of type '" "r1b_im_t *""'"); 
   }
-  arg2 = (r1b_im_t *)(argp2);
-  ecode3 = SWIG_AsVal_int(swig_obj[2], &val3);
-  if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "r1b_conv2d" "', argument " "3"" of type '" "int""'");
+  arg1 = (r1b_im_t *)(argp1);
+  r1b_upsample2x_epx(arg1);
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_r1b_upsample2x_eagle(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  r1b_im_t *arg1 = (r1b_im_t *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_r1b_im_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "r1b_upsample2x_eagle" "', argument " "1"" of type '" "r1b_im_t *""'"); 
+  }
+  arg1 = (r1b_im_t *)(argp1);
+  r1b_upsample2x_eagle(arg1);
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_r1b_hq2x_blend(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  unsigned int arg1 ;
+  float arg2 ;
+  float arg3 ;
+  float arg4 ;
+  float arg5 ;
+  float arg6 ;
+  float arg7 ;
+  unsigned int val1 ;
+  int ecode1 = 0 ;
+  float val2 ;
+  int ecode2 = 0 ;
+  float val3 ;
+  int ecode3 = 0 ;
+  float val4 ;
+  int ecode4 = 0 ;
+  float val5 ;
+  int ecode5 = 0 ;
+  float val6 ;
+  int ecode6 = 0 ;
+  float val7 ;
+  int ecode7 = 0 ;
+  PyObject *swig_obj[7] ;
+  float result;
+  
+  if (!SWIG_Python_UnpackTuple(args, "r1b_hq2x_blend", 7, 7, swig_obj)) SWIG_fail;
+  ecode1 = SWIG_AsVal_unsigned_SS_int(swig_obj[0], &val1);
+  if (!SWIG_IsOK(ecode1)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "r1b_hq2x_blend" "', argument " "1"" of type '" "unsigned int""'");
   } 
-  arg3 = (int)(val3);
-  r1b_conv2d(arg1,arg2,arg3);
+  arg1 = (unsigned int)(val1);
+  ecode2 = SWIG_AsVal_float(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "r1b_hq2x_blend" "', argument " "2"" of type '" "float""'");
+  } 
+  arg2 = (float)(val2);
+  ecode3 = SWIG_AsVal_float(swig_obj[2], &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "r1b_hq2x_blend" "', argument " "3"" of type '" "float""'");
+  } 
+  arg3 = (float)(val3);
+  ecode4 = SWIG_AsVal_float(swig_obj[3], &val4);
+  if (!SWIG_IsOK(ecode4)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "r1b_hq2x_blend" "', argument " "4"" of type '" "float""'");
+  } 
+  arg4 = (float)(val4);
+  ecode5 = SWIG_AsVal_float(swig_obj[4], &val5);
+  if (!SWIG_IsOK(ecode5)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode5), "in method '" "r1b_hq2x_blend" "', argument " "5"" of type '" "float""'");
+  } 
+  arg5 = (float)(val5);
+  ecode6 = SWIG_AsVal_float(swig_obj[5], &val6);
+  if (!SWIG_IsOK(ecode6)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode6), "in method '" "r1b_hq2x_blend" "', argument " "6"" of type '" "float""'");
+  } 
+  arg6 = (float)(val6);
+  ecode7 = SWIG_AsVal_float(swig_obj[6], &val7);
+  if (!SWIG_IsOK(ecode7)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode7), "in method '" "r1b_hq2x_blend" "', argument " "7"" of type '" "float""'");
+  } 
+  arg7 = (float)(val7);
+  result = (float)r1b_hq2x_blend(arg1,arg2,arg3,arg4,arg5,arg6,arg7);
+  resultobj = SWIG_From_float((float)(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_r1b_upsample2x_hqx(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  r1b_im_t *arg1 = (r1b_im_t *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_r1b_im_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "r1b_upsample2x_hqx" "', argument " "1"" of type '" "r1b_im_t *""'"); 
+  }
+  arg1 = (r1b_im_t *)(argp1);
+  r1b_upsample2x_hqx(arg1);
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_r1b_upsample2x(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  r1b_im_t *arg1 = (r1b_im_t *) 0 ;
+  int arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "r1b_upsample2x", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_r1b_im_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "r1b_upsample2x" "', argument " "1"" of type '" "r1b_im_t *""'"); 
+  }
+  arg1 = (r1b_im_t *)(argp1);
+  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "r1b_upsample2x" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = (int)(val2);
+  r1b_upsample2x(arg1,arg2);
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_r1b_bedstead(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  r1b_im_t *arg1 = (r1b_im_t *) 0 ;
+  int arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "r1b_bedstead", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_r1b_im_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "r1b_bedstead" "', argument " "1"" of type '" "r1b_im_t *""'"); 
+  }
+  arg1 = (r1b_im_t *)(argp1);
+  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "r1b_bedstead" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = (int)(val2);
+  r1b_bedstead(arg1,arg2);
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -6840,6 +7062,51 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_r1b_paste(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  r1b_im_t *arg1 = (r1b_im_t *) 0 ;
+  r1b_im_t *arg2 = (r1b_im_t *) 0 ;
+  float arg3 ;
+  float arg4 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  float val3 ;
+  int ecode3 = 0 ;
+  float val4 ;
+  int ecode4 = 0 ;
+  PyObject *swig_obj[4] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "r1b_paste", 4, 4, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_r1b_im_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "r1b_paste" "', argument " "1"" of type '" "r1b_im_t *""'"); 
+  }
+  arg1 = (r1b_im_t *)(argp1);
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_r1b_im_t, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "r1b_paste" "', argument " "2"" of type '" "r1b_im_t *""'"); 
+  }
+  arg2 = (r1b_im_t *)(argp2);
+  ecode3 = SWIG_AsVal_float(swig_obj[2], &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "r1b_paste" "', argument " "3"" of type '" "float""'");
+  } 
+  arg3 = (float)(val3);
+  ecode4 = SWIG_AsVal_float(swig_obj[3], &val4);
+  if (!SWIG_IsOK(ecode4)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "r1b_paste" "', argument " "4"" of type '" "float""'");
+  } 
+  arg4 = (float)(val4);
+  r1b_paste(arg1,arg2,arg3,arg4);
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_r1b_load_obj(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   char *arg1 = (char *) 0 ;
@@ -7357,6 +7624,316 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_r1b_make_kernel(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  int arg1 ;
+  int arg2 ;
+  int val1 ;
+  int ecode1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject *swig_obj[2] ;
+  r1b_im_t result;
+  
+  if (!SWIG_Python_UnpackTuple(args, "r1b_make_kernel", 2, 2, swig_obj)) SWIG_fail;
+  ecode1 = SWIG_AsVal_int(swig_obj[0], &val1);
+  if (!SWIG_IsOK(ecode1)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "r1b_make_kernel" "', argument " "1"" of type '" "int""'");
+  } 
+  arg1 = (int)(val1);
+  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "r1b_make_kernel" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = (int)(val2);
+  result = r1b_make_kernel(arg1,arg2);
+  resultobj = SWIG_NewPointerObj((r1b_im_t *)memcpy((r1b_im_t *)calloc(1,sizeof(r1b_im_t)),&result,sizeof(r1b_im_t)), SWIGTYPE_p_r1b_im_t, SWIG_POINTER_OWN |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_r1b_conv2d(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  r1b_im_t *arg1 = (r1b_im_t *) 0 ;
+  r1b_im_t *arg2 = (r1b_im_t *) 0 ;
+  int arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  int val3 ;
+  int ecode3 = 0 ;
+  PyObject *swig_obj[3] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "r1b_conv2d", 3, 3, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_r1b_im_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "r1b_conv2d" "', argument " "1"" of type '" "r1b_im_t *""'"); 
+  }
+  arg1 = (r1b_im_t *)(argp1);
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_r1b_im_t, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "r1b_conv2d" "', argument " "2"" of type '" "r1b_im_t *""'"); 
+  }
+  arg2 = (r1b_im_t *)(argp2);
+  ecode3 = SWIG_AsVal_int(swig_obj[2], &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "r1b_conv2d" "', argument " "3"" of type '" "int""'");
+  } 
+  arg3 = (int)(val3);
+  r1b_conv2d(arg1,arg2,arg3);
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_r1b_dilate(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  r1b_im_t *arg1 = (r1b_im_t *) 0 ;
+  r1b_im_t *arg2 = (r1b_im_t *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "r1b_dilate", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_r1b_im_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "r1b_dilate" "', argument " "1"" of type '" "r1b_im_t *""'"); 
+  }
+  arg1 = (r1b_im_t *)(argp1);
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_r1b_im_t, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "r1b_dilate" "', argument " "2"" of type '" "r1b_im_t *""'"); 
+  }
+  arg2 = (r1b_im_t *)(argp2);
+  r1b_dilate(arg1,arg2);
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_r1b_erode(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  r1b_im_t *arg1 = (r1b_im_t *) 0 ;
+  r1b_im_t *arg2 = (r1b_im_t *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "r1b_erode", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_r1b_im_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "r1b_erode" "', argument " "1"" of type '" "r1b_im_t *""'"); 
+  }
+  arg1 = (r1b_im_t *)(argp1);
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_r1b_im_t, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "r1b_erode" "', argument " "2"" of type '" "r1b_im_t *""'"); 
+  }
+  arg2 = (r1b_im_t *)(argp2);
+  r1b_erode(arg1,arg2);
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_r1b_sobel(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  r1b_im_t *arg1 = (r1b_im_t *) 0 ;
+  float *arg2 = (float *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "r1b_sobel", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_r1b_im_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "r1b_sobel" "', argument " "1"" of type '" "r1b_im_t *""'"); 
+  }
+  arg1 = (r1b_im_t *)(argp1);
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_float, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "r1b_sobel" "', argument " "2"" of type '" "float *""'"); 
+  }
+  arg2 = (float *)(argp2);
+  r1b_sobel(arg1,arg2);
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_r1b_blur(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  r1b_im_t *arg1 = (r1b_im_t *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  int val3 ;
+  int ecode3 = 0 ;
+  PyObject *swig_obj[3] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "r1b_blur", 3, 3, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_r1b_im_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "r1b_blur" "', argument " "1"" of type '" "r1b_im_t *""'"); 
+  }
+  arg1 = (r1b_im_t *)(argp1);
+  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "r1b_blur" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = (int)(val2);
+  ecode3 = SWIG_AsVal_int(swig_obj[2], &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "r1b_blur" "', argument " "3"" of type '" "int""'");
+  } 
+  arg3 = (int)(val3);
+  r1b_blur(arg1,arg2,arg3);
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_r1b_canny(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  r1b_im_t *arg1 = (r1b_im_t *) 0 ;
+  int arg2 ;
+  float arg3 ;
+  float arg4 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  float val3 ;
+  int ecode3 = 0 ;
+  float val4 ;
+  int ecode4 = 0 ;
+  PyObject *swig_obj[4] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "r1b_canny", 4, 4, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_r1b_im_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "r1b_canny" "', argument " "1"" of type '" "r1b_im_t *""'"); 
+  }
+  arg1 = (r1b_im_t *)(argp1);
+  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "r1b_canny" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = (int)(val2);
+  ecode3 = SWIG_AsVal_float(swig_obj[2], &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "r1b_canny" "', argument " "3"" of type '" "float""'");
+  } 
+  arg3 = (float)(val3);
+  ecode4 = SWIG_AsVal_float(swig_obj[3], &val4);
+  if (!SWIG_IsOK(ecode4)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "r1b_canny" "', argument " "4"" of type '" "float""'");
+  } 
+  arg4 = (float)(val4);
+  r1b_canny(arg1,arg2,arg3,arg4);
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_r1b_threshold(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  r1b_im_t *arg1 = (r1b_im_t *) 0 ;
+  float arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  float val2 ;
+  int ecode2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "r1b_threshold", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_r1b_im_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "r1b_threshold" "', argument " "1"" of type '" "r1b_im_t *""'"); 
+  }
+  arg1 = (r1b_im_t *)(argp1);
+  ecode2 = SWIG_AsVal_float(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "r1b_threshold" "', argument " "2"" of type '" "float""'");
+  } 
+  arg2 = (float)(val2);
+  r1b_threshold(arg1,arg2);
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_r1b_threshold_adaptive(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  r1b_im_t *arg1 = (r1b_im_t *) 0 ;
+  int arg2 ;
+  float arg3 ;
+  int arg4 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  float val3 ;
+  int ecode3 = 0 ;
+  int val4 ;
+  int ecode4 = 0 ;
+  PyObject *swig_obj[4] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "r1b_threshold_adaptive", 4, 4, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_r1b_im_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "r1b_threshold_adaptive" "', argument " "1"" of type '" "r1b_im_t *""'"); 
+  }
+  arg1 = (r1b_im_t *)(argp1);
+  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "r1b_threshold_adaptive" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = (int)(val2);
+  ecode3 = SWIG_AsVal_float(swig_obj[2], &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "r1b_threshold_adaptive" "', argument " "3"" of type '" "float""'");
+  } 
+  arg3 = (float)(val3);
+  ecode4 = SWIG_AsVal_int(swig_obj[3], &val4);
+  if (!SWIG_IsOK(ecode4)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "r1b_threshold_adaptive" "', argument " "4"" of type '" "int""'");
+  } 
+  arg4 = (int)(val4);
+  r1b_threshold_adaptive(arg1,arg2,arg3,arg4);
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_nullptr(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   void *result = 0 ;
@@ -7454,7 +8031,13 @@ static PyMethodDef SwigMethods[] = {
 	 { "r1b_resample", _wrap_r1b_resample, METH_VARARGS, NULL},
 	 { "r1b_get", _wrap_r1b_get, METH_VARARGS, NULL},
 	 { "r1b_set", _wrap_r1b_set, METH_VARARGS, NULL},
-	 { "r1b_conv2d", _wrap_r1b_conv2d, METH_VARARGS, NULL},
+	 { "r1b_upsample2x_saa5050", _wrap_r1b_upsample2x_saa5050, METH_O, NULL},
+	 { "r1b_upsample2x_epx", _wrap_r1b_upsample2x_epx, METH_O, NULL},
+	 { "r1b_upsample2x_eagle", _wrap_r1b_upsample2x_eagle, METH_O, NULL},
+	 { "r1b_hq2x_blend", _wrap_r1b_hq2x_blend, METH_VARARGS, NULL},
+	 { "r1b_upsample2x_hqx", _wrap_r1b_upsample2x_hqx, METH_O, NULL},
+	 { "r1b_upsample2x", _wrap_r1b_upsample2x, METH_VARARGS, NULL},
+	 { "r1b_bedstead", _wrap_r1b_bedstead, METH_VARARGS, NULL},
 	 { "r1b_triangle", _wrap_r1b_triangle, METH_VARARGS, NULL},
 	 { "r1b_rect", _wrap_r1b_rect, METH_VARARGS, NULL},
 	 { "r1b_line", _wrap_r1b_line, METH_VARARGS, NULL},
@@ -7478,6 +8061,7 @@ static PyMethodDef SwigMethods[] = {
 	 { "r1b_ellipse", _wrap_r1b_ellipse, METH_VARARGS, NULL},
 	 { "r1b_line_ellipse", _wrap_r1b_line_ellipse, METH_VARARGS, NULL},
 	 { "r1b_blit", _wrap_r1b_blit, METH_VARARGS, NULL},
+	 { "r1b_paste", _wrap_r1b_paste, METH_VARARGS, NULL},
 	 { "r1b_load_obj", _wrap_r1b_load_obj, METH_O, NULL},
 	 { "r1b_mesh_bbox", _wrap_r1b_mesh_bbox, METH_VARARGS, NULL},
 	 { "r1b_normalize_mesh", _wrap_r1b_normalize_mesh, METH_O, NULL},
@@ -7487,6 +8071,15 @@ static PyMethodDef SwigMethods[] = {
 	 { "r1b_transform_mesh", _wrap_r1b_transform_mesh, METH_VARARGS, NULL},
 	 { "r1b_compute_vertex_normals", _wrap_r1b_compute_vertex_normals, METH_O, NULL},
 	 { "r1b_render_mesh", _wrap_r1b_render_mesh, METH_VARARGS, NULL},
+	 { "r1b_make_kernel", _wrap_r1b_make_kernel, METH_VARARGS, NULL},
+	 { "r1b_conv2d", _wrap_r1b_conv2d, METH_VARARGS, NULL},
+	 { "r1b_dilate", _wrap_r1b_dilate, METH_VARARGS, NULL},
+	 { "r1b_erode", _wrap_r1b_erode, METH_VARARGS, NULL},
+	 { "r1b_sobel", _wrap_r1b_sobel, METH_VARARGS, NULL},
+	 { "r1b_blur", _wrap_r1b_blur, METH_VARARGS, NULL},
+	 { "r1b_canny", _wrap_r1b_canny, METH_VARARGS, NULL},
+	 { "r1b_threshold", _wrap_r1b_threshold, METH_VARARGS, NULL},
+	 { "r1b_threshold_adaptive", _wrap_r1b_threshold_adaptive, METH_VARARGS, NULL},
 	 { "nullptr", _wrap_nullptr, METH_NOARGS, NULL},
 	 { NULL, NULL, 0, NULL }
 };
@@ -8284,7 +8877,7 @@ SWIG_init(void) {
   
   SWIG_InstallConstants(d,swig_const_table);
   
-  SWIG_Python_SetConstant(d, "R1B_INFER",SWIG_From_int((int)(0)));
+  SWIG_Python_SetConstant(d, "R1B_INFER",SWIG_From_int((int)(-42)));
   SWIG_Python_SetConstant(d, "R1B_DTHR_ORD",SWIG_From_int((int)(1)));
   SWIG_Python_SetConstant(d, "R1B_DTHR_FS",SWIG_From_int((int)(2)));
   SWIG_Python_SetConstant(d, "R1B_SMPL_NN",SWIG_From_int((int)(11)));
@@ -8303,10 +8896,21 @@ SWIG_init(void) {
   SWIG_Python_SetConstant(d, "R1B_WIRE_NONE",SWIG_From_int((int)(61)));
   SWIG_Python_SetConstant(d, "R1B_WIRE_FRONT",SWIG_From_int((int)(62)));
   SWIG_Python_SetConstant(d, "R1B_WIRE_ALL",SWIG_From_int((int)(63)));
-  SWIG_Python_SetConstant(d, "R1B_SHDR_NONE",SWIG_From_int((int)(20)));
-  SWIG_Python_SetConstant(d, "R1B_SHDR_FLAT",SWIG_From_int((int)(21)));
-  SWIG_Python_SetConstant(d, "R1B_SHDR_NDOTL",SWIG_From_int((int)(22)));
-  SWIG_Python_SetConstant(d, "R1B_SHDR_NDOTLF",SWIG_From_int((int)(23)));
+  SWIG_Python_SetConstant(d, "R1B_SHDR_NONE",SWIG_From_int((int)(70)));
+  SWIG_Python_SetConstant(d, "R1B_SHDR_FLAT",SWIG_From_int((int)(71)));
+  SWIG_Python_SetConstant(d, "R1B_SHDR_NDOTL",SWIG_From_int((int)(72)));
+  SWIG_Python_SetConstant(d, "R1B_SHDR_NDOTLF",SWIG_From_int((int)(73)));
+  SWIG_Python_SetConstant(d, "R1B_UP2X_SAA5050",SWIG_From_int((int)(81)));
+  SWIG_Python_SetConstant(d, "R1B_UP2X_EPX",SWIG_From_int((int)(82)));
+  SWIG_Python_SetConstant(d, "R1B_UP2X_EAGLE",SWIG_From_int((int)(83)));
+  SWIG_Python_SetConstant(d, "R1B_UP2X_HQX",SWIG_From_int((int)(84)));
+  SWIG_Python_SetConstant(d, "R1B_KERN_ELLIPSE",SWIG_From_int((int)(91)));
+  SWIG_Python_SetConstant(d, "R1B_KERN_GAUSS",SWIG_From_int((int)(92)));
+  SWIG_Python_SetConstant(d, "R1B_KERN_GAUSS1D",SWIG_From_int((int)(93)));
+  SWIG_Python_SetConstant(d, "R1B_KERN_CROSS",SWIG_From_int((int)(94)));
+  SWIG_Python_SetConstant(d, "R1B_KERN_RECT",SWIG_From_int((int)(95)));
+  SWIG_Python_SetConstant(d, "R1B_BLUR_GAUSS",SWIG_From_int((int)(111)));
+  SWIG_Python_SetConstant(d, "R1B_BLUR_BOX",SWIG_From_int((int)(112)));
   SWIG_Python_SetConstant(d, "R1B_FLAG_SORTED",SWIG_From_int((int)(1)));
 #if PY_VERSION_HEX >= 0x03000000
   return m;

@@ -8,7 +8,7 @@
 
 %{
 
-#define R1B_INFER          0
+#define R1B_INFER         -42
 #define R1B_DTHR_ORD       1
 #define R1B_DTHR_FS        2
 #define R1B_SMPL_NN        11
@@ -27,10 +27,21 @@
 #define R1B_WIRE_NONE      61
 #define R1B_WIRE_FRONT     62
 #define R1B_WIRE_ALL       63
-#define R1B_SHDR_NONE      20
-#define R1B_SHDR_FLAT      21
-#define R1B_SHDR_NDOTL     22
-#define R1B_SHDR_NDOTLF    23
+#define R1B_SHDR_NONE      70
+#define R1B_SHDR_FLAT      71
+#define R1B_SHDR_NDOTL     72
+#define R1B_SHDR_NDOTLF    73
+#define R1B_UP2X_SAA5050   81
+#define R1B_UP2X_EPX       82
+#define R1B_UP2X_EAGLE     83
+#define R1B_UP2X_HQX       84
+#define R1B_KERN_ELLIPSE   91
+#define R1B_KERN_GAUSS     92
+#define R1B_KERN_GAUSS1D   93
+#define R1B_KERN_CROSS     94
+#define R1B_KERN_RECT      95
+#define R1B_BLUR_GAUSS     111
+#define R1B_BLUR_BOX       112
 #define R1B_FLAG_SORTED    1
 typedef struct {  int w;  int h;  float* data;} r1b_im_t;
 typedef struct {  int h;  char* glyphs;  int n;  uint32_t* offsets;  uint8_t*  sizes;  uint16_t* cmap;  int flags;} r1b_font_t;
@@ -63,7 +74,13 @@ void r1b_resample_bilinear(r1b_im_t* im, int w, int h);
 void r1b_resample(r1b_im_t* im, int w, int h, int mode);
 float r1b_get(r1b_im_t* im, int x, int y, int mode);
 void r1b_set(r1b_im_t* im, int x, int y, float val, int mode);
-void r1b_conv2d(r1b_im_t* im, r1b_im_t* kern, int border) ;
+void r1b_upsample2x_saa5050(r1b_im_t* im);
+void r1b_upsample2x_epx(r1b_im_t* im);
+void r1b_upsample2x_eagle(r1b_im_t* im);
+float r1b_hq2x_blend(unsigned rule, float E, float A, float B, float D, float F, float H) ;
+void r1b_upsample2x_hqx(r1b_im_t* im);
+void r1b_upsample2x(r1b_im_t* im, int mode);
+void r1b_bedstead(r1b_im_t* im, int n);
 void r1b_triangle(r1b_im_t* im,float x0 ,float y0 ,float x1 ,float y1 ,float x2 ,float y2 , r1b_im_t* pttn, int mode );
 void r1b_rect(r1b_im_t* im,float x0 ,float y0 ,float x1 ,float y1 , r1b_im_t* pttn, int mode);
 void r1b_line(r1b_im_t* im, float x0 ,float y0 ,float x1 ,float y1, float val, int mode);
@@ -87,6 +104,7 @@ void r1b_polygon(r1b_im_t* im, float* Xs, float* Ys, int n, r1b_im_t* pttn, int 
 void r1b_ellipse(r1b_im_t* im, float cx, float cy, float rx, float ry, float ang, r1b_im_t* pttn, int mode);
 void r1b_line_ellipse(r1b_im_t* im, float cx, float cy, float rx, float ry, float ang, int detail, float val, int mode);
 void r1b_blit(r1b_im_t* dst, r1b_im_t* src, r1b_im_t* msk, float x0, float y0, float x1, float y1, float sx, float sy, int bdmode, int mode);
+void r1b_paste(r1b_im_t* dst, r1b_im_t* src, float x, float y);
 r1b_mesh_t r1b_load_obj(const char* path);
 void r1b_mesh_bbox(r1b_mesh_t* mesh, float* xmin, float* ymin, float* zmin, float* xmax, float* ymax, float* zmax);
 void r1b_normalize_mesh(r1b_mesh_t* mesh);
@@ -96,6 +114,15 @@ void r1b_line3d(r1b_im_t* im, r1b_im_t* depth, int depth_read, float f, float x0
 void r1b_transform_mesh(r1b_mesh_t* mesh, float* mat);
 void r1b_compute_vertex_normals(r1b_mesh_t* mesh);
 void r1b_render_mesh(r1b_im_t* im, r1b_im_t* depth, r1b_mesh_t* mesh, float f, r1b_im_t* pttn, float* light, int wire_val, int shdr, int wire);
+r1b_im_t r1b_make_kernel(int ksize, int mode);
+void r1b_conv2d(r1b_im_t* im, r1b_im_t* kern, int border) ;
+void r1b_dilate(r1b_im_t* im, r1b_im_t* kern);
+void r1b_erode(r1b_im_t* im, r1b_im_t* kern);
+void r1b_sobel(r1b_im_t* im, float* out_gradient_directions);
+void r1b_blur(r1b_im_t* im, int rad, int mode);
+void r1b_canny(r1b_im_t* im, int blur_rad, float thresh_lo, float thresh_hi);
+void r1b_threshold(r1b_im_t* im, float th);
+void r1b_threshold_adaptive(r1b_im_t* im, int rad, float bias, int blur_mode);
 
 void* nullptr(){
  	return NULL;
@@ -104,7 +131,7 @@ void* nullptr(){
 
 %}
 
-#define R1B_INFER          0
+#define R1B_INFER         -42
 #define R1B_DTHR_ORD       1
 #define R1B_DTHR_FS        2
 #define R1B_SMPL_NN        11
@@ -123,10 +150,21 @@ void* nullptr(){
 #define R1B_WIRE_NONE      61
 #define R1B_WIRE_FRONT     62
 #define R1B_WIRE_ALL       63
-#define R1B_SHDR_NONE      20
-#define R1B_SHDR_FLAT      21
-#define R1B_SHDR_NDOTL     22
-#define R1B_SHDR_NDOTLF    23
+#define R1B_SHDR_NONE      70
+#define R1B_SHDR_FLAT      71
+#define R1B_SHDR_NDOTL     72
+#define R1B_SHDR_NDOTLF    73
+#define R1B_UP2X_SAA5050   81
+#define R1B_UP2X_EPX       82
+#define R1B_UP2X_EAGLE     83
+#define R1B_UP2X_HQX       84
+#define R1B_KERN_ELLIPSE   91
+#define R1B_KERN_GAUSS     92
+#define R1B_KERN_GAUSS1D   93
+#define R1B_KERN_CROSS     94
+#define R1B_KERN_RECT      95
+#define R1B_BLUR_GAUSS     111
+#define R1B_BLUR_BOX       112
 #define R1B_FLAG_SORTED    1
 typedef struct {  int w;  int h;  float* data;} r1b_im_t;
 typedef struct {  int h;  char* glyphs;  int n;  uint32_t* offsets;  uint8_t*  sizes;  uint16_t* cmap;  int flags;} r1b_font_t;
@@ -159,7 +197,13 @@ void r1b_resample_bilinear(r1b_im_t* im, int w, int h);
 void r1b_resample(r1b_im_t* im, int w, int h, int mode);
 float r1b_get(r1b_im_t* im, int x, int y, int mode);
 void r1b_set(r1b_im_t* im, int x, int y, float val, int mode);
-void r1b_conv2d(r1b_im_t* im, r1b_im_t* kern, int border) ;
+void r1b_upsample2x_saa5050(r1b_im_t* im);
+void r1b_upsample2x_epx(r1b_im_t* im);
+void r1b_upsample2x_eagle(r1b_im_t* im);
+float r1b_hq2x_blend(unsigned rule, float E, float A, float B, float D, float F, float H) ;
+void r1b_upsample2x_hqx(r1b_im_t* im);
+void r1b_upsample2x(r1b_im_t* im, int mode);
+void r1b_bedstead(r1b_im_t* im, int n);
 void r1b_triangle(r1b_im_t* im,float x0 ,float y0 ,float x1 ,float y1 ,float x2 ,float y2 , r1b_im_t* pttn, int mode );
 void r1b_rect(r1b_im_t* im,float x0 ,float y0 ,float x1 ,float y1 , r1b_im_t* pttn, int mode);
 void r1b_line(r1b_im_t* im, float x0 ,float y0 ,float x1 ,float y1, float val, int mode);
@@ -183,6 +227,7 @@ void r1b_polygon(r1b_im_t* im, float* Xs, float* Ys, int n, r1b_im_t* pttn, int 
 void r1b_ellipse(r1b_im_t* im, float cx, float cy, float rx, float ry, float ang, r1b_im_t* pttn, int mode);
 void r1b_line_ellipse(r1b_im_t* im, float cx, float cy, float rx, float ry, float ang, int detail, float val, int mode);
 void r1b_blit(r1b_im_t* dst, r1b_im_t* src, r1b_im_t* msk, float x0, float y0, float x1, float y1, float sx, float sy, int bdmode, int mode);
+void r1b_paste(r1b_im_t* dst, r1b_im_t* src, float x, float y);
 r1b_mesh_t r1b_load_obj(const char* path);
 void r1b_mesh_bbox(r1b_mesh_t* mesh, float* xmin, float* ymin, float* zmin, float* xmax, float* ymax, float* zmax);
 void r1b_normalize_mesh(r1b_mesh_t* mesh);
@@ -192,6 +237,15 @@ void r1b_line3d(r1b_im_t* im, r1b_im_t* depth, int depth_read, float f, float x0
 void r1b_transform_mesh(r1b_mesh_t* mesh, float* mat);
 void r1b_compute_vertex_normals(r1b_mesh_t* mesh);
 void r1b_render_mesh(r1b_im_t* im, r1b_im_t* depth, r1b_mesh_t* mesh, float f, r1b_im_t* pttn, float* light, int wire_val, int shdr, int wire);
+r1b_im_t r1b_make_kernel(int ksize, int mode);
+void r1b_conv2d(r1b_im_t* im, r1b_im_t* kern, int border) ;
+void r1b_dilate(r1b_im_t* im, r1b_im_t* kern);
+void r1b_erode(r1b_im_t* im, r1b_im_t* kern);
+void r1b_sobel(r1b_im_t* im, float* out_gradient_directions);
+void r1b_blur(r1b_im_t* im, int rad, int mode);
+void r1b_canny(r1b_im_t* im, int blur_rad, float thresh_lo, float thresh_hi);
+void r1b_threshold(r1b_im_t* im, float th);
+void r1b_threshold_adaptive(r1b_im_t* im, int rad, float bias, int blur_mode);
 
 void* nullptr(){
  	return NULL;
@@ -220,7 +274,13 @@ lpr=r1b_lpr
 resample=r1b_resample
 get=r1b_get
 set=r1b_set
-conv2d=r1b_conv2d
+upsample2x_saa5050=r1b_upsample2x_saa5050
+upsample2x_epx=r1b_upsample2x_epx
+upsample2x_eagle=r1b_upsample2x_eagle
+hq2x_blend=r1b_hq2x_blend
+upsample2x_hqx=r1b_upsample2x_hqx
+upsample2x=r1b_upsample2x
+bedstead=r1b_bedstead
 triangle=r1b_triangle
 rect=r1b_rect
 line=r1b_line
@@ -235,12 +295,22 @@ triangulate=r1b_triangulate
 ellipse=r1b_ellipse
 line_ellipse=r1b_line_ellipse
 blit=r1b_blit
+paste=r1b_paste
 load_obj=r1b_load_obj
 normalize_mesh=r1b_normalize_mesh
 destroy_mesh=r1b_destroy_mesh
 triangle3d=r1b_triangle3d
 line3d=r1b_line3d
 compute_vertex_normals=r1b_compute_vertex_normals
+make_kernel=r1b_make_kernel
+conv2d=r1b_conv2d
+dilate=r1b_dilate
+erode=r1b_erode
+sobel=r1b_sobel
+blur=r1b_blur
+canny=r1b_canny
+threshold=r1b_threshold
+threshold_adaptive=r1b_threshold_adaptive
 
 INFER=R1B_INFER
 DTHR_ORD=R1B_DTHR_ORD
@@ -265,6 +335,17 @@ SHDR_NONE=R1B_SHDR_NONE
 SHDR_FLAT=R1B_SHDR_FLAT
 SHDR_NDOTL=R1B_SHDR_NDOTL
 SHDR_NDOTLF=R1B_SHDR_NDOTLF
+UP2X_SAA5050=R1B_UP2X_SAA5050
+UP2X_EPX=R1B_UP2X_EPX
+UP2X_EAGLE=R1B_UP2X_EAGLE
+UP2X_HQX=R1B_UP2X_HQX
+KERN_ELLIPSE=R1B_KERN_ELLIPSE
+KERN_GAUSS=R1B_KERN_GAUSS
+KERN_GAUSS1D=R1B_KERN_GAUSS1D
+KERN_CROSS=R1B_KERN_CROSS
+KERN_RECT=R1B_KERN_RECT
+BLUR_GAUSS=R1B_BLUR_GAUSS
+BLUR_BOX=R1B_BLUR_BOX
 FLAG_SORTED=R1B_FLAG_SORTED
 
 def from_list(lst):
