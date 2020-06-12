@@ -1,0 +1,67 @@
+.TH "r1b_font_t" 3 "Fri Jun 12 2020" "Version 0.0.1" "r1b" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+r1b_font_t \- datatype for a bitmap font 
+.br
+  
+
+.SH SYNOPSIS
+.br
+.PP
+.PP
+\fC#include <r1b\&.h>\fP
+.SS "Data Fields"
+
+.in +1c
+.ti -1c
+.RI "int \fBh\fP"
+.br
+.ti -1c
+.RI "char * \fBglyphs\fP"
+.br
+.ti -1c
+.RI "int \fBn\fP"
+.br
+.ti -1c
+.RI "uint32_t * \fBoffsets\fP"
+.br
+.ti -1c
+.RI "uint8_t * \fBsizes\fP"
+.br
+.ti -1c
+.RI "uint16_t * \fBcmap\fP"
+.br
+.ti -1c
+.RI "int \fBflags\fP"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+datatype for a bitmap font 
+.br
+ 
+.SH "Field Documentation"
+.PP 
+.SS "uint16_t* cmap"
+array of unicode code points for each glyph 
+.SS "int flags"
+bitwise OR of flags: R1B_FLAG_SORTED: whether the glyphs are sorted by codepoint 
+.SS "char* glyphs"
+number of glyphs 
+.SS "int h"
+height of font 
+.SS "int n"
+pointer to data for glyphs 
+.SS "uint32_t* offsets"
+array of data offsets for each glyph 
+.br
+ 
+.SS "uint8_t* sizes"
+array of sizes (width/4) for each glyph 
+.br
+ 
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for r1b from the source code\&.

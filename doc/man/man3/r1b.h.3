@@ -1,0 +1,1867 @@
+.TH "/Users/admin/proj/r1b/r1b.h" 3 "Fri Jun 12 2020" "Version 0.0.1" "r1b" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+/Users/admin/proj/r1b/r1b.h
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <stdio\&.h>\fP
+.br
+\fC#include <stdlib\&.h>\fP
+.br
+\fC#include <math\&.h>\fP
+.br
+\fC#include <float\&.h>\fP
+.br
+
+.SS "Data Structures"
+
+.in +1c
+.ti -1c
+.RI "struct \fBr1b_im_t\fP"
+.br
+.RI "datatype for a (1-channel grayscale) image "
+.ti -1c
+.RI "struct \fBr1b_font_t\fP"
+.br
+.RI "datatype for a bitmap font 
+.br
+ "
+.ti -1c
+.RI "struct \fBr1b_mesh_t\fP"
+.br
+.RI "datatype for a 3D mesh "
+.in -1c
+.SS "Macros"
+
+.in +1c
+.ti -1c
+.RI "#define \fBR1B_CONFIG_LINE3D_EPSILON\fP   0\&.01"
+.br
+.ti -1c
+.RI "#define \fBR1B_CONFIG_UP2X_FLOAT_EPSILON\fP   0\&.1"
+.br
+.ti -1c
+.RI "#define \fBR1B_CONFIG_STBI_PATH\fP   'external/stb_image\&.h'"
+.br
+.ti -1c
+.RI "#define \fBR1B_CONFIG_STBIW_PATH\fP   'external/stb_image_write\&.h'"
+.br
+.ti -1c
+.RI "#define \fB_GNU_SOURCE\fP"
+.br
+.ti -1c
+.RI "#define \fBSTB_IMAGE_IMPLEMENTATION\fP"
+.br
+.ti -1c
+.RI "#define \fBSTB_IMAGE_WRITE_IMPLEMENTATION\fP"
+.br
+.ti -1c
+.RI "#define \fBR1B_INFER\fP   \-42"
+.br
+.ti -1c
+.RI "#define \fBR1B_DTHR_ORD\fP   1"
+.br
+.ti -1c
+.RI "#define \fBR1B_DTHR_FS\fP   2"
+.br
+.ti -1c
+.RI "#define \fBR1B_SMPL_NN\fP   11"
+.br
+.ti -1c
+.RI "#define \fBR1B_SMPL_BILINEAR\fP   12"
+.br
+.ti -1c
+.RI "#define \fBR1B_BRDR_COPY\fP   21"
+.br
+.ti -1c
+.RI "#define \fBR1B_BRDR_ZERO\fP   22"
+.br
+.ti -1c
+.RI "#define \fBR1B_BRDR_NONE\fP   23"
+.br
+.ti -1c
+.RI "#define \fBR1B_BRDR_WRAP\fP   24"
+.br
+.ti -1c
+.RI "#define \fBR1B_FONT_HEX\fP   31"
+.br
+.ti -1c
+.RI "#define \fBR1B_BLIT_OR\fP   41"
+.br
+.ti -1c
+.RI "#define \fBR1B_BLIT_ADD\fP   42"
+.br
+.ti -1c
+.RI "#define \fBR1B_BLIT_FLIP\fP   43"
+.br
+.ti -1c
+.RI "#define \fBR1B_BLIT_SET\fP   44"
+.br
+.ti -1c
+.RI "#define \fBR1B_POLY_CONVEX\fP   51"
+.br
+.ti -1c
+.RI "#define \fBR1B_POLY_CONCAVE\fP   52"
+.br
+.ti -1c
+.RI "#define \fBR1B_WIRE_NONE\fP   61"
+.br
+.ti -1c
+.RI "#define \fBR1B_WIRE_FRONT\fP   62"
+.br
+.ti -1c
+.RI "#define \fBR1B_WIRE_ALL\fP   63"
+.br
+.ti -1c
+.RI "#define \fBR1B_SHDR_NONE\fP   70"
+.br
+.ti -1c
+.RI "#define \fBR1B_SHDR_FLAT\fP   71"
+.br
+.ti -1c
+.RI "#define \fBR1B_SHDR_NDOTL\fP   72"
+.br
+.ti -1c
+.RI "#define \fBR1B_SHDR_NDOTLF\fP   73"
+.br
+.ti -1c
+.RI "#define \fBR1B_UP2X_SAA5050\fP   81"
+.br
+.ti -1c
+.RI "#define \fBR1B_UP2X_EPX\fP   82"
+.br
+.ti -1c
+.RI "#define \fBR1B_UP2X_EAGLE\fP   83"
+.br
+.ti -1c
+.RI "#define \fBR1B_UP2X_HQX\fP   84"
+.br
+.ti -1c
+.RI "#define \fBR1B_KERN_ELLIPSE\fP   91"
+.br
+.ti -1c
+.RI "#define \fBR1B_KERN_GAUSS\fP   92"
+.br
+.ti -1c
+.RI "#define \fBR1B_KERN_GAUSS1D\fP   93"
+.br
+.ti -1c
+.RI "#define \fBR1B_KERN_CROSS\fP   94"
+.br
+.ti -1c
+.RI "#define \fBR1B_KERN_RECT\fP   95"
+.br
+.ti -1c
+.RI "#define \fBR1B_BLUR_GAUSS\fP   111"
+.br
+.ti -1c
+.RI "#define \fBR1B_BLUR_BOX\fP   112"
+.br
+.ti -1c
+.RI "#define \fBR1B_FLAG_SORTED\fP   1"
+.br
+.ti -1c
+.RI "#define \fBR1B_MAX\fP(x,  y)   (((x) > (y)) ? (x) : (y))"
+.br
+.ti -1c
+.RI "#define \fBR1B_MIN\fP(x,  y)   (((x) < (y)) ? (x) : (y))"
+.br
+.ti -1c
+.RI "#define \fBR1B_PATTERN\fP(x)"
+.br
+.ti -1c
+.RI "#define \fBR1B_DESTROY_PATTERN\fP(x)   if (r1b_pttn_ ## x) {free(r1b_pttn_ ## x); r1b_pttn_ ## x = NULL;};"
+.br
+.ti -1c
+.RI "#define \fBR1B_FONT_FG8X12\fP"
+.br
+.ti -1c
+.RI "#define \fBR1B_PUT8\fP(x)   bytes[cnt_bytes] = x; cnt_bytes ++;"
+.br
+.ti -1c
+.RI "#define \fBR1B_HQ2X_BLEND1\fP(A,  B)   (((A)*3 +(B)        )/4 )"
+.br
+.ti -1c
+.RI "#define \fBR1B_HQ2X_BLEND2\fP(A,  B,  C)   (((A)*2 +(B)  +(C)  )/4 )"
+.br
+.ti -1c
+.RI "#define \fBR1B_HQ2X_BLEND3\fP(A,  B,  C)   (((A)*5 +(B)*2+(C)  )/8 )"
+.br
+.ti -1c
+.RI "#define \fBR1B_HQ2X_BLEND4\fP(A,  B,  C)   (((A)*6 +(B)  +(C)  )/8 )"
+.br
+.ti -1c
+.RI "#define \fBR1B_HQ2X_BLEND5\fP(A,  B,  C)   (((A)*2 +(B)*3+(C)*3)/8 )"
+.br
+.ti -1c
+.RI "#define \fBR1B_HQ2X_BLEND6\fP(A,  B,  C)   (((A)*14+(B)  +(C)  )/16)"
+.br
+.ti -1c
+.RI "#define \fBR1B_PT_IN_PL\fP(x,  y,  x0,  y0,  x1,  y1)   ((((x)\-(x0))*((y1)\-(y0)) \- ((y)\-(y0))*((x1)\-(x0)))<=0)"
+.br
+.ti -1c
+.RI "#define \fBR1B_PT_IN_TRI\fP(x,  y,  x0,  y0,  x1,  y1,  x2,  y2)   ( R1B_PT_IN_PL(x,y,x0,y0,x1,y1) && R1B_PT_IN_PL(x,y,x1,y1,x2,y2) && R1B_PT_IN_PL(x,y,x2,y2,x0,y0) )"
+.br
+.ti -1c
+.RI "#define \fBR1B_LINE_STEP\fP(sx0,  sx1,  sy0,  sy1,  x)   (((sx0) == (sx1)) ? (sy1) : ((int)round((float)(sy0)+(float)((x)\-(sx0))*(float)((sy1)\-(sy0))/(float)((sx1)\-(sx0)))) )"
+.br
+.ti -1c
+.RI "#define \fBR1B_PT_IN_ELL\fP(h,  k,  x,  y,  a,  b)   ((((x)\-(h))*((x)\-(h))/((a)*(a))+((y)\-(k))*((y)\-(k))/((b)*(b)))<=1)"
+.br
+.ti -1c
+.RI "#define \fBR1B_MAT_IDEN\fP   {1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1}"
+.br
+.ti -1c
+.RI "#define \fBR1B_MAT_ROTX\fP(a)   {1,0,0,0, 0,cos(a),\-sin(a),0, 0,sin(a),cos(a),0, 0,0,0,1}"
+.br
+.ti -1c
+.RI "#define \fBR1B_MAT_ROTY\fP(a)   {cos(a),0,sin(a),0, 0,1,0,0, \-sin(a),0,cos(a),0, 0,0,0,1}"
+.br
+.ti -1c
+.RI "#define \fBR1B_MAT_ROTZ\fP(a)   {cos(a),\-sin(a),0,0, sin(a),cos(a),0,0, 0,0,1,0, 0,0,0,1}"
+.br
+.ti -1c
+.RI "#define \fBR1B_MAT_TRSL\fP(x,  y,  z)   {1,0,0,x, 0,1,0,y, 0,0,1,z, 0,0,0,1}"
+.br
+.ti -1c
+.RI "#define \fBR1B_MAT_SCAL\fP(x,  y,  z)   {x,0,0,0, 0,y,0,0, 0,0,z,0, 0,0,0,1}"
+.br
+.ti -1c
+.RI "#define \fBR1B_MAT_MULT\fP(A,  B)   {(A)[0]*(B)[0]+(A)[1]*(B)[4]+(A)[2]*(B)[8]+(A)[3]*(B)[12],(A)[0]*(B)[1]+(A)[1]*(B)[5]+(A)[2]*(B)[9]+(A)[3]*(B)[13],(A)[0]*(B)[2]+(A)[1]*(B)[6]+(A)[2]*(B)[10]+(A)[3]*(B)[14],(A)[0]*(B)[3]+(A)[1]*(B)[7]+(A)[2]*(B)[11]+(A)[3]*(B)[15],(A)[4]*(B)[0]+(A)[5]*(B)[4]+(A)[6]*(B)[8]+(A)[7]*(B)[12],(A)[4]*(B)[1]+(A)[5]*(B)[5]+(A)[6]*(B)[9]+(A)[7]*(B)[13],(A)[4]*(B)[2]+(A)[5]*(B)[6]+(A)[6]*(B)[10]+(A)[7]*(B)[14],(A)[4]*(B)[3]+(A)[5]*(B)[7]+(A)[6]*(B)[11]+(A)[7]*(B)[15],(A)[8]*(B)[0]+(A)[9]*(B)[4]+(A)[10]*(B)[8]+(A)[11]*(B)[12],(A)[8]*(B)[1]+(A)[9]*(B)[5]+(A)[10]*(B)[9]+(A)[11]*(B)[13],(A)[8]*(B)[2]+(A)[9]*(B)[6]+(A)[10]*(B)[10]+(A)[11]*(B)[14],(A)[8]*(B)[3]+(A)[9]*(B)[7]+(A)[10]*(B)[11]+(A)[11]*(B)[15],(A)[12]*(B)[0]+(A)[13]*(B)[4]+(A)[14]*(B)[8]+(A)[15]*(B)[12],(A)[12]*(B)[1]+(A)[13]*(B)[5]+(A)[14]*(B)[9]+(A)[15]*(B)[13],(A)[12]*(B)[2]+(A)[13]*(B)[6]+(A)[14]*(B)[10]+(A)[15]*(B)[14],(A)[12]*(B)[3]+(A)[13]*(B)[7]+(A)[14]*(B)[11]+(A)[15]*(B)[15]}"
+.br
+.ti -1c
+.RI "#define \fBR1B_MAT_TFRM\fP(A,  v)   {((A)[0]*(v)[0]+(A)[1]*(v)[1]+(A)[2]*(v)[2]+(A)[3])/((A)[12]*(v)[0]+(A)[13]*(v)[1]+(A)[14]*(v)[2]+(A)[15]),((A)[4]*(v)[0]+(A)[5]*(v)[1]+(A)[6]*(v)[2]+(A)[7])/((A)[12]*(v)[0]+(A)[13]*(v)[1]+(A)[14]*(v)[2]+(A)[15]),((A)[8]*(v)[0]+(A)[9]*(v)[1]+(A)[10]*(v)[2]+(A)[11])/((A)[12]*(v)[0]+(A)[13]*(v)[1]+(A)[14]*(v)[2]+(A)[15])}"
+.br
+.ti -1c
+.RI "#define \fBR1B_MAT_PROJ\fP(f,  v)   {(f)*(v)[0]/(v)[2],(f)*(v)[1]/(v)[2]}"
+.br
+.ti -1c
+.RI "#define \fBR1B_BARY_DET\fP(x,  y,  x1,  y1,  x2,  y2,  x3,  y3)   (((y2)\-(y3))*((x1)\-(x3))+((x3)\-(x2))*((y1)\-(y3)))"
+.br
+.ti -1c
+.RI "#define \fBR1B_BARY_U\fP(x,  y,  x1,  y1,  x2,  y2,  x3,  y3)   (((y2)\-(y3))*((x)\-(x3))+((x3)\-(x2))*((y)\-(y3)))"
+.br
+.ti -1c
+.RI "#define \fBR1B_BARY_V\fP(x,  y,  x1,  y1,  x2,  y2,  x3,  y3)   (((y3)\-(y1))*((x)\-(x3))+((x1)\-(x3))*((y)\-(y3)))"
+.br
+.ti -1c
+.RI "#define \fBR1B_V3_CROSS\fP(a1,  a2,  a3,  b1,  b2,  b3)   {(a2)*(b3)\-(a3)*(b2),(a3)*(b1)\-(a1)*(b3),(a1)*(b2)\-(a2)*(b1)}"
+.br
+.ti -1c
+.RI "#define \fBR1B_V3_DOT\fP(a1,  a2,  a3,  b1,  b2,  b3)   ((a1)*(b1)+(a2)*(b2)+(a3)*(b3))"
+.br
+.ti -1c
+.RI "#define \fBR1B_V3_MAG\fP(a1,  a2,  a3)   (sqrt((a1)*(a1)+(a2)*(a2)+(a3)*(a3)))"
+.br
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "\fBr1b_font_t\fP * \fBr1b_get_font_fg8x12\fP ()"
+.br
+.ti -1c
+.RI "void \fBr1b_make_tmp0\fP (int w, int h)"
+.br
+.RI "(internal use) allocate temporary buffer for certain operations "
+.ti -1c
+.RI "void \fBr1b_make_tmp1\fP (int w, int h)"
+.br
+.RI "(internal use) allocate temporary buffer for certain operations "
+.ti -1c
+.RI "void \fBr1b_cleanup\fP ()"
+.br
+.RI "free all resources allocated internally by the library "
+.ti -1c
+.RI "\fBr1b_im_t\fP \fBr1b_read\fP (const char *path)"
+.br
+.RI "read an image from disk as grayscale "
+.ti -1c
+.RI "void \fBr1b_snapshot\fP (const char *path, \fBr1b_im_t\fP *im)"
+.br
+.RI "write image to file, supported: jpg, png, bmp "
+.ti -1c
+.RI "\fBr1b_im_t\fP \fBr1b_zeros\fP (int w, int h)"
+.br
+.RI "create image filled with zeros "
+.ti -1c
+.RI "\fBr1b_im_t\fP \fBr1b_ones\fP (int w, int h)"
+.br
+.RI "create image filled with ones "
+.ti -1c
+.RI "\fBr1b_im_t\fP \fBr1b_from_array\fP (int w, int h, float *arr)"
+.br
+.RI "create image from data pointed by array pointer, copying the data over "
+.ti -1c
+.RI "\fBr1b_im_t\fP \fBr1b_infs\fP (int w, int h)"
+.br
+.RI "create image filled with FLT_MAX "
+.ti -1c
+.RI "void \fBr1b_free\fP (\fBr1b_im_t\fP *im)"
+.br
+.RI "free data allocated in an image; does not free the pointer itself "
+.ti -1c
+.RI "void \fBr1b_transpose\fP (\fBr1b_im_t\fP *im)"
+.br
+.RI "transpose an image "
+.ti -1c
+.RI "void \fBr1b_transpose_flip\fP (\fBr1b_im_t\fP *im)"
+.br
+.RI "transpose and flip an image, effectively rotating it by 90 degrees\&. "
+.ti -1c
+.RI "void \fBr1b_normalize\fP (\fBr1b_im_t\fP *im, float lo, float hi)"
+.br
+.RI "normalize an image to a given interval "
+.ti -1c
+.RI "\fBr1b_im_t\fP \fBr1b_copy_of\fP (\fBr1b_im_t\fP *im)"
+.br
+.RI "duplicates an image "
+.ti -1c
+.RI "void \fBr1b_copy_to\fP (\fBr1b_im_t\fP *im, \fBr1b_im_t\fP *dst)"
+.br
+.RI "copy data from one image to another the images should have the same width, and destination is at least the same height as source "
+.ti -1c
+.RI "void \fBr1b_dither_fs\fP (\fBr1b_im_t\fP *im)"
+.br
+.RI "(internal use) apply floyd-steinberg dithering to a grayscale image "
+.ti -1c
+.RI "void \fBr1b_dither_ord\fP (\fBr1b_im_t\fP *im)"
+.br
+.RI "(internal use) apply ordered dithering to a grayscale image "
+.ti -1c
+.RI "void \fBr1b_dither\fP (\fBr1b_im_t\fP *im, int mode)"
+.br
+.RI "apply dithering to a grayscale image turning it into binary image using specified algorithm "
+.ti -1c
+.RI "void \fBr1b_log\fP (\fBr1b_im_t\fP *im)"
+.br
+.RI "print an image to stdout for debugging "
+.ti -1c
+.RI "char * \fBr1b_encode\fP (\fBr1b_im_t\fP *im, int *n_bytes_written)"
+.br
+.RI "encode an image to ESC/POS commands "
+.ti -1c
+.RI "void \fBr1b_encode2file\fP (const char *path, \fBr1b_im_t\fP *im)"
+.br
+.RI "encode an image to ESC/POS commands and write it to a file "
+.ti -1c
+.RI "void \fBr1b_lpr\fP (const char *printer, \fBr1b_im_t\fP *im)"
+.br
+.RI "send an image to a thermal printer for printing using LPR command "
+.ti -1c
+.RI "void \fBr1b_resample_nearest\fP (\fBr1b_im_t\fP *im, int w, int h)"
+.br
+.RI "(internal use) nearest neighbor resampling "
+.ti -1c
+.RI "void \fBr1b_resample_bilinear\fP (\fBr1b_im_t\fP *im, int w, int h)"
+.br
+.RI "(internal use) bilinear resampling "
+.ti -1c
+.RI "void \fBr1b_resample\fP (\fBr1b_im_t\fP *im, int w, int h, int mode)"
+.br
+.RI "resample image to a different size "
+.ti -1c
+.RI "float \fBr1b_get\fP (\fBr1b_im_t\fP *im, int x, int y, int mode)"
+.br
+.RI "retrieve the value of a pixel at given coordinate "
+.ti -1c
+.RI "void \fBr1b_set\fP (\fBr1b_im_t\fP *im, int x, int y, float val, int mode)"
+.br
+.RI "set the value of a pixel at given coordinate "
+.ti -1c
+.RI "void \fBr1b_upsample2x_saa5050\fP (\fBr1b_im_t\fP *im)"
+.br
+.RI "(internal use) upsample image by 2x using saa5050 algorithm "
+.ti -1c
+.RI "void \fBr1b_upsample2x_epx\fP (\fBr1b_im_t\fP *im)"
+.br
+.RI "(internal use) upsample image by 2x using EPX algorithm "
+.ti -1c
+.RI "void \fBr1b_upsample2x_eagle\fP (\fBr1b_im_t\fP *im)"
+.br
+.RI "(internal use) upsample image by 2x using Eagle algorithm "
+.ti -1c
+.RI "float \fBr1b_hq2x_blend\fP (unsigned rule, float E, float A, float B, float D, float F, float H)"
+.br
+.ti -1c
+.RI "void \fBr1b_upsample2x_hqx\fP (\fBr1b_im_t\fP *im)"
+.br
+.RI "(internal use) upsample image by 2x using HQX algorithm "
+.ti -1c
+.RI "void \fBr1b_upsample2x\fP (\fBr1b_im_t\fP *im, int mode)"
+.br
+.RI "upsample image by 2x using pixel-art scaling algorithms "
+.ti -1c
+.RI "void \fBr1b_bedstead\fP (\fBr1b_im_t\fP *im, int n)"
+.br
+.RI "upsample image by a power of two using bedstead algorithm "
+.ti -1c
+.RI "void \fBr1b_triangle\fP (\fBr1b_im_t\fP *im, float x0, float y0, float x1, float y1, float x2, float y2, \fBr1b_im_t\fP *pttn, int mode)"
+.br
+.RI "draw a 2D triangle "
+.ti -1c
+.RI "void \fBr1b_rect\fP (\fBr1b_im_t\fP *im, float x0, float y0, float x1, float y1, \fBr1b_im_t\fP *pttn, int mode)"
+.br
+.RI "draw a 2D rectangle "
+.ti -1c
+.RI "void \fBr1b_line\fP (\fBr1b_im_t\fP *im, float x0, float y0, float x1, float y1, float val, int mode)"
+.br
+.RI "draw a 2D line "
+.ti -1c
+.RI "void \fBr1b_lines\fP (\fBr1b_im_t\fP *im, float *Xs, float *Ys, int n, int close, float val, int mode)"
+.br
+.RI "draw a polyline or outline a polygon "
+.ti -1c
+.RI "void \fBr1b_thick_line\fP (\fBr1b_im_t\fP *im, float x0, float y0, float x1, float y1, float val, int half_thick, int mode)"
+.br
+.RI "draw a 2D line with thickness "
+.ti -1c
+.RI "\fBr1b_font_t\fP \fBr1b_load_font_hex\fP (const char *path, int h, int cp0, int cp1, int flags)"
+.br
+.RI "load a bitmap font in unifont \&.hex format "
+.ti -1c
+.RI "void \fBr1b_destroy_font\fP (\fBr1b_font_t\fP *font)"
+.br
+.RI "free data allocated in a font "
+.ti -1c
+.RI "int \fBr1b_glyph_index_lin_search\fP (\fBr1b_font_t\fP *font, int cp)"
+.br
+.RI "(internal use) locate a glyph in font by codepoint with linear search "
+.ti -1c
+.RI "int \fBr1b_glyph_index_bin_search\fP (\fBr1b_font_t\fP *font, int cp, int i0, int i1)"
+.br
+.RI "(internal use) locate a glyph in font by codepoint with binary search "
+.ti -1c
+.RI "int \fBr1b_glyph_index\fP (\fBr1b_font_t\fP *font, int cp)"
+.br
+.RI "(internal use) locate a glyph in font by codepoint "
+.ti -1c
+.RI "int \fBr1b_putchar\fP (\fBr1b_im_t\fP *im, int cp, int x, int y, \fBr1b_font_t\fP *font, float val, int mode, int highlight)"
+.br
+.RI "draw a single unicode character to image "
+.ti -1c
+.RI "void \fBr1b_text\fP (\fBr1b_im_t\fP *im, wchar_t *str, int x, int y, \fBr1b_font_t\fP *font, float val, int mode, int highlight)"
+.br
+.RI "draw a string (of wide chars) to image "
+.ti -1c
+.RI "void \fBr1b_text_utf8\fP (\fBr1b_im_t\fP *im, char *str, int x, int y, \fBr1b_font_t\fP *font, float val, int mode, int highlight)"
+.br
+.RI "draw a utf-8 encoded string to image "
+.ti -1c
+.RI "void \fBr1b_text_ascii\fP (\fBr1b_im_t\fP *im, char *str, int x, int y, \fBr1b_font_t\fP *font, float val, int mode, int highlight)"
+.br
+.RI "draw an ascii-only string to image "
+.ti -1c
+.RI "float \fBr1b_area\fP (float *X, float *Y, int n)"
+.br
+.RI "(internal use) calculate area of a polygon "
+.ti -1c
+.RI "int \fBr1b_triangulate_snip\fP (float *X, float *Y, int u, int v, int w, int n, int *V)"
+.br
+.ti -1c
+.RI "int \fBr1b_triangulate\fP (float *X, float *Y, int n, int *triangles)"
+.br
+.RI "(internal use) triangulate a polygon "
+.ti -1c
+.RI "void \fBr1b_polygon_convex\fP (\fBr1b_im_t\fP *im, float *Xs, float *Ys, int n, \fBr1b_im_t\fP *pttn, int mode)"
+.br
+.RI "(internal use) draw a convex polygon on image "
+.ti -1c
+.RI "void \fBr1b_polygon_concave\fP (\fBr1b_im_t\fP *im, float *Xs, float *Ys, int n, \fBr1b_im_t\fP *pttn, int mode)"
+.br
+.RI "(internal use) draw a concave polygon on image "
+.ti -1c
+.RI "void \fBr1b_polygon\fP (\fBr1b_im_t\fP *im, float *Xs, float *Ys, int n, \fBr1b_im_t\fP *pttn, int mode, int typ)"
+.br
+.RI "draw a polygon on image "
+.ti -1c
+.RI "void \fBr1b_ellipse\fP (\fBr1b_im_t\fP *im, float cx, float cy, float rx, float ry, float ang, \fBr1b_im_t\fP *pttn, int mode)"
+.br
+.RI "draw an ellipse on image "
+.ti -1c
+.RI "void \fBr1b_line_ellipse\fP (\fBr1b_im_t\fP *im, float cx, float cy, float rx, float ry, float ang, int detail, float val, int mode)"
+.br
+.RI "draw outline of an ellipse on image "
+.ti -1c
+.RI "void \fBr1b_blit\fP (\fBr1b_im_t\fP *dst, \fBr1b_im_t\fP *src, \fBr1b_im_t\fP *msk, float x0, float y0, float x1, float y1, float sx, float sy, int bdmode, int mode)"
+.br
+.RI "blit an image onto another, optionally applying a mask\&. supports drawing a subsection and repeated patterns "
+.ti -1c
+.RI "void \fBr1b_paste\fP (\fBr1b_im_t\fP *dst, \fBr1b_im_t\fP *src, float x, float y)"
+.br
+.RI "blit an image onto another, a simplified version of r1b_blit with less arguments "
+.ti -1c
+.RI "\fBr1b_mesh_t\fP \fBr1b_load_obj\fP (const char *path)"
+.br
+.RI "load an wavefront \&.obj file to a new mesh "
+.ti -1c
+.RI "void \fBr1b_mesh_bbox\fP (\fBr1b_mesh_t\fP *mesh, float *xmin, float *ymin, float *zmin, float *xmax, float *ymax, float *zmax)"
+.br
+.RI "calculate the bounding box of a mesh "
+.ti -1c
+.RI "void \fBr1b_normalize_mesh\fP (\fBr1b_mesh_t\fP *mesh)"
+.br
+.RI "normalize vertices of a mesh to be bounded by (-1,-1,-1) and (1,1,1), keeping proportions "
+.ti -1c
+.RI "void \fBr1b_destroy_mesh\fP (\fBr1b_mesh_t\fP *mesh)"
+.br
+.RI "free memory allocated in a mesh "
+.ti -1c
+.RI "void \fBr1b_triangle3d\fP (\fBr1b_im_t\fP *im, \fBr1b_im_t\fP *depth, float f, float x0, float y0, float z0, float x1, float y1, float z1, float x2, float y2, float z2, \fBr1b_im_t\fP *pttn, float *vals, int mode)"
+.br
+.RI "draw a 3D triangle to image, projected with pinhole camera model "
+.ti -1c
+.RI "void \fBr1b_line3d\fP (\fBr1b_im_t\fP *im, \fBr1b_im_t\fP *depth, int depth_read, float f, float x0, float y0, float z0, float x1, float y1, float z1, float val, int mode)"
+.br
+.RI "draw a 3D line to image, projected with pinhole camera model "
+.ti -1c
+.RI "void \fBr1b_transform_mesh\fP (\fBr1b_mesh_t\fP *mesh, float *mat)"
+.br
+.RI "transform mesh with a 4x4 transformation matrix "
+.ti -1c
+.RI "void \fBr1b_compute_vertex_normals\fP (\fBr1b_mesh_t\fP *mesh)"
+.br
+.RI "estimate vertex normals for a mesh and store result in mesh->norms "
+.ti -1c
+.RI "void \fBr1b_render_mesh\fP (\fBr1b_im_t\fP *im, \fBr1b_im_t\fP *depth, \fBr1b_mesh_t\fP *mesh, float f, \fBr1b_im_t\fP *pttn, float *light, int wire_val, int shdr, int wire)"
+.br
+.RI "draw a 3d mesh to the image, projected with pinhole camera model "
+.ti -1c
+.RI "\fBr1b_im_t\fP \fBr1b_make_kernel\fP (int ksize, int mode)"
+.br
+.ti -1c
+.RI "void \fBr1b_conv2d\fP (\fBr1b_im_t\fP *im, \fBr1b_im_t\fP *kern, int border)"
+.br
+.ti -1c
+.RI "void \fBr1b_dilate\fP (\fBr1b_im_t\fP *im, \fBr1b_im_t\fP *kern)"
+.br
+.ti -1c
+.RI "void \fBr1b_erode\fP (\fBr1b_im_t\fP *im, \fBr1b_im_t\fP *kern)"
+.br
+.ti -1c
+.RI "void \fBr1b_sobel\fP (\fBr1b_im_t\fP *im, float *out_gradient_directions)"
+.br
+.ti -1c
+.RI "void \fBr1b_blur\fP (\fBr1b_im_t\fP *im, int rad, int mode)"
+.br
+.ti -1c
+.RI "void \fBr1b_canny\fP (\fBr1b_im_t\fP *im, int blur_rad, float thresh_lo, float thresh_hi)"
+.br
+.ti -1c
+.RI "void \fBr1b_threshold\fP (\fBr1b_im_t\fP *im, float th)"
+.br
+.ti -1c
+.RI "void \fBr1b_threshold_adaptive\fP (\fBr1b_im_t\fP *im, int rad, float bias, int blur_mode)"
+.br
+.in -1c
+.SS "Variables"
+
+.in +1c
+.ti -1c
+.RI "\fBr1b_im_t\fP * \fBr1b_pttn_SOLID\fP = NULL"
+.br
+.ti -1c
+.RI "\fBr1b_im_t\fP * \fBr1b_pttn_GRAY5\fP = NULL"
+.br
+.ti -1c
+.RI "\fBr1b_im_t\fP * \fBr1b_pttn_GRAY4\fP = NULL"
+.br
+.ti -1c
+.RI "\fBr1b_im_t\fP * \fBr1b_pttn_GRAY3\fP = NULL"
+.br
+.ti -1c
+.RI "\fBr1b_im_t\fP * \fBr1b_pttn_GRAY2\fP = NULL"
+.br
+.ti -1c
+.RI "\fBr1b_im_t\fP * \fBr1b_pttn_GRAY1\fP = NULL"
+.br
+.ti -1c
+.RI "\fBr1b_im_t\fP * \fBr1b_pttn_EMPTY\fP = NULL"
+.br
+.ti -1c
+.RI "\fBr1b_im_t\fP * \fBr1b_pttn_GRID1\fP = NULL"
+.br
+.ti -1c
+.RI "\fBr1b_im_t\fP * \fBr1b_pttn_GRID2\fP = NULL"
+.br
+.ti -1c
+.RI "\fBr1b_im_t\fP * \fBr1b_pttn_DOTS1\fP = NULL"
+.br
+.ti -1c
+.RI "\fBr1b_im_t\fP * \fBr1b_pttn_DOTS2\fP = NULL"
+.br
+.ti -1c
+.RI "\fBr1b_im_t\fP * \fBr1b_pttn_DOTSR\fP = NULL"
+.br
+.ti -1c
+.RI "\fBr1b_im_t\fP * \fBr1b_pttn_HRZL1\fP = NULL"
+.br
+.ti -1c
+.RI "\fBr1b_im_t\fP * \fBr1b_pttn_VRTL1\fP = NULL"
+.br
+.ti -1c
+.RI "\fBr1b_im_t\fP * \fBr1b_pttn_HRZL2\fP = NULL"
+.br
+.ti -1c
+.RI "\fBr1b_im_t\fP * \fBr1b_pttn_VRTL2\fP = NULL"
+.br
+.ti -1c
+.RI "\fBr1b_im_t\fP * \fBr1b_pttn_DGNLL\fP = NULL"
+.br
+.ti -1c
+.RI "\fBr1b_im_t\fP * \fBr1b_pttn_DGNLR\fP = NULL"
+.br
+.ti -1c
+.RI "\fBr1b_im_t\fP * \fBr1b_pttn_CROSS\fP = NULL"
+.br
+.ti -1c
+.RI "\fBr1b_im_t\fP * \fBr1b_pttn_BRICK\fP = NULL"
+.br
+.ti -1c
+.RI "\fBr1b_im_t\fP * \fBr1b_pttn_SCALE\fP = NULL"
+.br
+.ti -1c
+.RI "\fBr1b_im_t\fP * \fBr1b_pttn_WAVES\fP = NULL"
+.br
+.ti -1c
+.RI "\fBr1b_im_t\fP * \fBr1b_pttn_CHESS\fP = NULL"
+.br
+.ti -1c
+.RI "\fBr1b_im_t\fP * \fBr1b_pttn_DMOND\fP = NULL"
+.br
+.ti -1c
+.RI "\fBr1b_font_t\fP * \fBr1b_font_fg8x12\fP = NULL"
+.br
+.ti -1c
+.RI "float * \fBr1b_tmp0\fP = NULL"
+.br
+.ti -1c
+.RI "int \fBr1b_tmp0_size\fP = 0"
+.br
+.ti -1c
+.RI "float * \fBr1b_tmp1\fP = NULL"
+.br
+.ti -1c
+.RI "int \fBr1b_tmp1_size\fP = 0"
+.br
+.ti -1c
+.RI "uint8_t \fBr1b_hq2x_rotate\fP [256] = {0,32,8,40,1,33,9,41,64,96,72,104,65,97,73,105,2,34,10,42,3,35,11,43,66,98,74,106,67,99,75,107,128,160,136,168,129,161,137,169,192,224,200,232,193,225,201,233,130,162,138,170,131,163,139,171,194,226,202,234,195,227,203,235,16,48,24,56,17,49,25,57,80,112,88,120,81,113,89,121,18,50,26,58,19,51,27,59,82,114,90,122,83,115,91,123,144,176,152,184,145,177,153,185,208,240,216,248,209,241,217,249,146,178,154,186,147,179,155,187,210,242,218,250,211,243,219,251,4,36,12,44,5,37,13,45,68,100,76,108,69,101,77,109,6,38,14,46,7,39,15,47,70,102,78,110,71,103,79,111,132,164,140,172,133,165,141,173,196,228,204,236,197,229,205,237,134,166,142,174,135,167,143,175,198,230,206,238,199,231,207,239,20,52,28,60,21,53,29,61,84,116,92,124,85,117,93,125,22,54,30,62,23,55,31,63,86,118,94,126,87,119,95,127,148,180,156,188,149,181,157,189,212,244,220,252,213,245,221,253,150,182,158,190,151,183,159,191,214,246,222,254,215,247,223,255}"
+.br
+.ti -1c
+.RI "uint8_t \fBr1b_hq2x_table\fP [256]"
+.br
+.in -1c
+.SH "Macro Definition Documentation"
+.PP 
+.SS "#define R1B_FONT_FG8X12"
+\fBValue:\fP
+.PP
+.nf
+    ((r1b_font_fg8x12) ? (r1b_font_fg8x12) : (\
+      r1b_font_fg8x12 = (r1b_font_t*)malloc(sizeof(r1b_font_t)),\
+      r1b_font_fg8x12 -> glyphs = R1B_FG8X12_GLYPHS ,\
+      r1b_font_fg8x12 -> offsets= R1B_FG8X12_OFFSETS,\
+      r1b_font_fg8x12 -> sizes  = R1B_FG8X12_SIZES  ,\
+      r1b_font_fg8x12 -> cmap   = R1B_FG8X12_CMAP   ,\
+      r1b_font_fg8x12 -> flags  = R1B_FLAG_SORTED   ,\
+      r1b_font_fg8x12 -> h = 12,\
+      r1b_font_fg8x12 -> n = 95,\
+      r1b_font_fg8x12 \
+    ))
+.fi
+.SS "#define R1B_PATTERN(x)"
+\fBValue:\fP
+.PP
+.nf
+  ((r1b_pttn_ ## x) ? (r1b_pttn_ ## x) : (\
+    r1b_pttn_ ## x = (r1b_im_t*)malloc(sizeof(r1b_im_t)),\
+    r1b_pttn_ ## x -> data = r1b_pttn_data_ ## x,\
+    r1b_pttn_ ## x -> w = r1b_pttn_w_ ## x,\
+    r1b_pttn_ ## x -> h = r1b_pttn_h_ ## x,\
+    r1b_pttn_ ## x \
+  ))
+.fi
+.SH "Function Documentation"
+.PP 
+.SS "float r1b_area (float * X, float * Y, int n)"
+
+.PP
+(internal use) calculate area of a polygon 
+.PP
+\fBParameters\fP
+.RS 4
+\fIX\fP x-coordinates of vertices 
+.br
+\fIY\fP y-coordinates of vertices 
+.br
+\fIn\fP number of vertices 
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+the area 
+.RE
+.PP
+
+.SS "void r1b_bedstead (\fBr1b_im_t\fP * im, int n)"
+
+.PP
+upsample image by a power of two using bedstead algorithm 
+.PP
+\fBParameters\fP
+.RS 4
+\fIim\fP pointer to image 
+.br
+\fIn\fP upscale by n-th power of two, e\&.g\&. n=3 => upscale by 8x 
+.RE
+.PP
+
+.SS "void r1b_blit (\fBr1b_im_t\fP * dst, \fBr1b_im_t\fP * src, \fBr1b_im_t\fP * msk, float x0, float y0, float x1, float y1, float sx, float sy, int bdmode, int mode)"
+
+.PP
+blit an image onto another, optionally applying a mask\&. supports drawing a subsection and repeated patterns 
+.PP
+\fBParameters\fP
+.RS 4
+\fIdst\fP pointer to destination image 
+.br
+\fIsrc\fP pointer to source image 
+.br
+\fImsk\fP pointer to mask image\&. for no masking, use an image of all 1's (e\&.g\&. R1B_GET_PATTERN(SOLID) and R1B_BRDR_WRAP for bdmode) 
+.br
+\fIx0\fP x coordinate on the destination image for upper left corner of source image 
+.br
+\fIy0\fP y coordinate on the destination image for upper left corner of source image 
+.br
+\fIx1\fP x coordinate on the destination image for lower right corner of source image 
+.br
+\fIy1\fP y coordinate on the destination image for lower right corner of source image 
+.br
+\fIsx\fP x coordinate on the source image to offset 
+.br
+\fIsy\fP y coordinate on the source image to offset 
+.br
+\fIbdmode\fP border mode, see r1b_get for details 
+.br
+\fImode\fP blit mode, see r1b_set for details 
+.RE
+.PP
+
+.SS "void r1b_cleanup ()"
+
+.PP
+free all resources allocated internally by the library 
+.PP
+\fBParameters\fP
+.RS 4
+\fIw\fP width 
+.br
+\fIh\fP height 
+.RE
+.PP
+
+.SS "void r1b_compute_vertex_normals (\fBr1b_mesh_t\fP * mesh)"
+
+.PP
+estimate vertex normals for a mesh and store result in mesh->norms 
+.PP
+\fBParameters\fP
+.RS 4
+\fImesh\fP pointer to mesh 
+.RE
+.PP
+
+.SS "\fBr1b_im_t\fP r1b_copy_of (\fBr1b_im_t\fP * im)"
+
+.PP
+duplicates an image 
+.PP
+\fBParameters\fP
+.RS 4
+\fIim\fP pointer to image 
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+the clone 
+.RE
+.PP
+
+.SS "void r1b_copy_to (\fBr1b_im_t\fP * im, \fBr1b_im_t\fP * dst)"
+
+.PP
+copy data from one image to another the images should have the same width, and destination is at least the same height as source 
+.PP
+\fBParameters\fP
+.RS 4
+\fIim\fP source: pointer to image to be copied from 
+.br
+\fIdst\fP destination: pointer to image to be copied into 
+.RE
+.PP
+
+.SS "void r1b_destroy_font (\fBr1b_font_t\fP * font)"
+
+.PP
+free data allocated in a font 
+.PP
+\fBParameters\fP
+.RS 4
+\fIfont\fP pointer to font 
+.RE
+.PP
+
+.SS "void r1b_destroy_mesh (\fBr1b_mesh_t\fP * mesh)"
+
+.PP
+free memory allocated in a mesh 
+.PP
+\fBParameters\fP
+.RS 4
+\fImesh\fP pointer to mesh 
+.RE
+.PP
+
+.SS "void r1b_dither (\fBr1b_im_t\fP * im, int mode)"
+
+.PP
+apply dithering to a grayscale image turning it into binary image using specified algorithm 
+.PP
+\fBParameters\fP
+.RS 4
+\fIim\fP pointer to image 
+.br
+\fImode\fP the algorithm to use, either R1B_DTHR_ORD or R1B_DTHR_FS 
+.RE
+.PP
+
+.SS "void r1b_dither_fs (\fBr1b_im_t\fP * im)"
+
+.PP
+(internal use) apply floyd-steinberg dithering to a grayscale image 
+.PP
+\fBParameters\fP
+.RS 4
+\fIim\fP pointer to image 
+.RE
+.PP
+
+.SS "void r1b_dither_ord (\fBr1b_im_t\fP * im)"
+
+.PP
+(internal use) apply ordered dithering to a grayscale image 
+.PP
+\fBParameters\fP
+.RS 4
+\fIim\fP pointer to image 
+.RE
+.PP
+
+.SS "void r1b_ellipse (\fBr1b_im_t\fP * im, float cx, float cy, float rx, float ry, float ang, \fBr1b_im_t\fP * pttn, int mode)"
+
+.PP
+draw an ellipse on image 
+.PP
+\fBParameters\fP
+.RS 4
+\fIim\fP pointer to iamge 
+.br
+\fIcx\fP x-coordinates of the center 
+.br
+\fIcy\fP y-coordinates of the center 
+.br
+\fIrx\fP radius in x-direction 
+.br
+\fIry\fP radius in y-direction 
+.br
+\fIang\fP rotation of the ellipse (in radians) 
+.br
+\fIpttn\fP fill pattern 
+.br
+\fImode\fP blit mode, see r1b_set for details 
+.RE
+.PP
+
+.SS "char* r1b_encode (\fBr1b_im_t\fP * im, int * n_bytes_written)"
+
+.PP
+encode an image to ESC/POS commands 
+.PP
+\fBParameters\fP
+.RS 4
+\fIim\fP pointer to image 
+.br
+\fIn_bytes_written\fP size of the returned buffer in bytes 
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+an array of bytes 
+.RE
+.PP
+
+.SS "void r1b_encode2file (const char * path, \fBr1b_im_t\fP * im)"
+
+.PP
+encode an image to ESC/POS commands and write it to a file 
+.PP
+\fBParameters\fP
+.RS 4
+\fIpath\fP file path to write to 
+.br
+\fIim\fP pointer to image 
+.RE
+.PP
+
+.SS "void r1b_free (\fBr1b_im_t\fP * im)"
+
+.PP
+free data allocated in an image; does not free the pointer itself 
+.PP
+\fBParameters\fP
+.RS 4
+\fIim\fP pointer to image 
+.RE
+.PP
+
+.SS "\fBr1b_im_t\fP r1b_from_array (int w, int h, float * arr)"
+
+.PP
+create image from data pointed by array pointer, copying the data over 
+.PP
+\fBParameters\fP
+.RS 4
+\fIw\fP width 
+.br
+\fIh\fP height 
+.br
+\fIarr\fP an array that is at least w x h in size 
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+an image 
+.RE
+.PP
+
+.SS "float r1b_get (\fBr1b_im_t\fP * im, int x, int y, int mode)"
+
+.PP
+retrieve the value of a pixel at given coordinate 
+.PP
+\fBParameters\fP
+.RS 4
+\fIim\fP pointer to image 
+.br
+\fIx\fP x coordinate 
+.br
+\fIy\fP y coordinate 
+.br
+\fImode\fP border handling when coordinate is outside image: R1B_BRDR_ZERO: zero padded; R1B_BRDR_COPY: copy padded; R1B_BRDR_WRAP: wrap around; R1B_BRDR_NONE: no boundry checking (expect funny result or segfault when out of range)\&. 
+.RE
+.PP
+
+.SS "int r1b_glyph_index (\fBr1b_font_t\fP * font, int cp)"
+
+.PP
+(internal use) locate a glyph in font by codepoint 
+.PP
+\fBParameters\fP
+.RS 4
+\fIfont\fP pointer to font 
+.br
+\fIcp\fP codepoint 
+.RE
+.PP
+
+.SS "int r1b_glyph_index_bin_search (\fBr1b_font_t\fP * font, int cp, int i0, int i1)"
+
+.PP
+(internal use) locate a glyph in font by codepoint with binary search 
+.PP
+\fBParameters\fP
+.RS 4
+\fIfont\fP pointer to font 
+.br
+\fIcp\fP codepoint 
+.br
+\fIi0\fP the low index 
+.br
+\fIi1\fP the high index 
+.RE
+.PP
+
+.SS "int r1b_glyph_index_lin_search (\fBr1b_font_t\fP * font, int cp)"
+
+.PP
+(internal use) locate a glyph in font by codepoint with linear search 
+.PP
+\fBParameters\fP
+.RS 4
+\fIfont\fP pointer to font 
+.br
+\fIcp\fP codepoint 
+.RE
+.PP
+
+.SS "\fBr1b_im_t\fP r1b_infs (int w, int h)"
+
+.PP
+create image filled with FLT_MAX 
+.PP
+\fBParameters\fP
+.RS 4
+\fIw\fP width 
+.br
+\fIh\fP height 
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+an image 
+.RE
+.PP
+
+.SS "void r1b_line (\fBr1b_im_t\fP * im, float x0, float y0, float x1, float y1, float val, int mode)"
+
+.PP
+draw a 2D line 
+.PP
+\fBParameters\fP
+.RS 4
+\fIim\fP pointer to image 
+.br
+\fIx0\fP x coordinate of first point 
+.br
+\fIy0\fP y coordinate of first point 
+.br
+\fIx1\fP x coordinate of second point 
+.br
+\fIy1\fP y coordinate of second point 
+.br
+\fIval\fP value (color) of the line 
+.br
+\fImode\fP blit mode, see r1b_set for details 
+.RE
+.PP
+
+.SS "void r1b_line3d (\fBr1b_im_t\fP * im, \fBr1b_im_t\fP * depth, int depth_read, float f, float x0, float y0, float z0, float x1, float y1, float z1, float val, int mode)"
+
+.PP
+draw a 3D line to image, projected with pinhole camera model 
+.PP
+\fBParameters\fP
+.RS 4
+\fIim\fP pointer to image 
+.br
+\fIdepth\fP pointer to the depth buffer\&. use \fBr1b_infs()\fP for initialization 
+.br
+\fIdepth_read\fP boolean: whether or not to read the depth buffer\&. use 0 to draw on top of everything 
+.br
+\fIf\fP focal length of the camera 
+.br
+\fIx0\fP x coordinate of the first endpoint 
+.br
+\fIy0\fP y coordinate of the first endpoint 
+.br
+\fIz0\fP z coordinate of the first endpoint 
+.br
+\fIx1\fP x coordinate of the second endpoint 
+.br
+\fIy1\fP y coordinate of the second endpoint 
+.br
+\fIz1\fP z coordinate of the second endpoint 
+.br
+\fIval\fP value (color) of the line 
+.br
+\fImode\fP blit mode, see r1b_set for details 
+.RE
+.PP
+
+.SS "void r1b_line_ellipse (\fBr1b_im_t\fP * im, float cx, float cy, float rx, float ry, float ang, int detail, float val, int mode)"
+
+.PP
+draw outline of an ellipse on image 
+.PP
+\fBParameters\fP
+.RS 4
+\fIim\fP pointer to iamge 
+.br
+\fIcx\fP x-coordinates of the center 
+.br
+\fIcy\fP y-coordinates of the center 
+.br
+\fIrx\fP radius in x-direction 
+.br
+\fIry\fP radius in y-direction 
+.br
+\fIang\fP rotation of the ellipse (in radians) 
+.br
+\fIdetail\fP number of segments used to approximate the ellipse, the higher the smoother 
+.br
+\fIval\fP value (color) of the outline 
+.br
+\fImode\fP blit mode, see r1b_set for details 
+.RE
+.PP
+
+.SS "void r1b_lines (\fBr1b_im_t\fP * im, float * Xs, float * Ys, int n, int close, float val, int mode)"
+
+.PP
+draw a polyline or outline a polygon 
+.PP
+\fBParameters\fP
+.RS 4
+\fIim\fP pointer to image 
+.br
+\fIXs\fP pointer to array of x-coordinates 
+.br
+\fIYs\fP pointer to array of y-coordinates 
+.br
+\fIn\fP number of points 
+.br
+\fIclose\fP true for closed (polygon) or false for open (polyline) 
+.br
+\fIval\fP value (color) of the lines 
+.br
+\fImode\fP blit mode, see r1b_set for details 
+.RE
+.PP
+
+.SS "\fBr1b_font_t\fP r1b_load_font_hex (const char * path, int h, int cp0, int cp1, int flags)"
+
+.PP
+load a bitmap font in unifont \&.hex format 
+.PP
+\fBParameters\fP
+.RS 4
+\fIpath\fP file path 
+.br
+\fIh\fP height of the font, since the hex format does not store this information 
+.br
+\fIcp0\fP unicode code point range start, only glyphs between cp0 and cp1 will be loaded (if any exist) when you don't need the whole set 
+.br
+\fIcp1\fP unicode code point range end 
+.br
+\fIflags\fP a bitwise OR of flags: R1B_FLAG_SORTED: set this if the glyphs stored in the file are sorted by unicode code point, which improves speed 
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+a font type 
+.RE
+.PP
+
+.SS "\fBr1b_mesh_t\fP r1b_load_obj (const char * path)"
+
+.PP
+load an wavefront \&.obj file to a new mesh currently doesn't support mtl or normals 
+.PP
+\fBParameters\fP
+.RS 4
+\fIpath\fP file path 
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+a mesh type 
+.RE
+.PP
+
+.SS "void r1b_log (\fBr1b_im_t\fP * im)"
+
+.PP
+print an image to stdout for debugging 
+.PP
+\fBParameters\fP
+.RS 4
+\fIim\fP pointer to image 
+.RE
+.PP
+
+.SS "void r1b_lpr (const char * printer, \fBr1b_im_t\fP * im)"
+
+.PP
+send an image to a thermal printer for printing using LPR command 
+.PP
+\fBParameters\fP
+.RS 4
+\fIprinter\fP the name of the printer 
+.br
+\fIim\fP pointer to image 
+.RE
+.PP
+
+.SS "void r1b_make_tmp0 (int w, int h)"
+
+.PP
+(internal use) allocate temporary buffer for certain operations 
+.PP
+\fBParameters\fP
+.RS 4
+\fIw\fP width 
+.br
+\fIh\fP height 
+.RE
+.PP
+
+.SS "void r1b_make_tmp1 (int w, int h)"
+
+.PP
+(internal use) allocate temporary buffer for certain operations 
+.PP
+\fBParameters\fP
+.RS 4
+\fIw\fP width 
+.br
+\fIh\fP height 
+.RE
+.PP
+
+.SS "void r1b_mesh_bbox (\fBr1b_mesh_t\fP * mesh, float * xmin, float * ymin, float * zmin, float * xmax, float * ymax, float * zmax)"
+
+.PP
+calculate the bounding box of a mesh 
+.PP
+\fBParameters\fP
+.RS 4
+\fImesh\fP pointer to mesh 
+.br
+\fIxmin\fP pointer to minimum x to be overwritten 
+.br
+\fIymin\fP pointer to minimum y to be overwritten 
+.br
+\fIzmin\fP pointer to minimum z to be overwritten 
+.br
+\fIxmax\fP pointer to maximum x to be overwritten 
+.br
+\fIymax\fP pointer to maximum y to be overwritten 
+.br
+\fIzmax\fP pointer to maximum z to be overwritten 
+.RE
+.PP
+
+.SS "void r1b_normalize (\fBr1b_im_t\fP * im, float lo, float hi)"
+
+.PP
+normalize an image to a given interval 
+.PP
+\fBParameters\fP
+.RS 4
+\fIim\fP pointer to image 
+.br
+\fIlo\fP new min value 
+.br
+\fIhi\fP new max value 
+.RE
+.PP
+
+.SS "void r1b_normalize_mesh (\fBr1b_mesh_t\fP * mesh)"
+
+.PP
+normalize vertices of a mesh to be bounded by (-1,-1,-1) and (1,1,1), keeping proportions 
+.PP
+\fBParameters\fP
+.RS 4
+\fImesh\fP pointer to mesh 
+.RE
+.PP
+
+.SS "\fBr1b_im_t\fP r1b_ones (int w, int h)"
+
+.PP
+create image filled with ones 
+.PP
+\fBParameters\fP
+.RS 4
+\fIw\fP width 
+.br
+\fIh\fP height 
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+an image 
+.RE
+.PP
+
+.SS "void r1b_paste (\fBr1b_im_t\fP * dst, \fBr1b_im_t\fP * src, float x, float y)"
+
+.PP
+blit an image onto another, a simplified version of r1b_blit with less arguments 
+.PP
+\fBParameters\fP
+.RS 4
+\fIdst\fP pointer to destination image 
+.br
+\fIsrc\fP pointer to source image 
+.br
+\fIx\fP x coordinate on the destination image for upper left corner of source image 
+.br
+\fIy\fP y coordinate on the destination image for upper left corner of source image 
+.RE
+.PP
+
+.SS "void r1b_polygon (\fBr1b_im_t\fP * im, float * Xs, float * Ys, int n, \fBr1b_im_t\fP * pttn, int mode, int typ)"
+
+.PP
+draw a polygon on image 
+.PP
+\fBParameters\fP
+.RS 4
+\fIim\fP pointer to iamge 
+.br
+\fIXs\fP x-coordinates of vertices 
+.br
+\fIYs\fP y-coordinates of vertices 
+.br
+\fIn\fP number of vertices 
+.br
+\fIpttn\fP fill pattern 
+.br
+\fImode\fP blit mode, see r1b_set for details 
+.br
+\fItyp\fP type of polygon, either R1B_POLY_CONVEX or R1B_POLY_CONCAVE\&. concave mode works for convex polygons too, but asserting it as convex can speed things up 
+.RE
+.PP
+
+.SS "void r1b_polygon_concave (\fBr1b_im_t\fP * im, float * Xs, float * Ys, int n, \fBr1b_im_t\fP * pttn, int mode)"
+
+.PP
+(internal use) draw a concave polygon on image 
+.PP
+\fBParameters\fP
+.RS 4
+\fIim\fP pointer to iamge 
+.br
+\fIXs\fP x-coordinates of vertices 
+.br
+\fIYs\fP y-coordinates of vertices 
+.br
+\fIn\fP number of vertices 
+.br
+\fIpttn\fP fill pattern 
+.br
+\fImode\fP blit mode, see r1b_set for details 
+.RE
+.PP
+
+.SS "void r1b_polygon_convex (\fBr1b_im_t\fP * im, float * Xs, float * Ys, int n, \fBr1b_im_t\fP * pttn, int mode)"
+
+.PP
+(internal use) draw a convex polygon on image 
+.PP
+\fBParameters\fP
+.RS 4
+\fIim\fP pointer to iamge 
+.br
+\fIXs\fP x-coordinates of vertices 
+.br
+\fIYs\fP y-coordinates of vertices 
+.br
+\fIn\fP number of vertices 
+.br
+\fIpttn\fP fill pattern 
+.br
+\fImode\fP blit mode, see r1b_set for details 
+.RE
+.PP
+
+.SS "int r1b_putchar (\fBr1b_im_t\fP * im, int cp, int x, int y, \fBr1b_font_t\fP * font, float val, int mode, int highlight)"
+
+.PP
+draw a single unicode character to image 
+.PP
+\fBParameters\fP
+.RS 4
+\fIim\fP pointer to image 
+.br
+\fIcp\fP codepoint 
+.br
+\fIx\fP x coordinate 
+.br
+\fIy\fP y coordinate 
+.br
+\fIfont\fP pointer to font 
+.br
+\fIval\fP value (color) of the text 
+.br
+\fImode\fP blit mode, see r1b_set 
+.br
+\fIhighlight\fP boolean: whether to draw a highlight behind the text (to stand out from busy background) 
+.RE
+.PP
+
+.SS "\fBr1b_im_t\fP r1b_read (const char * path)"
+
+.PP
+read an image from disk as grayscale 
+.PP
+\fBParameters\fP
+.RS 4
+\fIpath\fP the file path 
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+an image 
+.RE
+.PP
+
+.SS "void r1b_rect (\fBr1b_im_t\fP * im, float x0, float y0, float x1, float y1, \fBr1b_im_t\fP * pttn, int mode)"
+
+.PP
+draw a 2D rectangle 
+.PP
+\fBParameters\fP
+.RS 4
+\fIim\fP pointer to image 
+.br
+\fIx0\fP left 
+.br
+\fIy0\fP top 
+.br
+\fIx1\fP right 
+.br
+\fIy1\fP bottom 
+.br
+\fIpttn\fP fill pattern 
+.br
+\fImode\fP blit mode, see r1b_set for details 
+.RE
+.PP
+
+.SS "void r1b_render_mesh (\fBr1b_im_t\fP * im, \fBr1b_im_t\fP * depth, \fBr1b_mesh_t\fP * mesh, float f, \fBr1b_im_t\fP * pttn, float * light, int wire_val, int shdr, int wire)"
+
+.PP
+draw a 3d mesh to the image, projected with pinhole camera model 
+.PP
+\fBParameters\fP
+.RS 4
+\fIim\fP pointer to image 
+.br
+\fIdepth\fP pointer to the depth buffer, which will be read and written\&. use \fBr1b_infs()\fP for initialization 
+.br
+\fImesh\fP pointer to mesh 
+.br
+\fIf\fP focal length of the camera 
+.br
+\fIpttn\fP fill pattern, can be NULL depending on the shader specified 
+.br
+\fIlight\fP 4-array: the first 3 are direction of the light, 4th is global illumination\&. can be NULL depending on shader specified 
+.br
+\fIshdr\fP shader type to use, one of: R1B_SHDR_NONE: no shading will be done, if wireframe is also off, you will not be able to see anything; R1B_SHDR_FLAT: flat shading, use pattern fill to evenly fill all faces; R1B_SHDR_NDOTL: n-dot-l diffuse shading, quantized to 5 levels and filled with patterns of different shades; R1B_SHDR_NDOTLF: n-dot-l shading but without quantization, returning grayscale, on which dithering can be further applied 
+.br
+\fIwire_val\fP value (color) of the wireframe\&. might be unused depending on the shader specified 
+.br
+\fIwire\fP type of wireframe, one of: R1B_WIRE_FRONT: wireframe can be occluded; R1B_WIRE_ALL: all wireframes are drawn; R1B_WIRE_NONE: no wireframe is drawn\&. 
+.RE
+.PP
+
+.SS "void r1b_resample (\fBr1b_im_t\fP * im, int w, int h, int mode)"
+
+.PP
+resample image to a different size 
+.PP
+\fBParameters\fP
+.RS 4
+\fIim\fP pointer to image 
+.br
+\fIw\fP new width 
+.br
+\fIh\fP new height 
+.br
+\fImode\fP the alogirthm, either R1B_SMPL_NN or R1B_SMPL_BILINEAR 
+.RE
+.PP
+
+.SS "void r1b_resample_bilinear (\fBr1b_im_t\fP * im, int w, int h)"
+
+.PP
+(internal use) bilinear resampling 
+.PP
+\fBParameters\fP
+.RS 4
+\fIim\fP pointer to image 
+.br
+\fIw\fP new width 
+.br
+\fIh\fP new height 
+.RE
+.PP
+
+.SS "void r1b_resample_nearest (\fBr1b_im_t\fP * im, int w, int h)"
+
+.PP
+(internal use) nearest neighbor resampling 
+.PP
+\fBParameters\fP
+.RS 4
+\fIim\fP pointer to image 
+.br
+\fIw\fP new width 
+.br
+\fIh\fP new height 
+.RE
+.PP
+
+.SS "void r1b_set (\fBr1b_im_t\fP * im, int x, int y, float val, int mode)"
+
+.PP
+set the value of a pixel at given coordinate 
+.PP
+\fBParameters\fP
+.RS 4
+\fIim\fP pointer to image 
+.br
+\fIx\fP x coordinate 
+.br
+\fIy\fP y coordinate 
+.br
+\fIval\fP the value of the pixel 
+.br
+\fImode\fP blit mode, one of: R1B_BLIT_SET: overwrite the pixel; R1B_BLIT_FLIP: flip the value of the pixel; R1B_BLIT_OR: turn on the pixel if it's off; R1B_BLIT_ADD: add the value to the original\&. 
+.RE
+.PP
+
+.SS "void r1b_snapshot (const char * path, \fBr1b_im_t\fP * im)"
+
+.PP
+write image to file, supported: jpg, png, bmp 
+.PP
+\fBParameters\fP
+.RS 4
+\fIpath\fP the file path 
+.br
+\fIim\fP an image 
+.RE
+.PP
+
+.SS "void r1b_text (\fBr1b_im_t\fP * im, wchar_t * str, int x, int y, \fBr1b_font_t\fP * font, float val, int mode, int highlight)"
+
+.PP
+draw a string (of wide chars) to image 
+.PP
+\fBParameters\fP
+.RS 4
+\fIim\fP pointer to image 
+.br
+\fIstr\fP text stored as wchar_t* 
+.br
+\fIx\fP x coordinate 
+.br
+\fIy\fP y coordinate 
+.br
+\fIfont\fP pointer to font 
+.br
+\fIval\fP value (color) of the text 
+.br
+\fImode\fP blit mode, see r1b_set 
+.br
+\fIhighlight\fP boolean: whether to draw a highlight behind the text (to stand out from busy background) 
+.RE
+.PP
+
+.SS "void r1b_text_ascii (\fBr1b_im_t\fP * im, char * str, int x, int y, \fBr1b_font_t\fP * font, float val, int mode, int highlight)"
+
+.PP
+draw an ascii-only string to image 
+.PP
+\fBParameters\fP
+.RS 4
+\fIim\fP pointer to image 
+.br
+\fIstr\fP the string 
+.br
+\fIx\fP x coordinate 
+.br
+\fIy\fP y coordinate 
+.br
+\fIfont\fP pointer to font 
+.br
+\fIval\fP value (color) of the text 
+.br
+\fImode\fP blit mode, see r1b_set 
+.br
+\fIhighlight\fP boolean: whether to draw a highlight behind the text (to stand out from busy background) 
+.RE
+.PP
+
+.SS "void r1b_text_utf8 (\fBr1b_im_t\fP * im, char * str, int x, int y, \fBr1b_font_t\fP * font, float val, int mode, int highlight)"
+
+.PP
+draw a utf-8 encoded string to image 
+.PP
+\fBParameters\fP
+.RS 4
+\fIim\fP pointer to image 
+.br
+\fIstr\fP utf-8 encoded string 
+.br
+\fIx\fP x coordinate 
+.br
+\fIy\fP y coordinate 
+.br
+\fIfont\fP pointer to font 
+.br
+\fIval\fP value (color) of the text 
+.br
+\fImode\fP blit mode, see r1b_set 
+.br
+\fIhighlight\fP boolean: whether to draw a highlight behind the text (to stand out from busy background) 
+.RE
+.PP
+
+.SS "void r1b_thick_line (\fBr1b_im_t\fP * im, float x0, float y0, float x1, float y1, float val, int half_thick, int mode)"
+
+.PP
+draw a 2D line with thickness 
+.PP
+\fBParameters\fP
+.RS 4
+\fIim\fP pointer to image 
+.br
+\fIx0\fP x coordinate of first point 
+.br
+\fIy0\fP y coordinate of first point 
+.br
+\fIx1\fP x coordinate of second point 
+.br
+\fIy1\fP y coordinate of second point 
+.br
+\fIval\fP value (color) of the line 
+.br
+\fIhalf_thick\fP set thickness of line to half_thick*2+1 
+.br
+\fImode\fP blit mode, see r1b_set for details 
+.RE
+.PP
+
+.SS "void r1b_transform_mesh (\fBr1b_mesh_t\fP * mesh, float * mat)"
+
+.PP
+transform mesh with a 4x4 transformation matrix 
+.PP
+\fBParameters\fP
+.RS 4
+\fImesh\fP pointer to mesh 
+.br
+\fImat\fP the 4x4 row major transformation matrix as an array of 16 floats 
+.RE
+.PP
+
+.SS "void r1b_transpose (\fBr1b_im_t\fP * im)"
+
+.PP
+transpose an image 
+.PP
+\fBParameters\fP
+.RS 4
+\fIim\fP pointer to image 
+.RE
+.PP
+
+.SS "void r1b_transpose_flip (\fBr1b_im_t\fP * im)"
+
+.PP
+transpose and flip an image, effectively rotating it by 90 degrees\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fIim\fP pointer to image 
+.RE
+.PP
+
+.SS "void r1b_triangle (\fBr1b_im_t\fP * im, float x0, float y0, float x1, float y1, float x2, float y2, \fBr1b_im_t\fP * pttn, int mode)"
+
+.PP
+draw a 2D triangle 
+.PP
+\fBParameters\fP
+.RS 4
+\fIim\fP pointer to image 
+.br
+\fIx0\fP x coordinate of first vertex 
+.br
+\fIy0\fP y coordinate of first vertex 
+.br
+\fIx1\fP x coordinate of second vertex 
+.br
+\fIy1\fP y coordinate of second vertex 
+.br
+\fIx2\fP x coordinate of third vertex 
+.br
+\fIy2\fP y coordinate of third vertex 
+.br
+\fIpttn\fP fill pattern 
+.br
+\fImode\fP blit mode, see r1b_set for details 
+.RE
+.PP
+
+.SS "void r1b_triangle3d (\fBr1b_im_t\fP * im, \fBr1b_im_t\fP * depth, float f, float x0, float y0, float z0, float x1, float y1, float z1, float x2, float y2, float z2, \fBr1b_im_t\fP * pttn, float * vals, int mode)"
+
+.PP
+draw a 3D triangle to image, projected with pinhole camera model 
+.PP
+\fBParameters\fP
+.RS 4
+\fIim\fP pointer to image 
+.br
+\fIdepth\fP pointer to the depth buffer, which will be read and written\&. use \fBr1b_infs()\fP for initialization 
+.br
+\fIf\fP focal length of the camera 
+.br
+\fIx0\fP x coordinate of the first vertex 
+.br
+\fIy0\fP y coordinate of the first vertex 
+.br
+\fIz0\fP z coordinate of the first vertex 
+.br
+\fIx1\fP x coordinate of the second vertex 
+.br
+\fIy1\fP y coordinate of the second vertex 
+.br
+\fIz1\fP z coordinate of the second vertex 
+.br
+\fIx2\fP x coordinate of the third vertex 
+.br
+\fIy2\fP y coordinate of the third vertex 
+.br
+\fIz2\fP z coordinate of the third vertex 
+.br
+\fIpttn\fP fill pattern, when NULL, \fCvals\fP argument will be used instead 
+.br
+\fIvals\fP 3-array for value (color) of each vertex (points in triangle will have interpolated colors), used when \fCpttn\fP argument is NULL 
+.br
+\fImode\fP blit mode, see r1b_set for details 
+.RE
+.PP
+
+.SS "int r1b_triangulate (float * X, float * Y, int n, int * triangles)"
+
+.PP
+(internal use) triangulate a polygon 
+.PP
+\fBParameters\fP
+.RS 4
+\fIX\fP x-coordinates of vertices 
+.br
+\fIY\fP y-coordinates of vertices 
+.br
+\fIn\fP number of vertices 
+.br
+\fItriangles\fP pointer to an array where triangle vertex indices will be written 
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+number of triangles written 
+.RE
+.PP
+
+.SS "void r1b_upsample2x (\fBr1b_im_t\fP * im, int mode)"
+
+.PP
+upsample image by 2x using pixel-art scaling algorithms 
+.PP
+\fBParameters\fP
+.RS 4
+\fIim\fP pointer to image 
+.br
+\fImode\fP algorithm: one of R1B_UP2X_SAA5050, R1B_UP2X_EPX, R1B_UP2X_EAGLE, R1B_UP2X_HQX 
+.RE
+.PP
+
+.SS "void r1b_upsample2x_eagle (\fBr1b_im_t\fP * im)"
+
+.PP
+(internal use) upsample image by 2x using Eagle algorithm 
+.PP
+\fBParameters\fP
+.RS 4
+\fIim\fP pointer to image 
+.RE
+.PP
+
+.SS "void r1b_upsample2x_epx (\fBr1b_im_t\fP * im)"
+
+.PP
+(internal use) upsample image by 2x using EPX algorithm 
+.PP
+\fBParameters\fP
+.RS 4
+\fIim\fP pointer to image 
+.RE
+.PP
+
+.SS "void r1b_upsample2x_hqx (\fBr1b_im_t\fP * im)"
+
+.PP
+(internal use) upsample image by 2x using HQX algorithm 
+.PP
+\fBParameters\fP
+.RS 4
+\fIim\fP pointer to image 
+.RE
+.PP
+
+.SS "void r1b_upsample2x_saa5050 (\fBr1b_im_t\fP * im)"
+
+.PP
+(internal use) upsample image by 2x using saa5050 algorithm 
+.PP
+\fBParameters\fP
+.RS 4
+\fIim\fP pointer to image 
+.RE
+.PP
+
+.SS "\fBr1b_im_t\fP r1b_zeros (int w, int h)"
+
+.PP
+create image filled with zeros 
+.PP
+\fBParameters\fP
+.RS 4
+\fIw\fP width 
+.br
+\fIh\fP height 
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+an image 
+.RE
+.PP
+
+.SH "Variable Documentation"
+.PP 
+.SS "uint8_t r1b_hq2x_table[256]"
+\fBInitial value:\fP
+.PP
+.nf
+= {
+  4, 4, 6,  2, 4, 4, 6,  2, 5,  3, 15, 12, 5,  3, 17, 13,
+  4, 4, 6, 18, 4, 4, 6, 18, 5,  3, 12, 12, 5,  3,  1, 12,
+  4, 4, 6,  2, 4, 4, 6,  2, 5,  3, 17, 13, 5,  3, 16, 14,
+  4, 4, 6, 18, 4, 4, 6, 18, 5,  3, 16, 12, 5,  3,  1, 14,
+  4, 4, 6,  2, 4, 4, 6,  2, 5, 19, 12, 12, 5, 19, 16, 12,
+  4, 4, 6,  2, 4, 4, 6,  2, 5,  3, 16, 12, 5,  3, 16, 12,
+  4, 4, 6,  2, 4, 4, 6,  2, 5, 19,  1, 12, 5, 19,  1, 14,
+  4, 4, 6,  2, 4, 4, 6, 18, 5,  3, 16, 12, 5, 19,  1, 14,
+  4, 4, 6,  2, 4, 4, 6,  2, 5,  3, 15, 12, 5,  3, 17, 13,
+  4, 4, 6,  2, 4, 4, 6,  2, 5,  3, 16, 12, 5,  3, 16, 12,
+  4, 4, 6,  2, 4, 4, 6,  2, 5,  3, 17, 13, 5,  3, 16, 14,
+  4, 4, 6,  2, 4, 4, 6,  2, 5,  3, 16, 13, 5,  3,  1, 14,
+  4, 4, 6,  2, 4, 4, 6,  2, 5,  3, 16, 12, 5,  3, 16, 13,
+  4, 4, 6,  2, 4, 4, 6,  2, 5,  3, 16, 12, 5,  3,  1, 12,
+  4, 4, 6,  2, 4, 4, 6,  2, 5,  3, 16, 12, 5,  3,  1, 14,
+  4, 4, 6,  2, 4, 4, 6,  2, 5,  3,  1, 12, 5,  3,  1, 14,
+}
+.fi
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for r1b from the source code\&.

@@ -17,4 +17,5 @@ out = open("r1b.h",'r').read()\
     .replace("#include R1B_CONFIG_STBIW_PATH","\n"+open("external/stb_image_write.h",'r').read()+"\n")\
 
 
-open("build/r1b.c",'w').write(out);
+open("build/r1b.h",'w').write(out);
+open("build/r1b.c",'w').write('#include "r1b.h"');

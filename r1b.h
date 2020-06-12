@@ -51,6 +51,10 @@
 #include R1B_CONFIG_STBIW_PATH
 
 
+// ---------------
+// ENUMS
+// ---------------
+
 #define R1B_INFER         -42
 
 #define R1B_DTHR_ORD       1
@@ -100,35 +104,41 @@
 #define R1B_FLAG_SORTED    1
 
 
-
-#ifndef M_PI
-  #define M_PI   3.14159265358979323846264338327950288
-#endif
-
+/** 
+ * @brief datatype for a (1-channel grayscale or binary) image
+ */
 typedef struct {
-  int w;
-  int h;
-  float* data;
+  int w;        /**< width  */
+  int h;        /**< height */
+  float* data;  /**< image data: row-major array of floats */
 } r1b_im_t;
 
+/** 
+ * @brief datatype for a bitmap font                           
+ */
 typedef struct {
-  int h;
-  char* glyphs;
-  int n;
-  uint32_t* offsets;
-  uint8_t*  sizes;
-  uint16_t* cmap;
-  int flags;
+  int h;             /**< height of font */
+  char* glyphs;      /**< number of glyphs */     
+  int n;             /**< pointer to data for glyphs */     
+  uint32_t* offsets; /**< array of data offsets for each glyph  */
+  uint8_t*  sizes;   /**< array of sizes (width/4) for each glyph  */ 
+  uint16_t* cmap;    /**< array of unicode code points for each glyph */  
+  int flags;         /**< bitwise OR of flags:
+                            R1B_FLAG_SORTED: whether the glyphs are sorted by codepoint
+                      */
 } r1b_font_t;
 
+/** 
+ * @brief datatype for a 3D mesh
+ */
 typedef struct {
-  float* X;
-  float* Y;
-  float* Z;
-  int* tris;
-  float* norms;
-  int n_vtx;
-  int n_tri;
+  float* X;     /**< array of x coordinate of vertices */
+  float* Y;     /**< array of y coordinate of vertices */
+  float* Z;     /**< array of z coordinate of vertices */
+  int* tris;    /**< array of triangles (using vertex index) */
+  float* norms; /**< array of vertex normals (optional, can be NULL) */
+  int n_vtx;    /**< number of vertices */
+  int n_tri;    /**< number of triangles */
 } r1b_mesh_t;
 
 static const float r1b_dither_ord_idx[16] = {
@@ -248,7 +258,11 @@ int r1b_tmp0_size = 0;
 float* r1b_tmp1 = NULL;
 int r1b_tmp1_size = 0;
 
-
+/**
+ * @brief (internal use) allocate temporary buffer for certain operations
+ * @param w  width
+ * @param h  height
+ */
 void r1b_make_tmp0(int w, int h){
   int l = w*h;
   if (!r1b_tmp0){
@@ -260,6 +274,11 @@ void r1b_make_tmp0(int w, int h){
   }
 }
 
+/**
+ * @brief (internal use) allocate temporary buffer for certain operations
+ * @param w  width
+ * @param h  height
+ */
 void r1b_make_tmp1(int w, int h){
   int l = w*h;
   if (!r1b_tmp1){
@@ -271,6 +290,11 @@ void r1b_make_tmp1(int w, int h){
   }
 }
 
+/**
+ * @brief free all resources allocated internally by the library
+ * @param w  width
+ * @param h  height
+ */
 void r1b_cleanup(){
   if (r1b_tmp0){
     r1b_tmp0_size = 0;
@@ -300,49 +324,65 @@ void r1b_cleanup(){
 }
 
 #ifndef R1B_CONFIG_NO_STBI
-  r1b_im_t r1b_read(const char* path){  
-    int width, height, channels;
-    unsigned char *image = stbi_load(path,
-                                   &width,
-                                   &height,
-                                   &channels,
-                                   STBI_grey);
-    
-    float* data = (float*)malloc(width*height*sizeof(float));
-    int i; for (i= 0; i < height; i++){
-      int j; for (j= 0; j < width; j++){
-        data[i*width+j] = 1.0-(float)image[i*width+j]/255.0;
-      }
-    }
-    stbi_image_free(image);
-    r1b_im_t im;
-    im.w = width;
-    im.h = height;
-    im.data = data;
-    return im;
-  }
-  void r1b_snapshot(const char* path, r1b_im_t* im){
-    unsigned char *image = (unsigned char*)malloc(sizeof(unsigned char)*im->w*im->h);
-    int i; for (i= 0; i < im->h; i++ ){
-      int j; for (j= 0; j < im->w; j++ ){
-        image[i*im->w+j] = (unsigned char)(int) ((1.0-fmin(fmax(im->data[i*im->w+j],0.0),1.0)) * 255.0);
-      }
-    }
-    char* ext = (char*)path + strlen(path);
-    while (ext > (char*)path && *(char*)ext != '.') {
-        ext--;
-    }
-    ext ++;
-    if (strcmp(ext,"jpg")==0 || strcmp(ext,"jpeg")==0){
-      stbi_write_jpg(path, im->w, im->h, 1, image, 90);
-    }else if (strcmp(ext,"png")==0){
-      stbi_write_png(path, im->w, im->h, 1, image, im->w);
-    }else if (strcmp(ext,"bmp")==0){
-      stbi_write_bmp(path, im->w, im->h, 1, image);
+/**
+ * @brief read an image from disk as grayscale
+ * @param path  the file path
+ * @return      an image
+ */
+r1b_im_t r1b_read(const char* path){  
+  int width, height, channels;
+  unsigned char *image = stbi_load(path,
+                                 &width,
+                                 &height,
+                                 &channels,
+                                 STBI_grey);
+  
+  float* data = (float*)malloc(width*height*sizeof(float));
+  int i; for (i= 0; i < height; i++){
+    int j; for (j= 0; j < width; j++){
+      data[i*width+j] = 1.0-(float)image[i*width+j]/255.0;
     }
   }
+  stbi_image_free(image);
+  r1b_im_t im;
+  im.w = width;
+  im.h = height;
+  im.data = data;
+  return im;
+}
+/**
+ * @brief write image to file, supported: jpg, png, bmp
+ * @param path  the file path
+ * @param       im an image
+ */
+void r1b_snapshot(const char* path, r1b_im_t* im){
+  unsigned char *image = (unsigned char*)malloc(sizeof(unsigned char)*im->w*im->h);
+  int i; for (i= 0; i < im->h; i++ ){
+    int j; for (j= 0; j < im->w; j++ ){
+      image[i*im->w+j] = (unsigned char)(int) ((1.0-fmin(fmax(im->data[i*im->w+j],0.0),1.0)) * 255.0);
+    }
+  }
+  char* ext = (char*)path + strlen(path);
+  while (ext > (char*)path && *(char*)ext != '.') {
+      ext--;
+  }
+  ext ++;
+  if (strcmp(ext,"jpg")==0 || strcmp(ext,"jpeg")==0){
+    stbi_write_jpg(path, im->w, im->h, 1, image, 90);
+  }else if (strcmp(ext,"png")==0){
+    stbi_write_png(path, im->w, im->h, 1, image, im->w);
+  }else if (strcmp(ext,"bmp")==0){
+    stbi_write_bmp(path, im->w, im->h, 1, image);
+  }
+}
 #endif /*R1B_CONFIG_NO_STBI*/
 
+/**
+ * @brief create image filled with zeros
+ * @param w  width
+ * @param h  height
+ * @return   an image
+ */
 r1b_im_t r1b_zeros(int w, int h){
   r1b_im_t im;
   im.w = w;
@@ -350,7 +390,12 @@ r1b_im_t r1b_zeros(int w, int h){
   im.data = (float*)calloc(w*h,sizeof(float));
   return im;
 }
-
+/**
+ * @brief create image filled with ones
+ * @param w  width
+ * @param h  height
+ * @return   an image
+ */
 r1b_im_t r1b_ones(int w, int h){
   int l = w*h;
   r1b_im_t im;
@@ -362,7 +407,13 @@ r1b_im_t r1b_ones(int w, int h){
   }
   return im;
 }
-
+/**
+ * @brief create image from data pointed by array pointer, copying the data over
+ * @param w    width
+ * @param h    height
+ * @param arr  an array that is at least w x h in size
+ * @return     an image
+ */
 r1b_im_t r1b_from_array(int w, int h, float* arr){
   int l = w*h;
   r1b_im_t im;
@@ -373,6 +424,12 @@ r1b_im_t r1b_from_array(int w, int h, float* arr){
   return im;
 }
 
+/**
+ * @brief create image filled with FLT_MAX
+ * @param w  width
+ * @param h  height
+ * @return   an image
+ */
 r1b_im_t r1b_infs(int w, int h){
   int l = w*h;
   r1b_im_t im;
@@ -385,12 +442,19 @@ r1b_im_t r1b_infs(int w, int h){
   return im;
 }
 
-
+/**
+ * @brief free data allocated in an image; does not free the pointer itself
+ * @param im  pointer to image
+ */
 void r1b_free(r1b_im_t* im){
   free(im->data);
   im->data = NULL;
 }
 
+/**
+ * @brief transpose an image
+ * @param im  pointer to image
+ */
 void r1b_transpose(r1b_im_t* im){
   // TODO: cache friendly
   r1b_make_tmp0(im->w,im->h);
@@ -405,6 +469,10 @@ void r1b_transpose(r1b_im_t* im){
   memcpy(im->data, r1b_tmp0, im->w*im->h*sizeof(float));
 }
 
+/**
+ * @brief transpose and flip an image, effectively rotating it by 90 degrees.
+ * @param im  pointer to image
+ */
 void r1b_transpose_flip(r1b_im_t* im){
   // TODO: cache friendly
   r1b_make_tmp0(im->w,im->h);
@@ -419,7 +487,12 @@ void r1b_transpose_flip(r1b_im_t* im){
   memcpy(im->data, r1b_tmp0, im->w*im->h*sizeof(float));
 }
 
-
+/**
+ * @brief normalize an image to a given interval
+ * @param im  pointer to image
+ * @param lo  new min value
+ * @param hi  new max value
+ */
 void r1b_normalize(r1b_im_t* im, float lo, float hi){
   float m =  FLT_MAX;
   float M = -FLT_MAX;
@@ -437,6 +510,11 @@ void r1b_normalize(r1b_im_t* im, float lo, float hi){
   }
 }
 
+/**
+ * @brief duplicates an image
+ * @param im  pointer to image
+ * @return    the clone
+ */
 r1b_im_t r1b_copy_of(r1b_im_t* im){
   int s = im->w*im->h*sizeof(float);
   r1b_im_t dst;
@@ -447,10 +525,21 @@ r1b_im_t r1b_copy_of(r1b_im_t* im){
   return dst;
 }
 
+/**
+ * @brief copy data from one image to another
+ * the images should have the same width, and destination is at least
+ * the same height as source
+ * @param im   source: pointer to image to be copied from
+ * @param dst  destination: pointer to image to be copied into
+ */
 void r1b_copy_to(r1b_im_t* im, r1b_im_t* dst){
   memcpy(dst->data, im->data, im->w*im->h*sizeof(float));
 }
 
+/**
+ * @brief (internal use) apply floyd-steinberg dithering to a grayscale image
+ * @param im  pointer to image
+ */
 void r1b_dither_fs(r1b_im_t* im) {
   r1b_make_tmp0(im->w,im->h);
   r1b_make_tmp1(im->w,im->h);
@@ -474,6 +563,10 @@ void r1b_dither_fs(r1b_im_t* im) {
   memcpy(im->data, r1b_tmp0, im->w*im->h*sizeof(float));
 }
 
+/**
+ * @brief (internal use) apply ordered dithering to a grayscale image
+ * @param im  pointer to image
+ */
 void r1b_dither_ord(r1b_im_t* im){
   r1b_make_tmp0(im->w,im->h);
 
@@ -494,6 +587,12 @@ void r1b_dither_ord(r1b_im_t* im){
   memcpy(im->data, r1b_tmp0, im->w*im->h*sizeof(float));
 }
 
+/**
+ * @brief apply dithering to a grayscale image
+ * turning it into binary image using specified algorithm
+ * @param im    pointer to image
+ * @param mode  the algorithm to use, either R1B_DTHR_ORD or R1B_DTHR_FS
+ */
 void r1b_dither(r1b_im_t* im, int mode){
   switch(mode){
     case R1B_DTHR_ORD:
@@ -505,6 +604,10 @@ void r1b_dither(r1b_im_t* im, int mode){
   }
 }
 
+/**
+ * @brief print an image to stdout for debugging
+ * @param im  pointer to image
+ */
 void r1b_log(r1b_im_t* im){
   int i; for (i= 0; i < im->h; i++) {
     int j; for (j= 0; j < im->w; j++) {
@@ -520,6 +623,12 @@ void r1b_log(r1b_im_t* im){
 
 #define R1B_PUT8(x) bytes[cnt_bytes] = x; cnt_bytes ++;
 
+/**
+ * @brief encode an image to ESC/POS commands
+ * @param im               pointer to image
+ * @param n_bytes_written  size of the returned buffer in bytes
+ * @return                 an array of bytes
+ */
 char* r1b_encode(r1b_im_t* im, int* n_bytes_written){
   int l0 = im->w%256;
   int ll = (int)(im->w/256);
@@ -552,6 +661,11 @@ char* r1b_encode(r1b_im_t* im, int* n_bytes_written){
   return bytes;
 }
 
+/**
+ * @brief encode an image to ESC/POS commands and write it to a file
+ * @param path  file path to write to
+ * @param im    pointer to image
+ */
 void r1b_encode2file(const char* path, r1b_im_t* im){
   FILE * fp;
   fp = fopen(path, "wb");
@@ -561,6 +675,11 @@ void r1b_encode2file(const char* path, r1b_im_t* im){
   fclose(fp);
 }
 
+/**
+ * @brief send an image to a thermal printer for printing using LPR command
+ * @param printer  the name of the printer
+ * @param im       pointer to image
+ */
 void r1b_lpr(const char* printer, r1b_im_t* im){
   char buf[256];
   r1b_encode2file("r1b_tmp",im);
@@ -568,7 +687,12 @@ void r1b_lpr(const char* printer, r1b_im_t* im){
   system(buf);
 }
 
-
+/**
+ * @brief (internal use) nearest neighbor resampling
+ * @param im  pointer to image
+ * @param w   new width
+ * @param h   new height
+ */
 void r1b_resample_nearest(r1b_im_t* im, int w, int h){
   r1b_make_tmp0(w,h);
 
@@ -593,6 +717,12 @@ void r1b_resample_nearest(r1b_im_t* im, int w, int h){
   r1b_tmp0 = tmp;
 }
 
+/**
+ * @brief (internal use) bilinear resampling
+ * @param im  pointer to image
+ * @param w   new width
+ * @param h   new height
+ */
 void r1b_resample_bilinear(r1b_im_t* im, int w, int h){
   r1b_make_tmp0(w,h);
 
@@ -631,7 +761,13 @@ void r1b_resample_bilinear(r1b_im_t* im, int w, int h){
   r1b_tmp0 = tmp;
 }
 
-
+/**
+ * @brief resample image to a different size
+ * @param im    pointer to image
+ * @param w     new width
+ * @param h     new height
+ * @param mode  the alogirthm, either R1B_SMPL_NN or R1B_SMPL_BILINEAR
+ */
 void r1b_resample(r1b_im_t* im, int w, int h, int mode){
   if (w == R1B_INFER){
     w = (int)round((float)h*(float)(im->w)/(float)(im->h));
@@ -650,7 +786,17 @@ void r1b_resample(r1b_im_t* im, int w, int h, int mode){
   }
 }
 
-
+/**
+ * @brief retrieve the value of a pixel at given coordinate
+ * @param im    pointer to image
+ * @param x     x coordinate
+ * @param y     y coordinate
+ * @param mode  border handling when coordinate is outside image:
+ *              R1B_BRDR_ZERO: zero padded;
+ *              R1B_BRDR_COPY: copy padded;
+ *              R1B_BRDR_WRAP: wrap around;
+ *              R1B_BRDR_NONE: no boundry checking (expect funny result or segfault when out of range).
+ */
 float r1b_get(r1b_im_t* im, int x, int y, int mode){
   if (mode == R1B_BRDR_ZERO){
     if (x<  0 || x >= im->w || y < 0 || y >= im->h){
@@ -672,7 +818,18 @@ float r1b_get(r1b_im_t* im, int x, int y, int mode){
   return im->data[y*im->w+x];
 }
 
-
+/**
+ * @brief set the value of a pixel at given coordinate
+ * @param im    pointer to image
+ * @param x     x coordinate
+ * @param y     y coordinate
+ * @param val   the value of the pixel
+ * @param mode  blit mode, one of:
+ *              R1B_BLIT_SET:  overwrite the pixel;
+ *              R1B_BLIT_FLIP: flip the value of the pixel;
+ *              R1B_BLIT_OR:   turn on the pixel if it's off;
+ *              R1B_BLIT_ADD:  add the value to the original.
+ */
 void r1b_set(r1b_im_t* im, int x, int y, float val, int mode){
   if (x<  0 || x >= im->w || y < 0 || y >= im->h){
     return;
@@ -698,7 +855,10 @@ void r1b_set(r1b_im_t* im, int x, int y, float val, int mode){
   }
 }
 
-
+/**
+ * @brief (internal use) upsample image by 2x using saa5050 algorithm
+ * @param im  pointer to image
+ */
 void r1b_upsample2x_saa5050(r1b_im_t* im){
   //wikipedia.org/wiki/Pixel-art_scaling_algorithms#SAA5050_'diagonal_smoothing'
 
@@ -748,6 +908,10 @@ void r1b_upsample2x_saa5050(r1b_im_t* im){
   r1b_tmp0 = tmp;
 }
 
+/**
+ * @brief (internal use) upsample image by 2x using EPX algorithm
+ * @param im  pointer to image
+ */
 void r1b_upsample2x_epx(r1b_im_t* im){
   //wikipedia.org/wiki/Pixel-art_scaling_algorithms#EPX
   r1b_make_tmp0(im->w*2,im->h*2);
@@ -784,6 +948,10 @@ void r1b_upsample2x_epx(r1b_im_t* im){
   r1b_tmp0 = tmp;
 }
 
+/**
+ * @brief (internal use) upsample image by 2x using Eagle algorithm
+ * @param im  pointer to image
+ */
 void r1b_upsample2x_eagle(r1b_im_t* im){
   //wikipedia.org/wiki/Pixel-art_scaling_algorithms#Eagle
   r1b_make_tmp0(im->w*2,im->h*2);
@@ -888,6 +1056,10 @@ float r1b_hq2x_blend(unsigned rule, float E, float A, float B, float D, float F,
   }
 }
 
+/**
+ * @brief (internal use) upsample image by 2x using HQX algorithm
+ * @param im  pointer to image
+ */
 void r1b_upsample2x_hqx(r1b_im_t* im){
   r1b_make_tmp0(im->w*2,im->h*2);
 
@@ -960,6 +1132,11 @@ void r1b_upsample2x_hqx(r1b_im_t* im){
 
 }
 
+/**
+ * @brief upsample image by 2x using pixel-art scaling algorithms
+ * @param im   pointer to image
+ * @param mode algorithm: one of R1B_UP2X_SAA5050, R1B_UP2X_EPX, R1B_UP2X_EAGLE, R1B_UP2X_HQX
+ */
 void r1b_upsample2x(r1b_im_t* im, int mode){
   switch(mode){
     case R1B_UP2X_SAA5050:
@@ -978,12 +1155,17 @@ void r1b_upsample2x(r1b_im_t* im, int mode){
 }
 
 
-// algorithm used by the bedstead font (public domain)
-// basically a nicer saa5050
-// https://bjh21.me.uk/bedstead/
-// https://bjh21.me.uk/bedstead/bedstead.c
-// here modified to work with raster
+/**
+ * @brief upsample image by a power of two using bedstead algorithm
+ * @param im  pointer to image
+ * @param  n  upscale by n-th power of two, e.g. n=3 => upscale by 8x
+ */
 void r1b_bedstead(r1b_im_t* im, int n){
+  // algorithm used by the bedstead font (public domain)
+  // basically a nicer saa5050
+  // https://bjh21.me.uk/bedstead/
+  // https://bjh21.me.uk/bedstead/bedstead.c
+  // here modified to work with raster
   int po2 = pow(2,n);
   float w = (float)po2;
   float w4 = w/4;
@@ -1085,10 +1267,21 @@ void r1b_bedstead(r1b_im_t* im, int n){
 }
 
 
-
 #define R1B_PT_IN_PL(x,y,x0,y0,x1,y1) ((((x)-(x0))*((y1)-(y0)) - ((y)-(y0))*((x1)-(x0)))<=0)
 #define R1B_PT_IN_TRI(x,y,x0,y0,x1,y1,x2,y2) ( R1B_PT_IN_PL(x,y,x0,y0,x1,y1) && R1B_PT_IN_PL(x,y,x1,y1,x2,y2) && R1B_PT_IN_PL(x,y,x2,y2,x0,y0) )
 
+/**
+ * @brief draw a 2D triangle
+ * @param im    pointer to image
+ * @param x0    x coordinate of first vertex
+ * @param y0    y coordinate of first vertex
+ * @param x1    x coordinate of second vertex
+ * @param y1    y coordinate of second vertex
+ * @param x2    x coordinate of third vertex
+ * @param y2    y coordinate of third vertex
+ * @param pttn  fill pattern
+ * @param mode  blit mode, see r1b_set for details
+ */
 void r1b_triangle(r1b_im_t* im,float x0 ,float y0 ,float x1 ,float y1 ,float x2 ,float y2 , r1b_im_t* pttn, int mode ){
 
   if (!R1B_PT_IN_PL(x0,y0,x1,y1,x2,y2)){
@@ -1114,6 +1307,16 @@ void r1b_triangle(r1b_im_t* im,float x0 ,float y0 ,float x1 ,float y1 ,float x2 
   }
 }
 
+/**
+ * @brief draw a 2D rectangle
+ * @param im    pointer to image
+ * @param x0    left
+ * @param y0    top
+ * @param x1    right
+ * @param y1    bottom
+ * @param pttn  fill pattern
+ * @param mode  blit mode, see r1b_set for details
+ */
 void r1b_rect(r1b_im_t* im,float x0 ,float y0 ,float x1 ,float y1 , r1b_im_t* pttn, int mode){
   int xmin = (int)round(fmin(x0,x1));
   int xmax = (int)round(fmax(x0,x1));
@@ -1130,6 +1333,16 @@ void r1b_rect(r1b_im_t* im,float x0 ,float y0 ,float x1 ,float y1 , r1b_im_t* pt
 
 #define R1B_LINE_STEP(sx0,sx1,sy0,sy1,x) (((sx0) == (sx1)) ? (sy1) : ((int)round((float)(sy0)+(float)((x)-(sx0))*(float)((sy1)-(sy0))/(float)((sx1)-(sx0)))) )
 
+/**
+ * @brief draw a 2D line
+ * @param im    pointer to image
+ * @param x0    x coordinate of first point
+ * @param y0    y coordinate of first point
+ * @param x1    x coordinate of second point
+ * @param y1    y coordinate of second point
+ * @param val   value (color) of the line
+ * @param mode  blit mode, see r1b_set for details
+ */
 void r1b_line(r1b_im_t* im, float x0 ,float y0 ,float x1 ,float y1, float val, int mode){
 
   int sx0 = (int)round(x0-0.5);
@@ -1156,7 +1369,16 @@ void r1b_line(r1b_im_t* im, float x0 ,float y0 ,float x1 ,float y1, float val, i
   }
 }
 
-
+/**
+ * @brief draw a polyline or outline a polygon
+ * @param im    pointer to image
+ * @param Xs    pointer to array of x-coordinates
+ * @param Ys    pointer to array of y-coordinates
+ * @param n     number of points
+ * @param close true for closed (polygon) or false for open (polyline)
+ * @param val   value (color) of the lines
+ * @param mode  blit mode, see r1b_set for details
+ */
 void r1b_lines(r1b_im_t* im, float* Xs, float* Ys, int n, int close, float val, int mode){
   int m = n - 1 + (close & 1);
   int i; for (i=0; i < m; i++ ){
@@ -1164,12 +1386,23 @@ void r1b_lines(r1b_im_t* im, float* Xs, float* Ys, int n, int close, float val, 
   }
 }
 
-void r1b_thick_line(r1b_im_t* im, float x0, float y0, float x1, float y1, float val, int thick, int mode){
+/**
+ * @brief draw a 2D line with thickness
+ * @param im          pointer to image
+ * @param x0          x coordinate of first point
+ * @param y0          y coordinate of first point
+ * @param x1          x coordinate of second point
+ * @param y1          y coordinate of second point
+ * @param val         value (color) of the line
+ * @param half_thick  set thickness of line to half_thick*2+1
+ * @param mode        blit mode, see r1b_set for details
+ */
+void r1b_thick_line(r1b_im_t* im, float x0, float y0, float x1, float y1, float val, int half_thick, int mode){
   int dx = x1 > x0 ? 1 : -1;
   int dy = y1 > y0 ? 1 : -1;
   r1b_line(im,x0,y0,x1,y1,val,mode);
 
-  int i; for (i= 1; i <= thick; i++) {
+  int i; for (i= 1; i <= half_thick; i++) {
     float dxi = (float)(i*dx);
     float dyi = (float)(i*dy);
     r1b_line(im,x0+dxi,y0,x1,y1-dyi,val,mode);
@@ -1177,6 +1410,16 @@ void r1b_thick_line(r1b_im_t* im, float x0, float y0, float x1, float y1, float 
   }
 }
 
+/**
+ * @brief load a bitmap font in unifont .hex format
+ * @param path   file path
+ * @param h      height of the font, since the hex format does not store this information
+ * @param cp0    unicode code point range start, only glyphs between cp0 and cp1 will be loaded (if any exist) when you don't need the whole set
+ * @param cp1    unicode code point range end
+ * @param flags  a bitwise OR of flags:
+ *               R1B_FLAG_SORTED: set this if the glyphs stored in the file are sorted by unicode code point, which improves speed
+ * @return       a font type
+ */
 r1b_font_t r1b_load_font_hex(const char* path, int h, int cp0, int cp1, int flags) {
   cp0 = R1B_MAX(1,cp0);
 
@@ -1263,6 +1506,10 @@ r1b_font_t r1b_load_font_hex(const char* path, int h, int cp0, int cp1, int flag
   return font;
 }
 
+/**
+ * @brief free data allocated in a font
+ * @param font  pointer to font
+ */
 void r1b_destroy_font(r1b_font_t* font){
   if (font->glyphs)free(font->glyphs);
   if (font->sizes)free(font->sizes);
@@ -1270,6 +1517,11 @@ void r1b_destroy_font(r1b_font_t* font){
   if (font->offsets)free(font->offsets);
 }
 
+/**
+ * @brief (internal use) locate a glyph in font by codepoint with linear search
+ * @param font  pointer to font
+ * @param cp    codepoint
+ */
 int r1b_glyph_index_lin_search(r1b_font_t* font, int cp){
   int i; for (i= 0; i < font->n; i++){
     if (font->cmap[i] == cp){
@@ -1279,6 +1531,13 @@ int r1b_glyph_index_lin_search(r1b_font_t* font, int cp){
   return -1;
 }
 
+/**
+ * @brief (internal use) locate a glyph in font by codepoint with binary search
+ * @param font  pointer to font
+ * @param cp    codepoint
+ * @param i0    the low index
+ * @param i1    the high index
+ */
 int r1b_glyph_index_bin_search(r1b_font_t* font, int cp, int i0, int i1){
   if (i0 == i1){
     return -1;
@@ -1294,6 +1553,11 @@ int r1b_glyph_index_bin_search(r1b_font_t* font, int cp, int i0, int i1){
   }
 }
 
+/**
+ * @brief (internal use) locate a glyph in font by codepoint
+ * @param font  pointer to font
+ * @param cp    codepoint
+ */
 int r1b_glyph_index(r1b_font_t* font, int cp){
   if (font->flags & R1B_FLAG_SORTED){
     return r1b_glyph_index_bin_search(font, cp, 0, font->n);
@@ -1302,6 +1566,17 @@ int r1b_glyph_index(r1b_font_t* font, int cp){
   }
 }
 
+/**
+ * @brief draw a single unicode character to image
+ * @param im    pointer to image
+ * @param cp    codepoint
+ * @param x     x coordinate
+ * @param y     y coordinate
+ * @param font  pointer to font
+ * @param val   value (color) of the text
+ * @param mode  blit mode, see r1b_set
+ * @param highlight  boolean: whether to draw a highlight behind the text (to stand out from busy background)
+ */
 int r1b_putchar(r1b_im_t* im, int cp, int x, int y, r1b_font_t* font,float val, int mode, int highlight){
   int idx = r1b_glyph_index(font,cp);
   if (idx < 0){
@@ -1384,6 +1659,17 @@ static void* r1b_utf8_decode(void *buf, uint32_t *c, int *e) {
 }
 
 
+/**
+ * @brief draw a string (of wide chars) to image
+ * @param im         pointer to image
+ * @param str        text stored as wchar_t*
+ * @param x          x coordinate
+ * @param y          y coordinate
+ * @param font       pointer to font
+ * @param val        value (color) of the text
+ * @param mode       blit mode, see r1b_set
+ * @param highlight  boolean: whether to draw a highlight behind the text (to stand out from busy background)
+ */
 void r1b_text(r1b_im_t* im, wchar_t* str, int x, int y, r1b_font_t* font, float val, int mode, int highlight){
   wchar_t c = 42;
   int i = 0;
@@ -1404,12 +1690,26 @@ void r1b_text(r1b_im_t* im, wchar_t* str, int x, int y, r1b_font_t* font, float 
   }
 }
 
+/**
+ * @brief draw a utf-8 encoded string to image
+ * @param im         pointer to image
+ * @param str        utf-8 encoded string
+ * @param x          x coordinate
+ * @param y          y coordinate
+ * @param font       pointer to font
+ * @param val        value (color) of the text
+ * @param mode       blit mode, see r1b_set
+ * @param highlight  boolean: whether to draw a highlight behind the text (to stand out from busy background)
+ */
 void r1b_text_utf8(r1b_im_t* im, char* str, int x, int y, r1b_font_t* font, float val, int mode, int highlight){
-  wchar_t wstr[strlen(str)];
-  void* next = (void*)str;
+  wchar_t wstr[strlen(str)+1];
+  char padded[strlen(str)+4];
+  memcpy(padded,str,strlen(str));
+  memset(&padded[strlen(str)],0,4);
+  void* next = (void*)padded;
   int e;
   int idx = 0;
-  while((char*)next <= (char*)str+strlen(str)){
+  while((char*)next <= (char*)padded+strlen(str)){
     next = r1b_utf8_decode(next, (uint32_t *)&wstr[idx], &e);
     idx++;
   }
@@ -1417,6 +1717,17 @@ void r1b_text_utf8(r1b_im_t* im, char* str, int x, int y, r1b_font_t* font, floa
   r1b_text(im,wstr,x,y,font,val,mode,highlight);
 }
 
+/**
+ * @brief draw an ascii-only string to image
+ * @param im         pointer to image
+ * @param str        the string
+ * @param x          x coordinate
+ * @param y          y coordinate
+ * @param font       pointer to font
+ * @param val        value (color) of the text
+ * @param mode       blit mode, see r1b_set
+ * @param highlight  boolean: whether to draw a highlight behind the text (to stand out from busy background)
+ */
 void r1b_text_ascii(r1b_im_t* im, char* str, int x, int y, r1b_font_t* font, float val, int mode, int highlight){
   char c = 42;
   int i = 0;
@@ -1437,7 +1748,13 @@ void r1b_text_ascii(r1b_im_t* im, char* str, int x, int y, r1b_font_t* font, flo
   }
 }
 
-
+/**
+ * @brief (internal use) calculate area of a polygon
+ * @param X   x-coordinates of vertices
+ * @param Y   y-coordinates of vertices
+ * @param n   number of vertices
+ * @return    the area
+ */
 float r1b_area(float* X, float* Y, int n) {
   // ported from https://github.com/cmu462/DrawSVG
   float a = 0.0f;
@@ -1467,6 +1784,14 @@ int r1b_triangulate_snip(float* X, float* Y,int u,int v,int w,int n,int *V ) {
   return 1;
 }
 
+/**
+ * @brief (internal use) triangulate a polygon
+ * @param X          x-coordinates of vertices
+ * @param Y          y-coordinates of vertices
+ * @param n          number of vertices
+ * @param triangles  pointer to an array where triangle vertex indices will be written
+ * @return           number of triangles written
+ */
 int r1b_triangulate(float* X, float* Y, int n, int* triangles) {
   // ported from https://github.com/cmu462/DrawSVG
   // allocate and initialize list of vertices in polygon
@@ -1511,6 +1836,15 @@ int r1b_triangulate(float* X, float* Y, int n, int* triangles) {
   return m;
 }
 
+/**
+ * @brief (internal use) draw a convex polygon on image
+ * @param im    pointer to iamge
+ * @param Xs    x-coordinates of vertices
+ * @param Ys    y-coordinates of vertices
+ * @param n     number of vertices
+ * @param pttn  fill pattern
+ * @param mode  blit mode, see r1b_set for details
+ */
 void r1b_polygon_convex(r1b_im_t* im, float* Xs, float* Ys, int n, r1b_im_t* pttn, int mode){
   int i; for (i= 1; i < n-1; i++ ){
     r1b_triangle(im,
@@ -1520,6 +1854,15 @@ void r1b_polygon_convex(r1b_im_t* im, float* Xs, float* Ys, int n, r1b_im_t* ptt
   }
 }
 
+/**
+ * @brief (internal use) draw a concave polygon on image
+ * @param im    pointer to iamge
+ * @param Xs    x-coordinates of vertices
+ * @param Ys    y-coordinates of vertices
+ * @param n     number of vertices
+ * @param pttn  fill pattern
+ * @param mode  blit mode, see r1b_set for details
+ */
 void r1b_polygon_concave(r1b_im_t* im, float* Xs, float* Ys, int n, r1b_im_t* pttn, int mode){
   int tris[n*3];
   int n_tris = r1b_triangulate(Xs,Ys,n,tris);
@@ -1531,6 +1874,17 @@ void r1b_polygon_concave(r1b_im_t* im, float* Xs, float* Ys, int n, r1b_im_t* pt
   }
 }
 
+/**
+ * @brief draw a polygon on image
+ * @param im    pointer to iamge
+ * @param Xs    x-coordinates of vertices
+ * @param Ys    y-coordinates of vertices
+ * @param n     number of vertices
+ * @param pttn  fill pattern
+ * @param mode  blit mode, see r1b_set for details
+ * @param typ   type of polygon, either R1B_POLY_CONVEX or R1B_POLY_CONCAVE.
+ *              concave mode works for convex polygons too, but asserting it as convex can speed things up
+ */
 void r1b_polygon(r1b_im_t* im, float* Xs, float* Ys, int n, r1b_im_t* pttn, int mode, int typ){
   switch (typ){
     case R1B_POLY_CONVEX:
@@ -1544,6 +1898,18 @@ void r1b_polygon(r1b_im_t* im, float* Xs, float* Ys, int n, r1b_im_t* pttn, int 
 
 #define R1B_PT_IN_ELL(h,k,x,y,a,b) ((((x)-(h))*((x)-(h))/((a)*(a))+((y)-(k))*((y)-(k))/((b)*(b)))<=1)
 
+
+/**
+ * @brief draw an ellipse on image
+ * @param im    pointer to iamge
+ * @param cx    x-coordinates of the center
+ * @param cy    y-coordinates of the center
+ * @param rx    radius in x-direction
+ * @param ry    radius in y-direction
+ * @param ang   rotation of the ellipse (in radians)
+ * @param pttn  fill pattern
+ * @param mode  blit mode, see r1b_set for details
+ */
 void r1b_ellipse(r1b_im_t* im, float cx, float cy, float rx, float ry, float ang, r1b_im_t* pttn, int mode){
   int xmin,xmax,ymin,ymax;
   if (ang == 0){
@@ -1580,6 +1946,18 @@ void r1b_ellipse(r1b_im_t* im, float cx, float cy, float rx, float ry, float ang
   }
 }
 
+/**
+ * @brief draw outline of an ellipse on image
+ * @param im      pointer to iamge
+ * @param cx      x-coordinates of the center
+ * @param cy      y-coordinates of the center
+ * @param rx      radius in x-direction
+ * @param ry      radius in y-direction
+ * @param ang     rotation of the ellipse (in radians)
+ * @param detail  number of segments used to approximate the ellipse, the higher the smoother
+ * @param val     value (color) of the outline
+ * @param mode    blit mode, see r1b_set for details
+ */
 void r1b_line_ellipse(r1b_im_t* im, float cx, float cy, float rx, float ry, float ang, int detail, float val, int mode){
   
   float costh = cos(ang);
@@ -1600,7 +1978,21 @@ void r1b_line_ellipse(r1b_im_t* im, float cx, float cy, float rx, float ry, floa
   }
 }
 
-
+/**
+ * @brief blit an image onto another, optionally applying a mask.
+ *        supports drawing a subsection and repeated patterns
+ * @param dst     pointer to destination image
+ * @param src     pointer to source image
+ * @param msk     pointer to mask image. for no masking, use an image of all 1's (e.g. R1B_GET_PATTERN(SOLID) and R1B_BRDR_WRAP for bdmode)
+ * @param x0      x coordinate on the destination image for upper left  corner of source image
+ * @param y0      y coordinate on the destination image for upper left  corner of source image
+ * @param x1      x coordinate on the destination image for lower right corner of source image
+ * @param y1      y coordinate on the destination image for lower right corner of source image
+ * @param sx      x coordinate on the source image to offset
+ * @param sy      y coordinate on the source image to offset
+ * @param bdmode  border mode, see r1b_get for details
+ * @param mode    blit mode, see r1b_set for details
+ */
 void r1b_blit(r1b_im_t* dst, r1b_im_t* src, r1b_im_t* msk, float x0, float y0, float x1, float y1, float sx, float sy, int bdmode, int mode){
   int dx = x1 > x0 ? 1 : -1;
   int dy = y1 > y0 ? 1 : -1;
@@ -1628,11 +2020,25 @@ void r1b_blit(r1b_im_t* dst, r1b_im_t* src, r1b_im_t* msk, float x0, float y0, f
   }
 }
 
+/**
+ * @brief blit an image onto another, a simplified version of r1b_blit with less arguments
+ * @param dst  pointer to destination image
+ * @param src  pointer to source image
+ * @param x    x coordinate on the destination image for upper left corner of source image
+ * @param y    y coordinate on the destination image for upper left corner of source image
+ */
 void r1b_paste(r1b_im_t* dst, r1b_im_t* src, float x, float y){
   r1b_blit(dst,src,R1B_PATTERN(SOLID),x,y,x+src->w,y+src->h,0,0,R1B_BRDR_WRAP,R1B_BLIT_SET);
 }
 
 
+/**
+ * @brief load an wavefront .obj file to a new mesh
+ *
+ * currently doesn't support mtl or normals
+ * @param path  file path
+ * @return      a mesh type
+ */
 r1b_mesh_t r1b_load_obj(const char* path){
   r1b_mesh_t obj;
 
@@ -1739,6 +2145,16 @@ r1b_mesh_t r1b_load_obj(const char* path){
   return obj;
 }
 
+/**
+ * @brief calculate the bounding box of a mesh
+ * @param mesh   pointer to mesh
+ * @param xmin   pointer to minimum x to be overwritten
+ * @param ymin   pointer to minimum y to be overwritten
+ * @param zmin   pointer to minimum z to be overwritten
+ * @param xmax   pointer to maximum x to be overwritten
+ * @param ymax   pointer to maximum y to be overwritten
+ * @param zmax   pointer to maximum z to be overwritten
+ */
 void r1b_mesh_bbox(r1b_mesh_t* mesh, float* xmin, float* ymin, float* zmin, float* xmax, float* ymax, float* zmax){
   *xmin = FLT_MAX;
   *ymin = FLT_MAX;
@@ -1756,6 +2172,11 @@ void r1b_mesh_bbox(r1b_mesh_t* mesh, float* xmin, float* ymin, float* zmin, floa
   }
 }
 
+/**
+ * @brief normalize vertices of a mesh to be bounded by (-1,-1,-1) and (1,1,1), 
+ *        keeping proportions
+ * @param mesh   pointer to mesh
+ */
 void r1b_normalize_mesh(r1b_mesh_t* mesh){
   float xmin,ymin,zmin,xmax,ymax,zmax;
   r1b_mesh_bbox(mesh,&xmin,&ymin,&zmin,&xmax,&ymax,&zmax);
@@ -1773,6 +2194,10 @@ void r1b_normalize_mesh(r1b_mesh_t* mesh){
   // printf("%f %f %f, %f %f %f\n",xmin,ymin,zmin,xmax,ymax,zmax);
 }
 
+/**
+ * @brief free memory allocated in a mesh
+ * @param mesh   pointer to mesh
+ */
 void r1b_destroy_mesh(r1b_mesh_t* mesh){
   free(mesh->X);
   free(mesh->Y);
@@ -1799,6 +2224,26 @@ void r1b_destroy_mesh(r1b_mesh_t* mesh){
 #define R1B_BARY_U(x,y,x1,y1,x2,y2,x3,y3)   (((y2)-(y3))*((x)-(x3))+((x3)-(x2))*((y)-(y3)))
 #define R1B_BARY_V(x,y,x1,y1,x2,y2,x3,y3)   (((y3)-(y1))*((x)-(x3))+((x1)-(x3))*((y)-(y3)))
 
+
+/**
+ * @brief draw a 3D triangle to image, projected with pinhole camera model
+ * @param im     pointer to image
+ * @param depth  pointer to the depth buffer, which will be read and written. use r1b_infs() for initialization
+ * @param f      focal length of the camera
+ * @param x0     x coordinate of the first  vertex
+ * @param y0     y coordinate of the first  vertex
+ * @param z0     z coordinate of the first  vertex
+ * @param x1     x coordinate of the second vertex
+ * @param y1     y coordinate of the second vertex
+ * @param z1     z coordinate of the second vertex
+ * @param x2     x coordinate of the third  vertex
+ * @param y2     y coordinate of the third  vertex
+ * @param z2     z coordinate of the third  vertex
+ * @param pttn   fill pattern, when NULL, `vals` argument will be used instead
+ * @param vals   3-array for value (color) of each vertex (points in triangle will have interpolated colors), 
+ *               used when `pttn` argument is NULL
+ * @param mode   blit mode, see r1b_set for details
+ */
 void r1b_triangle3d(r1b_im_t* im, r1b_im_t* depth, float f, float x0, float y0, float z0, float x1 ,float y1, float z1, float x2 ,float y2, float z2, r1b_im_t* pttn, float* vals, int mode ){
   
   // printf("%f %f %f, %f %f %f, %f %f %f\n",x0,y0,z0,x1,y1,z1,x2,y2,z2);
@@ -1855,6 +2300,21 @@ void r1b_triangle3d(r1b_im_t* im, r1b_im_t* depth, float f, float x0, float y0, 
   }
 }
 
+/**
+ * @brief draw a 3D line to image, projected with pinhole camera model
+ * @param im         pointer to image
+ * @param depth      pointer to the depth buffer. use r1b_infs() for initialization
+ * @param depth_read boolean: whether or not to read the depth buffer. use 0 to draw on top of everything
+ * @param f          focal length of the camera
+ * @param x0         x coordinate of the first  endpoint
+ * @param y0         y coordinate of the first  endpoint
+ * @param z0         z coordinate of the first  endpoint
+ * @param x1         x coordinate of the second endpoint
+ * @param y1         y coordinate of the second endpoint
+ * @param z1         z coordinate of the second endpoint
+ * @param val        value (color) of the line
+ * @param mode       blit mode, see r1b_set for details
+ */
 void r1b_line3d(r1b_im_t* im, r1b_im_t* depth, int depth_read, float f, float x0 ,float y0, float z0, float x1 ,float y1, float z1, float val, int mode){
 
   float u0[3] = {x0,y0,z0};
@@ -1918,6 +2378,11 @@ void r1b_line3d(r1b_im_t* im, r1b_im_t* depth, int depth_read, float f, float x0
   }
 }
 
+/**
+ * @brief transform mesh with a 4x4 transformation matrix
+ * @param mesh   pointer to mesh
+ * @param mat    the 4x4 row major transformation matrix as an array of 16 floats
+ */
 void r1b_transform_mesh(r1b_mesh_t* mesh, float* mat){
   int i; for (i= 0; i < mesh->n_vtx; i++){
     float u[3] = {mesh->X[i],mesh->Y[i],mesh->Z[i]};
@@ -1933,7 +2398,10 @@ void r1b_transform_mesh(r1b_mesh_t* mesh, float* mat){
 
 #define R1B_V3_MAG(a1,a2,a3) (sqrt((a1)*(a1)+(a2)*(a2)+(a3)*(a3)))
 
-
+/**
+ * @brief estimate vertex normals for a mesh and store result in mesh->norms
+ * @param mesh   pointer to mesh
+ */
 void r1b_compute_vertex_normals(r1b_mesh_t* mesh){
   if (!(mesh->norms)){
     mesh->norms = (float*)malloc(sizeof(float)*mesh->n_vtx*3);
@@ -1980,6 +2448,25 @@ void r1b_compute_vertex_normals(r1b_mesh_t* mesh){
   free(cnts);
 }
 
+/**
+ * @brief draw a 3d mesh to the image, projected with pinhole camera model
+ * @param im        pointer to image
+ * @param depth     pointer to the depth buffer, which will be read and written. use r1b_infs() for initialization
+ * @param mesh      pointer to mesh
+ * @param f         focal length of the camera
+ * @param pttn      fill pattern, can be NULL depending on the shader specified
+ * @param light     4-array: the first 3 are direction of the light, 4th is global illumination. can be NULL depending on shader specified
+ * @param shdr      shader type to use, one of:
+ *                  R1B_SHDR_NONE:   no shading will be done, if wireframe is also off, you will not be able to see anything;
+ *                  R1B_SHDR_FLAT:   flat shading, use pattern fill to evenly fill all faces;
+ *                  R1B_SHDR_NDOTL:  n-dot-l diffuse shading, quantized to 5 levels and filled with patterns of different shades;
+ *                  R1B_SHDR_NDOTLF: n-dot-l shading but without quantization, returning grayscale, on which dithering can be further applied
+ * @param wire_val  value (color) of the wireframe. might be unused depending on the shader specified
+ * @param wire      type of wireframe, one of:
+ *                  R1B_WIRE_FRONT: wireframe can be occluded;
+ *                  R1B_WIRE_ALL:   all wireframes are drawn;
+ *                  R1B_WIRE_NONE:  no wireframe is drawn.
+ */
 void r1b_render_mesh(r1b_im_t* im, r1b_im_t* depth, r1b_mesh_t* mesh, float f, r1b_im_t* pttn, float* light, int wire_val, int shdr, int wire){
 
   int i; for (i= 0; i < mesh->n_tri; i++){
@@ -2365,4 +2852,5 @@ void r1b_threshold_adaptive(r1b_im_t* im, int rad, float bias, int blur_mode){
   }
 }
 
+/** @file */ 
 #endif // include guard

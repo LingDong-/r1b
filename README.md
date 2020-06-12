@@ -7,10 +7,9 @@
 *A thermal-printer-oriented, 1 bit graphics renderer for 2D and 3D.*
 
 <br>
-<br>
 <hr>
 
-- Header-only C99 library
+- Header-only C99 library with no dependencies.
 - Builtin ESC/POS (printing commands) support.
 - Rasterizes 2D and 3D primitives: lines, triangles, ellipses, polygons, meshes...
 - Pattern fills: 24 builtin fills + custom designs. All area-filling drawing routines support patterns.

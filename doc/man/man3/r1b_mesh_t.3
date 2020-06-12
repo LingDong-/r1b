@@ -1,0 +1,59 @@
+.TH "r1b_mesh_t" 3 "Fri Jun 12 2020" "Version 0.0.1" "r1b" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+r1b_mesh_t \- datatype for a 3D mesh  
+
+.SH SYNOPSIS
+.br
+.PP
+.PP
+\fC#include <r1b\&.h>\fP
+.SS "Data Fields"
+
+.in +1c
+.ti -1c
+.RI "float * \fBX\fP"
+.br
+.ti -1c
+.RI "float * \fBY\fP"
+.br
+.ti -1c
+.RI "float * \fBZ\fP"
+.br
+.ti -1c
+.RI "int * \fBtris\fP"
+.br
+.ti -1c
+.RI "float * \fBnorms\fP"
+.br
+.ti -1c
+.RI "int \fBn_vtx\fP"
+.br
+.ti -1c
+.RI "int \fBn_tri\fP"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+datatype for a 3D mesh 
+.SH "Field Documentation"
+.PP 
+.SS "int n_tri"
+number of triangles 
+.SS "int n_vtx"
+number of vertices 
+.SS "float* norms"
+array of vertex normals (optional, can be NULL) 
+.SS "int* tris"
+array of triangles (using vertex index) 
+.SS "float* X"
+array of x coordinate of vertices 
+.SS "float* Y"
+array of y coordinate of vertices 
+.SS "float* Z"
+array of z coordinate of vertices 
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for r1b from the source code\&.

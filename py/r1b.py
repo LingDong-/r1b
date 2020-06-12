@@ -291,8 +291,8 @@ def r1b_line(im, x0, y0, x1, y1, val, mode):
 def r1b_lines(im, Xs, Ys, n, close, val, mode):
     return _r1b.r1b_lines(im, Xs, Ys, n, close, val, mode)
 
-def r1b_thick_line(im, x0, y0, x1, y1, val, thick, mode):
-    return _r1b.r1b_thick_line(im, x0, y0, x1, y1, val, thick, mode)
+def r1b_thick_line(im, x0, y0, x1, y1, val, half_thick, mode):
+    return _r1b.r1b_thick_line(im, x0, y0, x1, y1, val, half_thick, mode)
 
 def r1b_load_font_hex(path, h, cp0, cp1, flags):
     return _r1b.r1b_load_font_hex(path, h, cp0, cp1, flags)

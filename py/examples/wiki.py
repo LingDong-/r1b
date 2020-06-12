@@ -5,8 +5,8 @@ import r1b
 
 
 # person = "Socrates"
-person = "Plato"
-# person = "Confucious"
+# person = "Plato"
+person = "Confucious"
 # person = "Friedrich_Nietzsche"
 
 
@@ -58,8 +58,8 @@ def text(im,s,x,y,f,v,m,h):
 	if is_ascii(s):
 		r1b.text_ascii(im,s,x,y,f,v,m,h);
 	else:
-		if (len(s)<4):
-			s += " "
+		# if (len(s)<4):
+			# s += " "
 		r1b.text_utf8(im,s,x,y,f,v,m,h);
 
 y = 0;

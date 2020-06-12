@@ -3011,9 +3011,9 @@ SWIGINTERN FloatArray *FloatArray_frompointer(float *t){
 #define R1B_BLUR_GAUSS     111
 #define R1B_BLUR_BOX       112
 #define R1B_FLAG_SORTED    1
-typedef struct {  int w;  int h;  float* data;} r1b_im_t;
-typedef struct {  int h;  char* glyphs;  int n;  uint32_t* offsets;  uint8_t*  sizes;  uint16_t* cmap;  int flags;} r1b_font_t;
-typedef struct {  float* X;  float* Y;  float* Z;  int* tris;  float* norms;  int n_vtx;  int n_tri;} r1b_mesh_t;
+typedef struct {  int w;        /**< width  */  int h;        /**< height */  float* data;  /**< image data: row-major array of floats */} r1b_im_t;
+typedef struct {  int h;             /**< height of font */  char* glyphs;      /**< number of glyphs */       int n;             /**< pointer to data for glyphs */       uint32_t* offsets; /**< array of data offsets for each glyph  */  uint8_t*  sizes;   /**< array of sizes (width/4) for each glyph  */   uint16_t* cmap;    /**< array of unicode code points for each glyph */    int flags;         /**< bitwise OR of flags:                            R1B_FLAG_SORTED: whether the glyphs are sorted by codepoint                      */} r1b_font_t;
+typedef struct {  float* X;     /**< array of x coordinate of vertices */  float* Y;     /**< array of y coordinate of vertices */  float* Z;     /**< array of z coordinate of vertices */  int* tris;    /**< array of triangles (using vertex index) */  float* norms; /**< array of vertex normals (optional, can be NULL) */  int n_vtx;    /**< number of vertices */  int n_tri;    /**< number of triangles */} r1b_mesh_t;
 r1b_font_t* r1b_get_font_fg8x12();;
 void r1b_make_tmp0(int w, int h);
 void r1b_make_tmp1(int w, int h);
@@ -3053,7 +3053,7 @@ void r1b_triangle(r1b_im_t* im,float x0 ,float y0 ,float x1 ,float y1 ,float x2 
 void r1b_rect(r1b_im_t* im,float x0 ,float y0 ,float x1 ,float y1 , r1b_im_t* pttn, int mode);
 void r1b_line(r1b_im_t* im, float x0 ,float y0 ,float x1 ,float y1, float val, int mode);
 void r1b_lines(r1b_im_t* im, float* Xs, float* Ys, int n, int close, float val, int mode);
-void r1b_thick_line(r1b_im_t* im, float x0, float y0, float x1, float y1, float val, int thick, int mode);
+void r1b_thick_line(r1b_im_t* im, float x0, float y0, float x1, float y1, float val, int half_thick, int mode);
 r1b_font_t r1b_load_font_hex(const char* path, int h, int cp0, int cp1, int flags) ;
 void r1b_destroy_font(r1b_font_t* font);
 int r1b_glyph_index_lin_search(r1b_font_t* font, int cp);
