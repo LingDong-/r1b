@@ -2433,6 +2433,66 @@ void r1b_transform_mesh(r1b_mesh_t* mesh, float* mat){
   }
 }
 
+/**
+ * @brief scale mesh, apply rotation by euler angles (x-y-z order) and translate mesh
+ * 
+ * a simplified interface to r1b_transform_mesh that covers many use cases.
+ * @param mesh pointer to mesh
+ * @param sx   scale along x-axis
+ * @param sy   scale along y-axis
+ * @param sz   scale along z-axis
+ * @param rx   rotation around x-axis
+ * @param ry   rotation around y-axis
+ * @param rz   rotation around z-axis
+ * @param x    translation along x-axis
+ * @param y    translation along y-axis
+ * @param z    translation along z-axis
+ */
+void r1b_scale_rotate_translate(r1b_mesh_t* mesh, float sx, float sy, float sz, float rx, float ry, float rz, float x, float y, float z){
+  float scl[]  = R1B_MAT_SCAL(sx,sy,sz);
+  float rotx[] = R1B_MAT_ROTX(rx);
+  float roty[] = R1B_MAT_ROTY(ry);
+  float rotz[] = R1B_MAT_ROTZ(rz);
+
+  float rotxy[]= R1B_MAT_MULT(roty,rotx);
+  float rot[]  = R1B_MAT_MULT(rotz,rotxy);
+  float trl[]  = R1B_MAT_TRSL(x,y,z);
+  float tfm[]  = R1B_MAT_MULT(trl,rot);
+
+  r1b_transform_mesh(mesh, scl);
+  r1b_transform_mesh(mesh, tfm);
+}
+
+/**
+ * @brief make a deep clone of given mesh
+ * 
+ * @param mesh pointer to mesh
+ * @return     the clone
+ */
+r1b_mesh_t r1b_copy_of_mesh(r1b_mesh_t* mesh){
+  r1b_mesh_t dst;
+  dst.n_vtx = mesh->n_vtx;
+  dst.n_tri = mesh->n_tri;
+  dst.X =  (float*)malloc(sizeof(float)*dst.n_vtx);
+  dst.Y =  (float*)malloc(sizeof(float)*dst.n_vtx);
+  dst.Z =  (float*)malloc(sizeof(float)*dst.n_vtx);
+  dst.tris = (int*)malloc(sizeof(int)*3*dst.n_tri);
+
+  memcpy(dst.X,   mesh->X,   sizeof(float)*dst.n_vtx);
+  memcpy(dst.Y,   mesh->Y,   sizeof(float)*dst.n_vtx);
+  memcpy(dst.Z,   mesh->Z,   sizeof(float)*dst.n_vtx);
+  memcpy(dst.tris,mesh->tris,sizeof(int)*3*dst.n_tri);
+
+  if (mesh->norms){
+    dst.norms = (float*)malloc(sizeof(float)*3*dst.n_vtx);
+    memcpy(dst.norms,mesh->norms,sizeof(float)*3*dst.n_vtx);
+  }else{
+    dst.norms = NULL;
+  }
+
+  return dst;
+}
+
 #define R1B_V3_CROSS(a1,a2,a3,b1,b2,b3) {(a2)*(b3)-(a3)*(b2),(a3)*(b1)-(a1)*(b3),(a1)*(b2)-(a2)*(b1)}
 #define R1B_V3_DOT(a1,a2,a3,b1,b2,b3)   ((a1)*(b1)+(a2)*(b2)+(a3)*(b3))
 
