@@ -15,7 +15,7 @@
 // ---------------
 
 #ifndef R1B_CONFIG_LINE3D_EPSILON
-  #define R1B_CONFIG_LINE3D_EPSILON 0.01
+  #define R1B_CONFIG_LINE3D_EPSILON 0.015
 #endif
 
 #ifndef R1B_CONFIG_UP2X_FLOAT_EPSILON
@@ -226,6 +226,46 @@ r1b_im_t* r1b_pttn_CHESS = NULL; r1b_im_t* r1b_pttn_DMOND = NULL;
 
 #ifndef R1B_CONFIG_NO_FG8X12
   // converted from freeglut/freeglut_font_data.c
+  // ==============================================================
+  // this license below is from freeGlut, (freeglut_font_data.c)
+
+  /*
+   * The legal status of this file is a bit vague.  The font glyphs
+   * themselves come from XFree86 v4.3.0 (as of this writing), and as
+   * part of the X server may be subject to the XFree86 copyrights.
+   * The original freeglut fonts were extracted by a utility written
+   * by Pawel W. Olszta (see below) and the generated fonts contained
+   * his copyright exclusively.  Steve Baker asserts that Pawel
+   * assigned intellectual property rights to Steve Baker.  Steve
+   * Baker also asserts that fonts cannot be copyrighted.  He has
+   * neither stripped the copyright from the freeglut fonts nor
+   * formally retitled anything in his name.  Since that time, the
+   * OpenGLUT project has branched from freeglut, and has made
+   * necessary modifications to Pawel's ``genfonts'' utility.
+   * To that extent, OpenGLUT may have some title to this file.
+   * What is fairly clear is that the font data is licensed under
+   * the XFree86 license (which is variously termed ``XFree'' and
+   * ``MIT'' by the freeglut project).  It is believed that all
+   * title holders wish this file to be as useful as possible, and
+   * that either the ``XFree'' or ``MIT'' license works.
+   *
+   * Portions copyright (c) 2004, the OpenGLUT project contributors.
+   * OpenGLUT branched from freeglut in February, 2004.
+   *
+   * Copyright (c) 1999-2000 by Pawel W. Olszta
+   * Written by Pawel W. Olszta, <olszta@sourceforge.net>
+   * 
+   * Permission is hereby granted, free of charge, to any person obtaining a
+   * copy of this software and associated documentation files (the "Software"),
+   * to deal in the Software without restriction, including without limitation
+   * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+   * and/or sell copies of the Software, and to permit persons to whom the
+   * Software is furnished to do so, subject to the following conditions:
+   *
+   * The above copyright notice and this permission notice shall be included
+   * in all copies or substantial portions of the Sotware.
+   */
+  // ==============================================================
   static char     R1B_FG8X12_GLYPHS [] = {0,0,0,0,0,0,0,0,0,0,0,0,0,16,16,16,16,16,16,16,0,16,0,0,0,36,36,36,0,0,0,0,0,0,0,0,0,0,36,36,126,36,126,36,36,0,0,0,0,16,60,80,80,56,20,20,120,16,0,0,0,34,82,36,8,8,16,36,42,68,0,0,0,0,0,48,72,72,48,74,68,58,0,0,0,56,48,64,0,0,0,0,0,0,0,0,0,4,8,8,16,16,16,8,8,4,0,0,0,32,16,16,8,8,8,16,16,32,0,0,0,0,0,36,24,126,24,36,0,0,0,0,0,0,0,16,16,124,16,16,0,0,0,0,0,0,0,0,0,0,0,0,56,48,64,0,0,0,0,0,0,126,0,0,0,0,0,0,0,0,0,0,0,0,0,0,16,56,16,0,0,2,2,4,8,16,32,64,128,128,0,0,0,24,36,66,66,66,66,66,36,24,0,0,0,16,48,80,16,16,16,16,16,124,0,0,0,60,66,66,2,4,24,32,64,126,0,0,0,126,2,4,8,28,2,2,66,60,0,0,0,4,12,20,36,68,68,126,4,4,0,0,0,126,64,64,92,98,2,2,66,60,0,0,0,28,32,64,64,92,98,66,66,60,0,0,0,126,2,4,8,8,16,16,32,32,0,0,0,60,66,66,66,60,66,66,66,60,0,0,0,60,66,66,70,58,2,2,4,56,0,0,0,0,0,16,56,16,0,0,16,56,16,0,0,0,0,16,56,16,0,0,56,48,64,0,0,2,4,8,16,32,16,8,4,2,0,0,0,0,0,0,126,0,0,126,0,0,0,0,0,64,32,16,8,4,8,16,32,64,0,0,0,60,66,66,2,4,8,8,0,8,0,0,0,60,66,66,78,82,86,74,64,60,0,0,0,24,36,66,66,66,126,66,66,66,0,0,0,252,66,66,66,124,66,66,66,252,0,0,0,60,66,64,64,64,64,64,66,60,0,0,0,252,66,66,66,66,66,66,66,252,0,0,0,126,64,64,64,120,64,64,64,126,0,0,0,126,64,64,64,120,64,64,64,64,0,0,0,60,66,64,64,64,78,66,70,58,0,0,0,66,66,66,66,126,66,66,66,66,0,0,0,124,16,16,16,16,16,16,16,124,0,0,0,31,4,4,4,4,4,4,68,56,0,0,0,66,68,72,80,96,80,72,68,66,0,0,0,64,64,64,64,64,64,64,64,126,0,0,0,130,130,198,170,146,146,130,130,130,0,0,0,66,66,98,82,74,70,66,66,66,0,0,0,60,66,66,66,66,66,66,66,60,0,0,0,124,66,66,66,124,64,64,64,64,0,0,0,60,66,66,66,66,66,82,74,60,2,0,0,124,66,66,66,124,80,72,68,66,0,0,0,60,66,64,64,60,2,2,66,60,0,0,0,254,16,16,16,16,16,16,16,16,0,0,0,66,66,66,66,66,66,66,66,60,0,0,0,130,130,68,68,68,40,40,40,16,0,0,0,130,130,130,130,146,146,146,170,68,0,0,0,130,130,68,40,16,40,68,130,130,0,0,0,130,130,68,40,16,16,16,16,16,0,0,0,126,2,4,8,16,32,64,64,126,0,0,0,60,32,32,32,32,32,32,32,60,0,0,0,128,128,64,32,16,8,4,2,2,0,0,0,120,8,8,8,8,8,8,8,120,0,0,0,16,40,68,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,254,0,0,56,24,4,0,0,0,0,0,0,0,0,0,0,0,0,60,2,62,66,70,58,0,0,0,64,64,64,92,98,66,66,98,92,0,0,0,0,0,0,60,66,64,64,66,60,0,0,0,2,2,2,58,70,66,66,70,58,0,0,0,0,0,0,60,66,126,64,66,60,0,0,0,28,34,32,32,124,32,32,32,32,0,0,0,0,0,0,58,68,68,56,64,60,66,60,0,64,64,64,92,98,66,66,66,66,0,0,0,0,16,0,48,16,16,16,16,124,0,0,0,0,4,0,12,4,4,4,4,68,68,56,0,64,64,64,68,72,112,72,68,66,0,0,0,48,16,16,16,16,16,16,16,124,0,0,0,0,0,0,236,146,146,146,146,130,0,0,0,0,0,0,92,98,66,66,66,66,0,0,0,0,0,0,60,66,66,66,66,60,0,0,0,0,0,0,92,98,66,98,92,64,64,64,0,0,0,0,58,70,66,70,58,2,2,2,0,0,0,0,92,34,32,32,32,32,0,0,0,0,0,0,60,66,48,12,66,60,0,0,0,0,32,32,124,32,32,32,34,28,0,0,0,0,0,0,68,68,68,68,68,58,0,0,0,0,0,0,68,68,68,40,40,16,0,0,0,0,0,0,130,130,146,146,170,68,0,0,0,0,0,0,66,36,24,24,36,66,0,0,0,0,0,0,66,66,66,70,58,2,66,60,0,0,0,0,126,4,8,16,32,126,0,0,0,14,16,16,8,48,8,16,16,14,0,0,0,16,16,16,16,16,16,16,16,16,0,0,0,112,8,8,16,12,16,8,8,112,0,0,0,36,84,72,0,0,0,0,0,0,0,0};
   static uint32_t R1B_FG8X12_OFFSETS[] = {0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40,42,44,46,48,50,52,54,56,58,60,62,64,66,68,70,72,74,76,78,80,82,84,86,88,90,92,94,96,98,100,102,104,106,108,110,112,114,116,118,120,122,124,126,128,130,132,134,136,138,140,142,144,146,148,150,152,154,156,158,160,162,164,166,168,170,172,174,176,178,180,182,184,186,188 };
   static uint8_t  R1B_FG8X12_SIZES  [] = {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2 };
@@ -764,8 +804,8 @@ void r1b_resample_bilinear(r1b_im_t* im, int w, int h){
 /**
  * @brief resample image to a different size
  * @param im    pointer to image
- * @param w     new width
- * @param h     new height
+ * @param w     new width, pass R1B_INFER to scale proportionally per new height
+ * @param h     new height, pass R1B_INFER to scale proportionally per new width
  * @param mode  the alogirthm, either R1B_SMPL_NN or R1B_SMPL_BILINEAR
  */
 void r1b_resample(r1b_im_t* im, int w, int h, int mode){
@@ -2414,15 +2454,14 @@ void r1b_compute_vertex_normals(r1b_mesh_t* mesh){
     int b = mesh->tris[i*3+1];
     int c = mesh->tris[i*3+2];
     float v0[3] = {mesh->X[b]-mesh->X[c],mesh->Y[b]-mesh->Y[c],mesh->Z[b]-mesh->Z[c]};
-    float v1[3] = {mesh->X[a]-mesh->X[b],mesh->Y[a]-mesh->Y[b],mesh->Z[a]-mesh->Z[b]};
-
-    float l0 = R1B_V3_MAG(v0[0],v0[1],v0[2]);
-    float l1 = R1B_V3_MAG(v1[0],v1[1],v1[2]);
+    float v1[3] = {mesh->X[a]-mesh->X[b],mesh->Y[a]-mesh->Y[b],mesh->Z[a]-mesh->Z[b]};;
 
     float nml[] = R1B_V3_CROSS(
-      v0[0]/l0,v0[1]/l0,v0[2]/l0,
-      v1[0]/l1,v1[1]/l1,v1[2]/l1
+      v0[0],v0[1],v0[2],
+      v1[0],v1[1],v1[2]
     );
+    float mnml = R1B_V3_MAG(nml[0],nml[1],nml[2]);
+    nml[0]/=mnml;nml[1]/=mnml;nml[2]/=mnml;
 
     mesh->norms[a*3  ]+=nml[0];
     mesh->norms[a*3+1]+=nml[1];
@@ -2492,13 +2531,13 @@ void r1b_render_mesh(r1b_im_t* im, r1b_im_t* depth, r1b_mesh_t* mesh, float f, r
         float v0[3] = {mesh->X[b]-mesh->X[c],mesh->Y[b]-mesh->Y[c],mesh->Z[b]-mesh->Z[c]};
         float v1[3] = {mesh->X[a]-mesh->X[b],mesh->Y[a]-mesh->Y[b],mesh->Z[a]-mesh->Z[b]};
 
-        float l0 = R1B_V3_MAG(v0[0],v0[1],v0[2]);
-        float l1 = R1B_V3_MAG(v1[0],v1[1],v1[2]);
-
         float nml[] = R1B_V3_CROSS(
-          v0[0]/l0,v0[1]/l0,v0[2]/l0,
-          v1[0]/l1,v1[1]/l1,v1[2]/l1
+          v0[0],v0[1],v0[2],
+          v1[0],v1[1],v1[2]
         );
+        float mnml = R1B_V3_MAG(nml[0],nml[1],nml[2]);
+        nml[0]/=mnml;nml[1]/=mnml;nml[2]/=mnml;
+
         ndl = R1B_V3_DOT(nml[0],nml[1],nml[2],light[0],light[1],light[2]) + light[3];
       }
 
@@ -2535,8 +2574,210 @@ void r1b_render_mesh(r1b_im_t* im, r1b_im_t* depth, r1b_mesh_t* mesh, float f, r
 
 }
 
+#define R1B_MESH_ADD_VTX(mesh,x,y,z) mesh.X[mesh.n_vtx]=x; mesh.Y[mesh.n_vtx]=y; mesh.Z[mesh.n_vtx]=z; mesh.n_vtx++;
+#define R1B_MESH_ADD_TRI(mesh,a,b,c) mesh.tris[mesh.n_tri*3]=a; mesh.tris[mesh.n_tri*3+1]=b; mesh.tris[mesh.n_tri*3+2]=c; mesh.n_tri++;
 
+/**
+ * @brief make a 3d cube mesh
+ *
+ * cube will be centred at 0,0,0
+ * @param sx  x dimension
+ * @param sy  y dimension
+ * @param sz  z dimension
+ */
+r1b_mesh_t r1b_cube(float sx, float sy, float sz){
+  float rx = sx/2;
+  float ry = sy/2;
+  float rz = sz/2;
+  r1b_mesh_t mesh;
 
+  mesh.X = (float*)malloc(sizeof(float)*8);
+  mesh.Y = (float*)malloc(sizeof(float)*8);
+  mesh.Z = (float*)malloc(sizeof(float)*8);
+
+  mesh.tris = (int*)malloc(sizeof(int)*12*3);
+  mesh.norms = NULL;
+
+  mesh.n_tri = 0;
+  mesh.n_vtx = 0;
+
+  /* a cubist's cube
+     4_____5
+     /    /|
+    /____/ |
+  0|    1| |
+   | 6   | |
+   |_____|/ 7
+  2     3
+  */
+
+  R1B_MESH_ADD_VTX(mesh,-rx, ry,-rz);
+  R1B_MESH_ADD_VTX(mesh, rx, ry,-rz);
+  R1B_MESH_ADD_VTX(mesh,-rx,-ry,-rz);
+  R1B_MESH_ADD_VTX(mesh, rx,-ry,-rz);
+  R1B_MESH_ADD_VTX(mesh,-rx, ry, rz);
+  R1B_MESH_ADD_VTX(mesh, rx, ry, rz);
+  R1B_MESH_ADD_VTX(mesh,-rx,-ry, rz);
+  R1B_MESH_ADD_VTX(mesh, rx,-ry, rz);
+
+  R1B_MESH_ADD_TRI(mesh,0,1,2);
+  R1B_MESH_ADD_TRI(mesh,2,1,3);
+
+  R1B_MESH_ADD_TRI(mesh,0,4,5);
+  R1B_MESH_ADD_TRI(mesh,0,5,1);
+
+  R1B_MESH_ADD_TRI(mesh,3,1,5);
+  R1B_MESH_ADD_TRI(mesh,3,5,7);
+
+  R1B_MESH_ADD_TRI(mesh,2,3,6);
+  R1B_MESH_ADD_TRI(mesh,6,3,7);
+
+  R1B_MESH_ADD_TRI(mesh,6,4,0);
+  R1B_MESH_ADD_TRI(mesh,6,0,2);
+
+  R1B_MESH_ADD_TRI(mesh,7,4,6);
+  R1B_MESH_ADD_TRI(mesh,7,5,4);
+
+  return mesh;
+}
+
+/**
+ * @brief make a 3d sphere mesh
+ *
+ * sphere will be centred at 0,0,0
+ * @param rad      radius
+ * @param slices   number of segments on x-z plane 
+ * @param stacks   number of segments on y axis
+ */
+r1b_mesh_t r1b_sphere(float rad, int slices, int stacks){
+  r1b_mesh_t mesh;
+
+  mesh.X = (float*)malloc(sizeof(float)*(2+stacks*slices));
+  mesh.Y = (float*)malloc(sizeof(float)*(2+stacks*slices));
+  mesh.Z = (float*)malloc(sizeof(float)*(2+stacks*slices));
+
+  mesh.tris = (int*)malloc(sizeof(int)*stacks*slices*2*3);
+  mesh.norms = NULL;
+
+  mesh.n_tri = 0;
+  mesh.n_vtx = 0;
+
+  R1B_MESH_ADD_VTX(mesh,0, rad,0);
+  R1B_MESH_ADD_VTX(mesh,0,-rad,0);
+
+  int i;for (i = 0; i < stacks; i++){
+    float th0 = (float)(i+1)/(float)stacks * M_PI;
+    float y = rad*cos(th0);
+    int j; for (j = 0; j < slices; j++){
+      float th1 = (float)j/(float)slices * M_PI*2;
+      float x = rad*cos(th1)*sin(th0);
+      float z = rad*sin(th1)*sin(th0);
+
+      R1B_MESH_ADD_VTX(mesh,x,y,z);
+      if (i == 0){
+        R1B_MESH_ADD_TRI(mesh,2+i*stacks+j,0,2+i*stacks+(j+1)%slices);
+      }else if (i == stacks-1){
+        R1B_MESH_ADD_TRI(mesh,2+(i-1)*stacks+j,2+(i-1)*stacks+(j+1)%slices,1);
+      }else{
+        R1B_MESH_ADD_TRI(mesh,2+(i-1)*stacks+j,   2+(i-1)*stacks+(j+1)%slices, 2+(i  )*stacks+j);
+        R1B_MESH_ADD_TRI(mesh,2+(i-1)*stacks+(j+1)%slices, 2+(i  )*stacks+(j+1)%slices, 2+(i  )*stacks+j);
+      }
+    } 
+  }
+  return mesh;
+}
+
+/**
+ * @brief make a 3d cylinder mesh
+ *
+ * cylinder will be centred at 0,0,0
+ * @param rx       radius on x axis
+ * @param rz       radius on z axis
+ * @param h        height
+ * @param slices   number of segments
+ */
+r1b_mesh_t r1b_cylinder(float rx, float rz, float h, int slices){
+  r1b_mesh_t mesh;
+
+  mesh.X = (float*)malloc(sizeof(float)*(2*slices+2));
+  mesh.Y = (float*)malloc(sizeof(float)*(2*slices+2));
+  mesh.Z = (float*)malloc(sizeof(float)*(2*slices+2));
+
+  mesh.tris = (int*)malloc(sizeof(int)*slices*4*3);
+  mesh.norms = NULL;
+
+  mesh.n_tri = 0;
+  mesh.n_vtx = 0;
+
+  R1B_MESH_ADD_VTX(mesh,0, h/2,0);
+  R1B_MESH_ADD_VTX(mesh,0,-h/2,0);
+
+  int j; for (j = 0; j < slices; j++){
+    float th = (float)j/(float)slices * M_PI*2;
+    float x = rx*cos(th);
+    float z = rz*sin(th);
+
+    R1B_MESH_ADD_VTX(mesh,x, h/2,z);
+    R1B_MESH_ADD_VTX(mesh,x,-h/2,z);
+
+    R1B_MESH_ADD_TRI(mesh,2+j*2,            2+(j+1)%slices*2  , 2+j*2+1);
+    R1B_MESH_ADD_TRI(mesh,2+(j+1)%slices*2, 2+(j+1)%slices*2+1, 2+j*2+1);
+
+    R1B_MESH_ADD_TRI(mesh,2+j*2,         0, 2+(j+1)%slices*2);
+    R1B_MESH_ADD_TRI(mesh,2+j*2+1,       2+(j+1)%slices*2+1,1);
+    
+  } 
+
+  return mesh;
+}
+
+/**
+ * @brief make a 3d cone mesh
+ *
+ * cone will be centred at 0,0,0
+ * @param rx       radius on x axis
+ * @param rz       radius on z axis
+ * @param h        height
+ * @param slices   number of segments
+ */
+r1b_mesh_t r1b_cone(float rx, float rz, float h, int slices){
+  r1b_mesh_t mesh;
+
+  mesh.X = (float*)malloc(sizeof(float)*(slices+2));
+  mesh.Y = (float*)malloc(sizeof(float)*(slices+2));
+  mesh.Z = (float*)malloc(sizeof(float)*(slices+2));
+
+  mesh.tris = (int*)malloc(sizeof(int)*slices*2*3);
+  mesh.norms = NULL;
+
+  mesh.n_tri = 0;
+  mesh.n_vtx = 0;
+
+  R1B_MESH_ADD_VTX(mesh,0, h/2,0);
+  R1B_MESH_ADD_VTX(mesh,0,-h/2,0);
+
+  int j; for (j = 0; j < slices; j++){
+    float th = (float)j/(float)slices * M_PI*2;
+    float x = rx*cos(th);
+    float z = rz*sin(th);
+
+    R1B_MESH_ADD_VTX(mesh,x,-h/2,z);
+
+    R1B_MESH_ADD_TRI(mesh,2+j,   0, 2+(j+1)%slices);
+    R1B_MESH_ADD_TRI(mesh,2+j,   2+(j+1)%slices,1);
+    
+  } 
+
+  return mesh;
+}
+
+/**
+ * @brief generate a specified convolution matrix for image processing
+ * @param ksize  kernel size, will be automatically rounded up to an odd integer
+ * @param mode   morphological kernels: R1B_KERN_ELLIPSE, R1B_KERN_CROSS, R1B_KERN_RECT;
+ *               convolutional kernels: R1B_KERN_GAUSS, R1B_KERN_GAUSS1D;
+ * @return       kernal as image type
+ */
 r1b_im_t r1b_make_kernel(int ksize, int mode){
   if (!(ksize % 2)){
     ksize ++;
@@ -2580,6 +2821,12 @@ r1b_im_t r1b_make_kernel(int ksize, int mode){
   return im;
 }
 
+/**
+ * @brief perform 2D convolution on an image
+ * @param im      pointer to image
+ * @param kern    pointer to kernel
+ * @param border  border mode, see r1b_get
+ */
 void r1b_conv2d(r1b_im_t* im, r1b_im_t* kern, int border) {
   r1b_make_tmp0(im->w,im->h);
 
@@ -2600,6 +2847,12 @@ void r1b_conv2d(r1b_im_t* im, r1b_im_t* kern, int border) {
   memcpy(im->data, r1b_tmp0, im->w*im->h*sizeof(float));
 }
 
+/**
+ * @brief perform morphological dilation on an image
+ *
+ * @param im      pointer to image
+ * @param kern    pointer to kernel
+ */
 void r1b_dilate(r1b_im_t* im, r1b_im_t* kern){
   r1b_make_tmp0(im->w,im->h);
 
@@ -2620,6 +2873,12 @@ void r1b_dilate(r1b_im_t* im, r1b_im_t* kern){
   memcpy(im->data, r1b_tmp0, im->w*im->h*sizeof(float));
 }
 
+/**
+ * @brief perform morphological erosion on an image
+ *
+ * @param im      pointer to image
+ * @param kern    pointer to kernel
+ */
 void r1b_erode(r1b_im_t* im, r1b_im_t* kern){
   r1b_make_tmp0(im->w,im->h);
 
@@ -2642,6 +2901,14 @@ void r1b_erode(r1b_im_t* im, r1b_im_t* kern){
   memcpy(im->data, r1b_tmp0, im->w*im->h*sizeof(float));
 }
 
+/**
+ * @brief apply sobel edge detection to an image
+ *
+ * @param im                        pointer to image
+ * @param out_gradient_directions   optional: if non NULL, will be overwritten with gradient directions.
+ *                                  (the source image will be written with gradient strength).
+ *                                  if only gradient directions are needed, pass im->data here
+ */
 void r1b_sobel(r1b_im_t* im, float* out_gradient_directions){
   r1b_make_tmp1(im->w,im->h);
 
@@ -2678,6 +2945,12 @@ void r1b_sobel(r1b_im_t* im, float* out_gradient_directions){
   free(gx.data);
 }
 
+/**
+ * @brief apply bluring to an image
+ * @param im    pointer to image
+ * @param rad   radius of blur, kernel size = rad*2+1
+ * @param mode  one of: R1B_BLUR_BOX, R1B_BLUR_GAUSS
+ */
 void r1b_blur(r1b_im_t* im, int rad, int mode){
   r1b_im_t k1;
   if (mode == R1B_BLUR_GAUSS){
@@ -2698,7 +2971,13 @@ void r1b_blur(r1b_im_t* im, int rad, int mode){
 
 }
 
-
+/**
+ * @brief apply canny edge detection to an image
+ * @param im         pointer to image
+ * @param blur_rad   radius for preprocessing blur, reduces noise
+ * @param thresh_lo  lower threshold for the double thresholding step (weak edges)
+ * @param thresh_hi  higher threshold for the double thresholding step (strong edges)
+ */
 void r1b_canny(r1b_im_t* im, int blur_rad, float thresh_lo, float thresh_hi){
   blur_rad  = ((int)blur_rad  == (int)R1B_INFER) ? 3   : blur_rad ;
   float th0 = ((int)thresh_lo == (int)R1B_INFER) ? 0.1 : thresh_lo;
@@ -2765,6 +3044,11 @@ void r1b_canny(r1b_im_t* im, int blur_rad, float thresh_lo, float thresh_hi){
   }
 }
 
+/**
+ * @brief apply thresholding to an image
+ * @param im   pointer to image
+ * @param th   the threshold. pass R1B_INFER to use Otsu's method for automatically picking optimal threshold
+ */
 void r1b_threshold(r1b_im_t* im, float th){
 
   int i;
@@ -2831,7 +3115,13 @@ void r1b_threshold(r1b_im_t* im, float th){
   }
 }
 
-
+/**
+ * @brief apply adaptive threshold to an image
+ * @param im         pointer to image
+ * @param rad        radius of neighborhood for each pixel
+ * @param bias       adjusts brightness: pixel is considered below the threshold if it is this factor lower than its neighborhood
+ * @param blur_mode  blurring kernel for averaging the neighborhood, e.g. R1B_BLUR_GAUSS, R1B_BLUR_BOX
+ */
 void r1b_threshold_adaptive(r1b_im_t* im, int rad, float bias, int blur_mode){
   int i;
   r1b_make_tmp0(im->w,im->h);
@@ -2854,3 +3144,29 @@ void r1b_threshold_adaptive(r1b_im_t* im, int rad, float bias, int blur_mode){
 
 /** @file */ 
 #endif // include guard
+
+// note: the license below applies to this file (r1b.h) only, other resources
+// included in the project might be under a different license
+/* =========================================================================
+MIT License
+
+Copyright (c) 2020 Lingdong Huang
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+========================================================================= */

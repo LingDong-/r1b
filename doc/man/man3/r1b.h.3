@@ -1,4 +1,4 @@
-.TH "/Users/admin/proj/r1b/r1b.h" 3 "Fri Jun 12 2020" "Version 0.0.1" "r1b" \" -*- nroff -*-
+.TH "/Users/admin/proj/r1b/r1b.h" 3 "Sat Jun 13 2020" "Version 0.0.1" "r1b" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -21,7 +21,7 @@
 .ti -1c
 .RI "struct \fBr1b_im_t\fP"
 .br
-.RI "datatype for a (1-channel grayscale) image "
+.RI "datatype for a (1-channel grayscale or binary) image "
 .ti -1c
 .RI "struct \fBr1b_font_t\fP"
 .br
@@ -37,7 +37,7 @@
 
 .in +1c
 .ti -1c
-.RI "#define \fBR1B_CONFIG_LINE3D_EPSILON\fP   0\&.01"
+.RI "#define \fBR1B_CONFIG_LINE3D_EPSILON\fP   0\&.015"
 .br
 .ti -1c
 .RI "#define \fBR1B_CONFIG_UP2X_FLOAT_EPSILON\fP   0\&.1"
@@ -254,6 +254,12 @@
 .br
 .ti -1c
 .RI "#define \fBR1B_V3_MAG\fP(a1,  a2,  a3)   (sqrt((a1)*(a1)+(a2)*(a2)+(a3)*(a3)))"
+.br
+.ti -1c
+.RI "#define \fBR1B_MESH_ADD_VTX\fP(mesh,  x,  y,  z)   mesh\&.X[mesh\&.n_vtx]=x; mesh\&.Y[mesh\&.n_vtx]=y; mesh\&.Z[mesh\&.n_vtx]=z; mesh\&.n_vtx++;"
+.br
+.ti -1c
+.RI "#define \fBR1B_MESH_ADD_TRI\fP(mesh,  a,  b,  c)   mesh\&.tris[mesh\&.n_tri*3]=a; mesh\&.tris[mesh\&.n_tri*3+1]=b; mesh\&.tris[mesh\&.n_tri*3+2]=c; mesh\&.n_tri++;"
 .br
 .in -1c
 .SS "Functions"
@@ -529,32 +535,57 @@
 .br
 .RI "draw a 3d mesh to the image, projected with pinhole camera model "
 .ti -1c
+.RI "\fBr1b_mesh_t\fP \fBr1b_cube\fP (float sx, float sy, float sz)"
+.br
+.RI "make a 3d cube mesh "
+.ti -1c
+.RI "\fBr1b_mesh_t\fP \fBr1b_sphere\fP (float rad, int slices, int stacks)"
+.br
+.RI "make a 3d sphere mesh "
+.ti -1c
+.RI "\fBr1b_mesh_t\fP \fBr1b_cylinder\fP (float rx, float rz, float h, int slices)"
+.br
+.RI "make a 3d cylinder mesh "
+.ti -1c
+.RI "\fBr1b_mesh_t\fP \fBr1b_cone\fP (float rx, float rz, float h, int slices)"
+.br
+.RI "make a 3d cone mesh "
+.ti -1c
 .RI "\fBr1b_im_t\fP \fBr1b_make_kernel\fP (int ksize, int mode)"
 .br
+.RI "generate a specified convolution matrix for image processing "
 .ti -1c
 .RI "void \fBr1b_conv2d\fP (\fBr1b_im_t\fP *im, \fBr1b_im_t\fP *kern, int border)"
 .br
+.RI "perform 2D convolution on an image "
 .ti -1c
 .RI "void \fBr1b_dilate\fP (\fBr1b_im_t\fP *im, \fBr1b_im_t\fP *kern)"
 .br
+.RI "perform morphological dilation on an image "
 .ti -1c
 .RI "void \fBr1b_erode\fP (\fBr1b_im_t\fP *im, \fBr1b_im_t\fP *kern)"
 .br
+.RI "perform morphological erosion on an image "
 .ti -1c
 .RI "void \fBr1b_sobel\fP (\fBr1b_im_t\fP *im, float *out_gradient_directions)"
 .br
+.RI "apply sobel edge detection to an image "
 .ti -1c
 .RI "void \fBr1b_blur\fP (\fBr1b_im_t\fP *im, int rad, int mode)"
 .br
+.RI "apply bluring to an image "
 .ti -1c
 .RI "void \fBr1b_canny\fP (\fBr1b_im_t\fP *im, int blur_rad, float thresh_lo, float thresh_hi)"
 .br
+.RI "apply canny edge detection to an image "
 .ti -1c
 .RI "void \fBr1b_threshold\fP (\fBr1b_im_t\fP *im, float th)"
 .br
+.RI "apply thresholding to an image "
 .ti -1c
 .RI "void \fBr1b_threshold_adaptive\fP (\fBr1b_im_t\fP *im, int rad, float bias, int blur_mode)"
 .br
+.RI "apply adaptive threshold to an image "
 .in -1c
 .SS "Variables"
 
@@ -749,6 +780,38 @@ blit an image onto another, optionally applying a mask\&. supports drawing a sub
 .RE
 .PP
 
+.SS "void r1b_blur (\fBr1b_im_t\fP * im, int rad, int mode)"
+
+.PP
+apply bluring to an image 
+.PP
+\fBParameters\fP
+.RS 4
+\fIim\fP pointer to image 
+.br
+\fIrad\fP radius of blur, kernel size = rad*2+1 
+.br
+\fImode\fP one of: R1B_BLUR_BOX, R1B_BLUR_GAUSS 
+.RE
+.PP
+
+.SS "void r1b_canny (\fBr1b_im_t\fP * im, int blur_rad, float thresh_lo, float thresh_hi)"
+
+.PP
+apply canny edge detection to an image 
+.PP
+\fBParameters\fP
+.RS 4
+\fIim\fP pointer to image 
+.br
+\fIblur_rad\fP radius for preprocessing blur, reduces noise 
+.br
+\fIthresh_lo\fP lower threshold for the double thresholding step (weak edges) 
+.br
+\fIthresh_hi\fP higher threshold for the double thresholding step (strong edges) 
+.RE
+.PP
+
 .SS "void r1b_cleanup ()"
 
 .PP
@@ -770,6 +833,38 @@ estimate vertex normals for a mesh and store result in mesh->norms
 \fBParameters\fP
 .RS 4
 \fImesh\fP pointer to mesh 
+.RE
+.PP
+
+.SS "\fBr1b_mesh_t\fP r1b_cone (float rx, float rz, float h, int slices)"
+
+.PP
+make a 3d cone mesh cone will be centred at 0,0,0 
+.PP
+\fBParameters\fP
+.RS 4
+\fIrx\fP radius on x axis 
+.br
+\fIrz\fP radius on z axis 
+.br
+\fIh\fP height 
+.br
+\fIslices\fP number of segments 
+.RE
+.PP
+
+.SS "void r1b_conv2d (\fBr1b_im_t\fP * im, \fBr1b_im_t\fP * kern, int border)"
+
+.PP
+perform 2D convolution on an image 
+.PP
+\fBParameters\fP
+.RS 4
+\fIim\fP pointer to image 
+.br
+\fIkern\fP pointer to kernel 
+.br
+\fIborder\fP border mode, see r1b_get 
 .RE
 .PP
 
@@ -802,6 +897,38 @@ copy data from one image to another the images should have the same width, and d
 .RE
 .PP
 
+.SS "\fBr1b_mesh_t\fP r1b_cube (float sx, float sy, float sz)"
+
+.PP
+make a 3d cube mesh cube will be centred at 0,0,0 
+.PP
+\fBParameters\fP
+.RS 4
+\fIsx\fP x dimension 
+.br
+\fIsy\fP y dimension 
+.br
+\fIsz\fP z dimension 
+.RE
+.PP
+
+.SS "\fBr1b_mesh_t\fP r1b_cylinder (float rx, float rz, float h, int slices)"
+
+.PP
+make a 3d cylinder mesh cylinder will be centred at 0,0,0 
+.PP
+\fBParameters\fP
+.RS 4
+\fIrx\fP radius on x axis 
+.br
+\fIrz\fP radius on z axis 
+.br
+\fIh\fP height 
+.br
+\fIslices\fP number of segments 
+.RE
+.PP
+
 .SS "void r1b_destroy_font (\fBr1b_font_t\fP * font)"
 
 .PP
@@ -821,6 +948,19 @@ free memory allocated in a mesh
 \fBParameters\fP
 .RS 4
 \fImesh\fP pointer to mesh 
+.RE
+.PP
+
+.SS "void r1b_dilate (\fBr1b_im_t\fP * im, \fBr1b_im_t\fP * kern)"
+
+.PP
+perform morphological dilation on an image 
+.PP
+\fBParameters\fP
+.RS 4
+\fIim\fP pointer to image 
+.br
+\fIkern\fP pointer to kernel 
 .RE
 .PP
 
@@ -912,6 +1052,19 @@ encode an image to ESC/POS commands and write it to a file
 \fIpath\fP file path to write to 
 .br
 \fIim\fP pointer to image 
+.RE
+.PP
+
+.SS "void r1b_erode (\fBr1b_im_t\fP * im, \fBr1b_im_t\fP * kern)"
+
+.PP
+perform morphological erosion on an image 
+.PP
+\fBParameters\fP
+.RS 4
+\fIim\fP pointer to image 
+.br
+\fIkern\fP pointer to kernel 
 .RE
 .PP
 
@@ -1194,6 +1347,24 @@ send an image to a thermal printer for printing using LPR command
 .RE
 .PP
 
+.SS "\fBr1b_im_t\fP r1b_make_kernel (int ksize, int mode)"
+
+.PP
+generate a specified convolution matrix for image processing 
+.PP
+\fBParameters\fP
+.RS 4
+\fIksize\fP kernel size, will be automatically rounded up to an odd integer 
+.br
+\fImode\fP morphological kernels: R1B_KERN_ELLIPSE, R1B_KERN_CROSS, R1B_KERN_RECT; convolutional kernels: R1B_KERN_GAUSS, R1B_KERN_GAUSS1D; 
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+kernal as image type 
+.RE
+.PP
+
 .SS "void r1b_make_tmp0 (int w, int h)"
 
 .PP
@@ -1469,9 +1640,9 @@ resample image to a different size
 .RS 4
 \fIim\fP pointer to image 
 .br
-\fIw\fP new width 
+\fIw\fP new width, pass R1B_INFER to scale proportionally per new height 
 .br
-\fIh\fP new height 
+\fIh\fP new height, pass R1B_INFER to scale proportionally per new width 
 .br
 \fImode\fP the alogirthm, either R1B_SMPL_NN or R1B_SMPL_BILINEAR 
 .RE
@@ -1536,6 +1707,34 @@ write image to file, supported: jpg, png, bmp
 \fIpath\fP the file path 
 .br
 \fIim\fP an image 
+.RE
+.PP
+
+.SS "void r1b_sobel (\fBr1b_im_t\fP * im, float * out_gradient_directions)"
+
+.PP
+apply sobel edge detection to an image 
+.PP
+\fBParameters\fP
+.RS 4
+\fIim\fP pointer to image 
+.br
+\fIout_gradient_directions\fP optional: if non NULL, will be overwritten with gradient directions\&. (the source image will be written with gradient strength)\&. if only gradient directions are needed, pass im->data here 
+.RE
+.PP
+
+.SS "\fBr1b_mesh_t\fP r1b_sphere (float rad, int slices, int stacks)"
+
+.PP
+make a 3d sphere mesh sphere will be centred at 0,0,0 
+.PP
+\fBParameters\fP
+.RS 4
+\fIrad\fP radius 
+.br
+\fIslices\fP number of segments on x-z plane 
+.br
+\fIstacks\fP number of segments on y axis 
 .RE
 .PP
 
@@ -1636,6 +1835,36 @@ draw a 2D line with thickness
 \fIhalf_thick\fP set thickness of line to half_thick*2+1 
 .br
 \fImode\fP blit mode, see r1b_set for details 
+.RE
+.PP
+
+.SS "void r1b_threshold (\fBr1b_im_t\fP * im, float th)"
+
+.PP
+apply thresholding to an image 
+.PP
+\fBParameters\fP
+.RS 4
+\fIim\fP pointer to image 
+.br
+\fIth\fP the threshold\&. pass R1B_INFER to use Otsu's method for automatically picking optimal threshold 
+.RE
+.PP
+
+.SS "void r1b_threshold_adaptive (\fBr1b_im_t\fP * im, int rad, float bias, int blur_mode)"
+
+.PP
+apply adaptive threshold to an image 
+.PP
+\fBParameters\fP
+.RS 4
+\fIim\fP pointer to image 
+.br
+\fIrad\fP radius of neighborhood for each pixel 
+.br
+\fIbias\fP adjusts brightness: pixel is considered below the threshold if it is this factor lower than its neighborhood 
+.br
+\fIblur_mode\fP blurring kernel for averaging the neighborhood, e\&.g\&. R1B_BLUR_GAUSS, R1B_BLUR_BOX 
 .RE
 .PP
 
