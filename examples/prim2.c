@@ -39,7 +39,7 @@ int main(){
   r1b_snapshot("examples/out/prim2.png",&im);
 
   r1b_transpose_flip(&im);
-  // r1b_lpr("Printer_USB_Thermal_Printer",&im);
+  r1b_lpr("Printer_USB_Thermal_Printer",&im);
 
   r1b_free(&im);
   r1b_free(&depth);

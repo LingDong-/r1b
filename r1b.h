@@ -2555,12 +2555,12 @@ void r1b_compute_vertex_normals(r1b_mesh_t* mesh){
  * @param f         focal length of the camera
  * @param pttn      fill pattern, can be NULL depending on the shader specified
  * @param light     4-array: the first 3 are direction of the light, 4th is global illumination. can be NULL depending on shader specified
+ * @param wire_val  value (color) of the wireframe. might be unused depending on the shader specified
  * @param shdr      shader type to use, one of:
  *                  R1B_SHDR_NONE:   no shading will be done, if wireframe is also off, you will not be able to see anything;
  *                  R1B_SHDR_FLAT:   flat shading, use pattern fill to evenly fill all faces;
  *                  R1B_SHDR_NDOTL:  n-dot-l diffuse shading, quantized to 5 levels and filled with patterns of different shades;
  *                  R1B_SHDR_NDOTLF: n-dot-l shading but without quantization, returning grayscale, on which dithering can be further applied
- * @param wire_val  value (color) of the wireframe. might be unused depending on the shader specified
  * @param wire      type of wireframe, one of:
  *                  R1B_WIRE_FRONT: wireframe can be occluded;
  *                  R1B_WIRE_ALL:   all wireframes are drawn;
