@@ -1047,7 +1047,7 @@ r1b_destroy_font(&font_4thD);
 
   r1b_snapshot("examples/out/fonts.png",&im);
 
-  // r1b_lpr("Printer_USB_Thermal_Printer",&hstack);
+  r1b_lpr("Printer_USB_Thermal_Printer",&im);
 
   r1b_free(&im);
   r1b_cleanup();

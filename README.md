@@ -21,7 +21,14 @@
 - Python 3 binding available via SWIG!
 
 
+## Gallery
 
+Following images are made with r1b and printed with my SKY POS-5870 Thermal Receipt Printer:
+
+![](gallery/prim2.png)
+![](gallery/bottles.png)
+![](gallery/lsys.png)
+![](gallery/teapots.png)
 
 # Manual
 
