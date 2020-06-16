@@ -29,6 +29,8 @@ Following images are made with r1b and printed with my SKY POS-5870 Thermal Rece
 ![](gallery/bottles.png)
 ![](gallery/lsys.png)
 ![](gallery/teapots.png)
+![](gallery/colorcard.png)
+
 
 # Manual
 
@@ -50,15 +52,15 @@ Let's make a simple drawing!
 
 int main(){
     //initialize a new image of zeros
-    r1b_im_t im = r1b_zeros(384,384);
+    r1b_im_t im = r1b_zeros(128,128);
     
     //draw an ellipse
     r1b_ellipse(
         &im,    // pointer to the image
-        50,80,  // center coordinate
+        64,64,  // center coordinate
         40,60,  // radius on each axis
         M_PI/4, // rotation
-        R1B_PATTERN(BRICK), // cool pattern fill!
+        R1B_PATTERN(WAVES), // cool pattern fill!
         R1B_BLIT_SET // overwrite the pixels on the image
     );
     
@@ -72,6 +74,12 @@ int main(){
 }
 
 ```
+
+... and you should be able to see the tiny image in Fig.1:
+
+| Fig. 1  |  Fig. 2 | Fig. 3 | Fig. 4 |
+|---|---|---|---|
+|  ![](examples/out/manual/1.png) |  ![](examples/out/manual/2.png)  | ![](examples/out/manual/3.png)  | ![](examples/out/manual/4.png)  |
 
 
 Note that `build/r1b.h` is the concatenated version which contains the entire source code of [*stbi*](https://github.com/nothings/stb) library for image reading and writing. Alternatively, you can include the more compact `r1b.h` at top-level of this repo. You'll now have two options: To not use stbi at all (and perhaps use your own image library of preference), do:
@@ -89,39 +97,79 @@ Or, you can grab a copy of *stbi* from the [original author](https://github.com/
 #include "r1b.h"
 ```
 
+## Printing
+
+*If you're using r1b for something other than thermal printers, feel free to skip to the next section.*
+
+r1b offers 3 ways for outputting ESC/POS commands. We've mentioned the first one in the previous section, which is to use `r1b_encode2file` to write to a printable file to disk. Then if you have the printer properly configured with CUPS, you can type the following command in the terminal to print the design (subsituting `Printer_USB_Thermal_Printer` with the name of your printer):
+
+```bash
+lpr -PPrinter_USB_Thermal_Printer -o raw out.bin
+```
+
+Alternatively, r1b has a function that runs the command above for you from within C code.
+
+
+```c
+r1b_lpr("Printer_USB_Thermal_Printer",&im);
+```
+
+The third method returns an array of bytes without writing to file or invoking system commands:
+
+```c
+int num_bytes_written;
+
+char* bytes = r1b_encode(&im,&num_bytes_written);
+
+printf("%d bytes written!\n",num_bytes_written);
+
+// printf("%s\n",bytes); // vomit out the (non-human-readable) dump of bytes until first 0
+
+```
+
+### Setting up printer
+
+There're lots of resources on the internet, but here're some quick tips:
+
+- Download the `driver/zj80.ppd` included in this repo. I grabbed it from [here](https://github.com/klirichek/zj-58). Should work for many thermal printer models.
+- Install CUPS, goto `localhost:631` and add the driver
+- Quick test: `echo "hello world" | lpr -PPrinter_Thermal_Printer -o raw`. Again, subsitute with the name of your printer.
+
 
 ## Basic Shapes and Patterns
 
 ### Shapes
 
-We saw how to draw an ellipse in the last section, let's do a rectangle:
+We saw how to draw an ellipse in the last section, let's do a rectangle (Fig. 2):
 
 ```c
-r1b_im_t im = r1b_zeros(384,384);
 
 // draw a rectangle
 r1b_rect(&im,
-    10,  10,  // upper left corner
-    110,110,  // lower right corner
+    40,  40,  // upper left corner
+    88,  88,  // lower right corner
     R1B_PATTERN(GRAY4), // a different pattern fill
-    R1B_BLIT_SET,
+    R1B_BLIT_SET
 );
+    
 
 ```
 
-Let's draw a triangle on top of it, but instead of overwriting the pixels, we also can flip the pixels so we can tell between the shapes even if they have the same pattern fill:
+Let's draw a triangle on top of it, but instead of overwriting the pixels, we also can flip the pixels so we can see through the shape behind (Fig. 3):
 
 ```c
 // draw a triangle
 r1b_triangle(&im,
     10,  10,  // first vertex
-    110,110,  // second vertex
-    110,110,  // third vertex
-    R1B_PATTERN(GRAY4),
-    R1B_BLIT_FLIP,  // <-- flip the pixels!
+    110,125,  // second vertex
+    100, 20,  // third vertex
+    R1B_PATTERN(GRAY3),
+    R1B_BLIT_FLIP   // <-- flip the pixels!
 );
 
 ```
+
+As you can see the flip mode creates some pretty interesting new patterns!
 
 For most of the operations, you'll be able to set the blit flag for different compositing methods, available options are:
 
@@ -130,22 +178,21 @@ For most of the operations, you'll be able to set the blit flag for different co
 - `R1B_BLIT_OR`:   turn on the pixel if it's off;
 - `R1B_BLIT_ADD`:  add the value to the original.
 
-Lines:
+Lines (Fig. 4):
 
 ```c
 // perfect 1 pixel line
 r1b_line(&im,
-    0,    0, // first endpoint
+    28, 28,  // first endpoint
     100,100, // second endpoint
     1,       // color
     R1B_BLIT_SET
 );
 
 // a bolder line
-// perfect 1 pixel line
 r1b_thick_line(&im,
-    0,    0, // first endpoint
-    100,100, // second endpoint
+    100, 28, // first endpoint
+    28, 100, // second endpoint
     1,       // color
     2,       // that much thicker on either side of the line
     R1B_BLIT_SET
@@ -194,21 +241,26 @@ r1b_im_t* get_nth_pattern(n){
   return NULL;
 }
 int main(){
-    r1b_im_t im = r1b_zeros(384,2400);
+    r1b_im_t im = r1b_zeros(1200,100);
     
     for (int i = 0; i < 24; i++){
         r1b_im_t* pttn = get_nth_pattern(i);
         // draw a rect for each pattern
         r1b_rect(&im,
-            0,       i*100,   // upper left corner
-            384, (i+1)*100,   // lower right corner
+                i*50, 0,      // upper left corner
+            (i+1)*50, im.h,   // lower right corner
             pttn, R1B_BLIT_SET);
     }
     
     r1b_snapshot("out.png",&im);
+    
+    r1b_transpose_flip(&im); // rotate image by 90° so the dimensions fit into the printer
     r1b_encode2file("out.bin",&im);
+    
 }
 ```
+
+![](examples/out/manual/5.png)
 
 Note that the pattern names (e.g. `SOLID`, `GRAY5` etc.) does not pollute the global namespace, they're used as verbatim strings in the macro and does not have meaning elsewhere. (Look into the source code for `R1B_PATTERN()` and see the magic!)
 

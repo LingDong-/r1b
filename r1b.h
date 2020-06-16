@@ -1339,7 +1339,7 @@ void r1b_triangle(r1b_im_t* im,float x0 ,float y0 ,float x1 ,float y1 ,float x2 
 
   int y; for (y=ymin; y <= ymax; y++){
     int x; for (x=xmin; x <= xmax; x++){
-      if (R1B_PT_IN_TRI((float)x+0.5,(float)y+0.5,x0,y0,x1,y1,x2,y2)){
+      if (R1B_PT_IN_TRI((float)x,(float)y,x0,y0,x1,y1,x2,y2)){
         float v = pttn->data[(y % pttn->h) * pttn->w + (x % pttn->w)];
         r1b_set(im,x,y,v,mode);
       }
@@ -1385,10 +1385,10 @@ void r1b_rect(r1b_im_t* im,float x0 ,float y0 ,float x1 ,float y1 , r1b_im_t* pt
  */
 void r1b_line(r1b_im_t* im, float x0 ,float y0 ,float x1 ,float y1, float val, int mode){
 
-  int sx0 = (int)round(x0-0.5);
-  int sy0 = (int)round(y0-0.5);
-  int sx1 = (int)round(x1-0.5);
-  int sy1 = (int)round(y1-0.5);
+  int sx0 = (int)round(x0);
+  int sy0 = (int)round(y0);
+  int sx1 = (int)round(x1);
+  int sy1 = (int)round(y1);
   int dx  = sx1 > sx0 ? 1 : -1; // x increment
   int dy  = sy1 > sy0 ? 1 : -1; // y increment
   
@@ -1978,7 +1978,7 @@ void r1b_ellipse(r1b_im_t* im, float cx, float cy, float rx, float ry, float ang
         fx = cx + (gx * costh - gy * sinth);
         fy = cy + (gx * sinth + gy * costh);
       }
-      if R1B_PT_IN_ELL(cx,cy,fx+0.5,fy+0.5,rx,ry){
+      if R1B_PT_IN_ELL(cx,cy,fx,fy,rx,ry){
         float v = pttn->data[(y % pttn->h) * pttn->w + (x % pttn->w)];
         r1b_set(im,x,y,v,mode);
       }  
@@ -2313,9 +2313,9 @@ void r1b_triangle3d(r1b_im_t* im, r1b_im_t* depth, float f, float x0, float y0, 
   int y; for (y=ymin; y <= ymax; y++){
     int x; for (x=xmin; x <= xmax; x++){
 
-      float det= R1B_BARY_DET(x+0.5,y+0.5,xx0,yy0,xx1,yy1,xx2,yy2);
-      float u  = R1B_BARY_U(  x+0.5,y+0.5,xx0,yy0,xx1,yy1,xx2,yy2)/det;
-      float v  = R1B_BARY_V(  x+0.5,y+0.5,xx0,yy0,xx1,yy1,xx2,yy2)/det;
+      float det= R1B_BARY_DET(x,y,xx0,yy0,xx1,yy1,xx2,yy2);
+      float u  = R1B_BARY_U(  x,y,xx0,yy0,xx1,yy1,xx2,yy2)/det;
+      float v  = R1B_BARY_V(  x,y,xx0,yy0,xx1,yy1,xx2,yy2)/det;
       float w  = (1-u-v);
 
       if (!(0 <= u && u <= 1 && 0 <= v && v<= 1 && 0 <= w && w <= 1)){
@@ -2367,10 +2367,10 @@ void r1b_line3d(r1b_im_t* im, r1b_im_t* depth, int depth_read, float f, float x0
   float xx1 = v1[0]+im->w/2;
   float yy1 =-v1[1]+im->h/2;
 
-  int sx0 = (int)round(xx0-0.5);
-  int sy0 = (int)round(yy0-0.5);
-  int sx1 = (int)round(xx1-0.5);
-  int sy1 = (int)round(yy1-0.5);
+  int sx0 = (int)round(xx0);
+  int sy0 = (int)round(yy0);
+  int sx1 = (int)round(xx1);
+  int sy1 = (int)round(yy1);
   int dx  = sx1 > sx0 ? 1 : -1; // x increment
   int dy  = sy1 > sy0 ? 1 : -1; // y increment
   
@@ -2871,7 +2871,7 @@ r1b_im_t r1b_make_kernel(int ksize, int mode){
       }
     }
   }else if (mode == R1B_KERN_ELLIPSE){
-    r1b_ellipse(&im, (ksize-1)/2+0.5, (ksize-1)/2+0.5, (ksize-1)/2+0.5, (ksize-1)/2+0.5, 0, R1B_PATTERN(SOLID), R1B_BLIT_SET);
+    r1b_ellipse(&im, (ksize-1)/2, (ksize-1)/2, (ksize-1)/2, (ksize-1)/2, 0, R1B_PATTERN(SOLID), R1B_BLIT_SET);
   }else if (mode == R1B_KERN_CROSS){
     int i; for (i = 0; i < ksize; i++){
       im.data[i*ksize+ksize/2]=1;
