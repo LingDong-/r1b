@@ -2000,8 +2000,8 @@ void r1b_ellipse(r1b_im_t* im, float cx, float cy, float rx, float ry, float ang
  */
 void r1b_line_ellipse(r1b_im_t* im, float cx, float cy, float rx, float ry, float ang, int detail, float val, int mode){
   
-  float costh = cos(ang);
-  float sinth = sin(ang);
+  float costh = cos(-ang);
+  float sinth = sin(-ang);
   float px, py;
 
   int i; for (i=0; i < detail+1; i ++){

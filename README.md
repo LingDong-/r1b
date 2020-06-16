@@ -79,7 +79,7 @@ int main(){
 
 | Fig. 1  |  Fig. 2 | Fig. 3 | Fig. 4 |
 |---|---|---|---|
-|  ![](examples/out/manual/1.png) |  ![](examples/out/manual/2.png)  | ![](examples/out/manual/3.png)  | ![](examples/out/manual/4.png)  |
+|  ![](examples/out/manual/01.png) |  ![](examples/out/manual/02.png)  | ![](examples/out/manual/03.png)  | ![](examples/out/manual/04.png)  |
 
 
 Note that `build/r1b.h` is the concatenated version which contains the entire source code of [*stbi*](https://github.com/nothings/stb) library for image reading and writing. Alternatively, you can include the more compact `r1b.h` at top-level of this repo. You'll now have two options: To not use stbi at all (and perhaps use your own image library of preference), do:
@@ -260,7 +260,9 @@ int main(){
 }
 ```
 
-![](examples/out/manual/5.png)
+![](examples/out/manual/05.png)
+
+Fig. 5
 
 Note that the pattern names (e.g. `SOLID`, `GRAY5` etc.) does not pollute the global namespace, they're used as verbatim strings in the macro and does not have meaning elsewhere. (Look into the source code for `R1B_PATTERN()` and see the magic!)
 
@@ -289,18 +291,22 @@ r1b_im_t pttn = r1b_from_array(
 
 r1b uses 1-channel row-major floating point arrays for storing all image data, we'll go into more of that later.
 
-Use it to draw the ellipse in the first demo:
+Use it to draw the ellipse in the first demo (Fig. 6):
 
 ```c
-r1b_ellipse(&im, 50,80,40,60,M_PI/4, 
+r1b_ellipse(&im, 64,64,40,60,M_PI/4, 
     &pttn, // <-- pointer to our pattern!
     R1B_BLIT_SET);
 
 ```
 
+| Fig. 6  |  Fig. 7 | Fig. 8 | Fig. 9 |
+|---|---|---|---|
+|  ![](examples/out/manual/06.png) |  ![](examples/out/manual/07.png)  | ![](examples/out/manual/08.png)  | ![](examples/out/manual/09.png)  |
+
 ## More shapes
 
-We can drawn an arbitrary polygon defined by arrays of coordinates.
+We can drawn an arbitrary polygon defined by arrays of coordinates. (Fig. 7)
 
 ```c
 float X[] = {50, 80, 110, 10, 50, 20}; // x coordinates
@@ -316,7 +322,7 @@ r1b_polygon(&im,
 
 The `R1B_POLY_CONVEX` mode can be passed in place of `R1B_POLY_CONCAVE` if we're sure that our polygon is convex for a speed up; otherwise `R1B_POLY_CANCAVE` works for both situations.
 
-We can draw an outline for the polygon as a polyline with `r1b_lines`:
+We can draw an outline for the polygon as a polyline with `r1b_lines` (Fig. 8):
 
 ```c
 r1b_lines(&im,
@@ -329,12 +335,12 @@ r1b_lines(&im,
 ```
 
 
-We can also draw outline for our previous ellipse with `r1b_line_ellipse`:
+We can also draw outline for our previous ellipse with `r1b_line_ellipse` (Fig. 9):
 
 ```c
 r1b_line_ellipse(
     &im,    // pointer to the image
-    50,80,  // center coordinate
+    64,64,  // center coordinate
     40,60,  // radius on each axis
     M_PI/4, // rotation
     32,     // detail, number of segments used to approximate the ellipse
@@ -345,19 +351,19 @@ r1b_line_ellipse(
 
 ## Images and the Image Struct
 
-Here's how to read images from disk, resize them (so it fits in the thermal printer) and dither them to 1 bit:
+Here's how to read images from disk, resize them (so it fits in the thermal printer) and dither them to 1 bit (Fig. 10):
 
 ```c
 // read from disk as grayscale
 r1b_im_t im = r1b_read("examples/assets/peppers.png");
 
 // `w` and `h` fields store the dimensions
-printf("width=%d height=%d\n",im->w,im->h);
+printf("width=%d height=%d\n",im.w,im.h);
 
 // resize the image
 r1b_resample(
     &im,       // pointer to image
-    384,       // width
+    128,       // width
     R1B_INFER, // height, we can use R1B_INFER to
                // scale proportionally based on given width
     R1B_SMPL_BILINEAR  // resampling method
@@ -368,12 +374,16 @@ r1b_resample(
 r1b_dither(&im, R1B_DTHR_FS);
 
 // we can also use ordered dithering for a more "retro" look
-// r1b_dither(&im, R1b_DTHR_ORD);
+// r1b_dither(&im, R1B_DTHR_ORD);
 
 // `im` is now dithered. save the output!
 r1b_snapshot("out.png",&im);
 
 ```
+
+![](examples/out/manual/10.png)
+
+Fig. 10
 
 
 In r1b, all images are internally stored as 1-channel row-major floating point array. Though r1b claims to be a library for 1-bit graphics, it is often necessary to operate on grayscale images before binarizing it to 1-bit using thresholding or dithering. Thefore, to avoid the inconvenience and inefficiency of constantly converting between types, we store even binary images as floating points, typically using 0.0 and 1.0 to mean on and off. This also makes it possible to abuse r1b as grayscale or even full RGB or RGBA processing. Most of the operations do not assume propeties of the pixels stored and merely copy the value around. So with a bit of bit-twiddling we can reinterpret the 32-bits of the float for anything, e.g. a hex color 0xAARRGGBB.
@@ -477,6 +487,13 @@ r1b_text(&im,
 );
 ```
 
+| Fig. 11 |
+|---|
+| ![](examples/out/manual/11.png) |
+
+
+
+
 To free memory allocated in the font:
 
 ```c
@@ -490,7 +507,7 @@ There are about 200 aditional bitmap fonts included in the `font` folder of this
 
 r1b contains a low-level minimalistic 3D engine. It is capable of rendering triangle meshes with and without wireframe, with flat shading (pattern fill) and lambertian shading (dither). The perspective camera is fixed at (0,0,0) with adjustable focal length. There're a set of builtin primitives such as 3d triangles, 3d lines, cubes, spheres, cylinders and cones, and the user can acquire more by either loading a model file in wavefront .obj format, or procedurally generate one. Many transformation matrix utilities such as rotation, translation, scaling are also provided for convenience. 
 
-Let's start with a sphere with flat shading
+Let's start with a sphere with flat shading (Fig. 12):
 
 ```c
 r1b_im_t im = r1b_zeros(384,384); // the image to render onto
@@ -507,8 +524,8 @@ r1b_mesh_t mesh = r1b_sphere(
 // position the mesh at a good place for rendering
 r1b_scale_rotate_translate(&mesh, 
   1,  1,1,  //scale
- -0.2,0,0,  //rotation (euler angles)
-  0,  0,5,  //we need a z-offset because camera is at (0,0,0)
+ -0.5,0,0,  //rotation (euler angles)
+  0,  0,4   //we need a z-offset because camera is at (0,0,0)
 );
     
 r1b_render_mesh(&im, &depth, &mesh, focal, 
@@ -527,7 +544,11 @@ r1b_destroy_mesh(&mesh); // free up memory
 
 ```
 
-We can add some "realism" by using a lambertian shader instead:
+| Fig. 12  |  Fig. 13 | Fig. 14 |
+|---|---|---|
+|  ![](examples/out/manual/12.png) |  ![](examples/out/manual/13.png)  | ![](examples/out/manual/14.png)  | 
+
+We can add some "realism" by using a lambertian shader instead (Fig. 13):
 
 ```c
 // directional light
@@ -582,7 +603,7 @@ r1b_mesh_t cone    = r1b_cone(0.5,0.5,1,20);    // radius-x, radius-z, height, s
 
 ```
 
-In addition to primitives, we can also load .OBJ files to a mesh:
+In addition to primitives, we can also load .OBJ files to a mesh (Fig. 14):
 
 
 ```c
@@ -592,7 +613,7 @@ r1b_mesh_t mesh = r1b_load_obj("examples/assets/teapot.obj");
 // resize mesh so it stays within (-1,-1,-1) and (1,1,1)
 r1b_normalize_mesh(&mesh);
 
-r1b_scale_rotate_translate(&mesh, 1,1,1, -0.2,0,0, 0,0,5); 
+r1b_scale_rotate_translate(&mesh, 1,1,1, -0.2,0,0, 0,0,6); 
 
 // optional: generate vertex normals for smoother shading effects
 // might cause problems with certain meshes
