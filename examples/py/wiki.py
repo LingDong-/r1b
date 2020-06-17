@@ -1,16 +1,12 @@
-import sys; sys.path.append("../")
+import sys; sys.path.append("../../swig")
 import os
 import re
 import r1b
 
 # person = "Pythagoras"
 # person = "Socrates"
-# person = "Plato"
-
-person = "Aristotle"
-# person = "Confucious"
-# person = "Friedrich_Nietzsche"
-
+person = "Plato"
+# person = "Aristotle"
 
 
 os.system("curl https://en.wikipedia.org/wiki/"+person+" > tmp.html")
@@ -110,9 +106,9 @@ for i in range(len(card)):
 		y += 16
 im.h = y
 
-r1b.snapshot("out/wiki.png",im)
+r1b.snapshot("../out/wiki.png",im)
 
-r1b.lpr("Printer_USB_Thermal_Printer",im);
+# r1b.lpr("Printer_USB_Thermal_Printer",im);
 
 r1b.destroy_font(fonth)
 r1b.destroy_font(fontb)

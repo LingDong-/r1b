@@ -2644,6 +2644,7 @@ void r1b_render_mesh(r1b_im_t* im, r1b_im_t* depth, r1b_mesh_t* mesh, float f, r
  * @param sx  x dimension
  * @param sy  y dimension
  * @param sz  z dimension
+ * @return    a new cube mesh
  */
 r1b_mesh_t r1b_cube(float sx, float sy, float sz){
   float rx = sx/2;
@@ -2708,6 +2709,7 @@ r1b_mesh_t r1b_cube(float sx, float sy, float sz){
  * @param rad      radius
  * @param slices   number of segments on x-z plane 
  * @param stacks   number of segments on y axis
+ * @return         a new sphere mesh
  */
 r1b_mesh_t r1b_sphere(float rad, int slices, int stacks){
   r1b_mesh_t mesh;
@@ -2755,6 +2757,7 @@ r1b_mesh_t r1b_sphere(float rad, int slices, int stacks){
  * @param rz       radius on z axis
  * @param h        height
  * @param slices   number of segments
+ * @return         a new cylinder mesh
  */
 r1b_mesh_t r1b_cylinder(float rx, float rz, float h, int slices){
   r1b_mesh_t mesh;
@@ -2799,6 +2802,7 @@ r1b_mesh_t r1b_cylinder(float rx, float rz, float h, int slices){
  * @param rz       radius on z axis
  * @param h        height
  * @param slices   number of segments
+ * @return         a new cone mesh
  */
 r1b_mesh_t r1b_cone(float rx, float rz, float h, int slices){
   r1b_mesh_t mesh;

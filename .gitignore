@@ -5,4 +5,5 @@ a.out
 r1b_tmp
 py/examples/r1b_tmp
 doc/html/*
+doc/xml/*
 examples/manual.c

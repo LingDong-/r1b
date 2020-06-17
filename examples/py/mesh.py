@@ -1,14 +1,14 @@
 import os
-import sys; sys.path.append("../")
+import sys; sys.path.append("../../swig")
 from math import sin,cos
 
 import r1b
 
-font = r1b.load_font_hex("../../fonts/unifont.hex",16,0,65535,r1b.FLAG_SORTED);
+font = r1b.load_font_hex("../fonts/unifont.hex",16,0,65535,r1b.FLAG_SORTED);
 
 hstack = r1b.zeros(3000,384);
 
-mesh = r1b.load_obj("../../examples/assets/teapot.obj");
+mesh = r1b.load_obj("../assets/teapot.obj");
 r1b.normalize_mesh(mesh);
 
 rotx = -0.2;
@@ -101,7 +101,7 @@ r1b.blit(hstack,im,r1b.PTTN_SOLID,2500,0,3000,384,0,0,r1b.BRDR_WRAP,r1b.BLIT_SET
 r1b.free(im);
 r1b.free(depth);
 
-r1b.snapshot("out/teapots.png",hstack);
+r1b.snapshot("../out/teapots.png",hstack);
 
 r1b.transpose_flip(hstack);
 

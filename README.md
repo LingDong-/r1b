@@ -6,6 +6,9 @@
 
 *A thermal-printer-oriented, 1 bit graphics renderer for 2D and 3D.*
 
+
+### [Examples](./examples) | [API Reference](API.md) | [Manual](#manual)
+
 <br>
 <hr>
 
@@ -96,6 +99,8 @@ Or, you can grab a copy of *stbi* from the [original author](https://github.com/
 #define R1B_CONFIG_STBIW_PATH "path/to/stb_image_write.h"
 #include "r1b.h"
 ```
+
+At this point, you can choose to follow the manual, or simply take a look at the [examples](./examples) and start from there!
 
 ## Printing
 

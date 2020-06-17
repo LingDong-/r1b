@@ -1,4 +1,4 @@
-.TH "/Users/admin/proj/r1b/r1b.h" 3 "Sat Jun 13 2020" "Version 0.0.1" "r1b" \" -*- nroff -*-
+.TH "/Users/admin/proj/r1b/r1b.h" 3 "Wed Jun 17 2020" "Version 0.0.1" "r1b" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -527,6 +527,14 @@
 .br
 .RI "transform mesh with a 4x4 transformation matrix "
 .ti -1c
+.RI "void \fBr1b_scale_rotate_translate\fP (\fBr1b_mesh_t\fP *mesh, float sx, float sy, float sz, float rx, float ry, float rz, float x, float y, float z)"
+.br
+.RI "scale mesh, apply rotation by euler angles (x-y-z order) and translate mesh "
+.ti -1c
+.RI "\fBr1b_mesh_t\fP \fBr1b_copy_of_mesh\fP (\fBr1b_mesh_t\fP *mesh)"
+.br
+.RI "make a deep clone of given mesh "
+.ti -1c
 .RI "void \fBr1b_compute_vertex_normals\fP (\fBr1b_mesh_t\fP *mesh)"
 .br
 .RI "estimate vertex normals for a mesh and store result in mesh->norms "
@@ -852,6 +860,11 @@ make a 3d cone mesh cone will be centred at 0,0,0
 \fIslices\fP number of segments 
 .RE
 .PP
+\fBReturns\fP
+.RS 4
+a new cone mesh 
+.RE
+.PP
 
 .SS "void r1b_conv2d (\fBr1b_im_t\fP * im, \fBr1b_im_t\fP * kern, int border)"
 
@@ -876,6 +889,22 @@ duplicates an image
 \fBParameters\fP
 .RS 4
 \fIim\fP pointer to image 
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+the clone 
+.RE
+.PP
+
+.SS "\fBr1b_mesh_t\fP r1b_copy_of_mesh (\fBr1b_mesh_t\fP * mesh)"
+
+.PP
+make a deep clone of given mesh 
+.PP
+\fBParameters\fP
+.RS 4
+\fImesh\fP pointer to mesh 
 .RE
 .PP
 \fBReturns\fP
@@ -911,6 +940,11 @@ make a 3d cube mesh cube will be centred at 0,0,0
 \fIsz\fP z dimension 
 .RE
 .PP
+\fBReturns\fP
+.RS 4
+a new cube mesh 
+.RE
+.PP
 
 .SS "\fBr1b_mesh_t\fP r1b_cylinder (float rx, float rz, float h, int slices)"
 
@@ -926,6 +960,11 @@ make a 3d cylinder mesh cylinder will be centred at 0,0,0
 \fIh\fP height 
 .br
 \fIslices\fP number of segments 
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+a new cylinder mesh 
 .RE
 .PP
 
@@ -1623,9 +1662,9 @@ draw a 3d mesh to the image, projected with pinhole camera model
 .br
 \fIlight\fP 4-array: the first 3 are direction of the light, 4th is global illumination\&. can be NULL depending on shader specified 
 .br
-\fIshdr\fP shader type to use, one of: R1B_SHDR_NONE: no shading will be done, if wireframe is also off, you will not be able to see anything; R1B_SHDR_FLAT: flat shading, use pattern fill to evenly fill all faces; R1B_SHDR_NDOTL: n-dot-l diffuse shading, quantized to 5 levels and filled with patterns of different shades; R1B_SHDR_NDOTLF: n-dot-l shading but without quantization, returning grayscale, on which dithering can be further applied 
-.br
 \fIwire_val\fP value (color) of the wireframe\&. might be unused depending on the shader specified 
+.br
+\fIshdr\fP shader type to use, one of: R1B_SHDR_NONE: no shading will be done, if wireframe is also off, you will not be able to see anything; R1B_SHDR_FLAT: flat shading, use pattern fill to evenly fill all faces; R1B_SHDR_NDOTL: n-dot-l diffuse shading, quantized to 5 levels and filled with patterns of different shades; R1B_SHDR_NDOTLF: n-dot-l shading but without quantization, returning grayscale, on which dithering can be further applied 
 .br
 \fIwire\fP type of wireframe, one of: R1B_WIRE_FRONT: wireframe can be occluded; R1B_WIRE_ALL: all wireframes are drawn; R1B_WIRE_NONE: no wireframe is drawn\&. 
 .RE
@@ -1675,6 +1714,35 @@ resample image to a different size
 \fIw\fP new width 
 .br
 \fIh\fP new height 
+.RE
+.PP
+
+.SS "void r1b_scale_rotate_translate (\fBr1b_mesh_t\fP * mesh, float sx, float sy, float sz, float rx, float ry, float rz, float x, float y, float z)"
+
+.PP
+scale mesh, apply rotation by euler angles (x-y-z order) and translate mesh a simplified interface to r1b_transform_mesh that covers many use cases\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fImesh\fP pointer to mesh 
+.br
+\fIsx\fP scale along x-axis 
+.br
+\fIsy\fP scale along y-axis 
+.br
+\fIsz\fP scale along z-axis 
+.br
+\fIrx\fP rotation around x-axis 
+.br
+\fIry\fP rotation around y-axis 
+.br
+\fIrz\fP rotation around z-axis 
+.br
+\fIx\fP translation along x-axis 
+.br
+\fIy\fP translation along y-axis 
+.br
+\fIz\fP translation along z-axis 
 .RE
 .PP
 
@@ -1735,6 +1803,11 @@ make a 3d sphere mesh sphere will be centred at 0,0,0
 \fIslices\fP number of segments on x-z plane 
 .br
 \fIstacks\fP number of segments on y axis 
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+a new sphere mesh 
 .RE
 .PP
 
