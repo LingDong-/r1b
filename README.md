@@ -5,6 +5,9 @@
 
 *A thermal-printer-oriented, 1 bit graphics renderer for 2D and 3D.*
 
+<br>
+<hr>
+
 <p align="center"><b>
 <a href="./examples">Examples</a> / <a href="/API.md">API Reference</a> / <a href="#manual">Manual</a>
 </b></p>
