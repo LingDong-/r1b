@@ -37,6 +37,8 @@ Following images are made with r1b and printed with my SKY POS-5870 Thermal Rece
 ![](gallery/colorcard.png)
 
 
+Code for generating them can be found in the [examples](./examples) folder.
+
 # Manual
 
 ## Getting Started
