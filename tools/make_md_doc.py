@@ -1,6 +1,6 @@
 import xml.etree.cElementTree as ET
 
-print("# r1b API documentation")
+print("# r1b API Reference")
 
 tree = ET.ElementTree(file="../doc/xml/r1b_8h.xml")
 sections = tree.iter("sectiondef")

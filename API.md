@@ -1,4 +1,4 @@
-# r1b API documentation
+# r1b API Reference
 ### `void r1b_cleanup()`
 ```
 free all resources allocated internally by the library 
