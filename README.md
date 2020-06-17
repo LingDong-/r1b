@@ -3,13 +3,11 @@
 
 # r1b
 
-
 *A thermal-printer-oriented, 1 bit graphics renderer for 2D and 3D.*
 
-<br>
-<hr>
-
 ### [Examples](./examples) / [API Reference](API.md) / [Manual](#manual)
+
+## Features
 
 - Header-only C99 library with no dependencies.
 - Builtin ESC/POS (printing commands) support.
