@@ -760,3 +760,15 @@ r1b_beadstead(&im,
 	3 //nth power of 2, 2^3 = 8x
 );
 ```
+
+
+## SWIG Interface
+
+r1b has a swig interface so you can call it from Python! To compile it, go to `swig/compile.sh`, modify the paths, and run the shell script. Currently it is configured for my macOS 10.14 and Python 3.7, but should work for other systems with some modification. There's also a `swig/compile_pi.sh` that is configured for Raspbian 8.
+
+
+For a list of python examples, check out [./examples](./examples).
+
+## License
+
+The main library (r1b.h) is under MIT (check the bottom of r1b.h for details). Other files and folders may have a different license listed in them.

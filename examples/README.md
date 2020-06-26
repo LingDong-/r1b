@@ -103,6 +103,8 @@ Python version of mesh.c
 
 ![](out/teapots.png)
 
+------------------------
+
 
 ### [wiki.py](wiki.py)
 
