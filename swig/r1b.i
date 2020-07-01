@@ -112,8 +112,14 @@ void r1b_destroy_mesh(r1b_mesh_t* mesh);
 void r1b_triangle3d(r1b_im_t* im, r1b_im_t* depth, float f, float x0, float y0, float z0, float x1 ,float y1, float z1, float x2 ,float y2, float z2, r1b_im_t* pttn, float* vals, int mode );
 void r1b_line3d(r1b_im_t* im, r1b_im_t* depth, int depth_read, float f, float x0 ,float y0, float z0, float x1 ,float y1, float z1, float val, int mode);
 void r1b_transform_mesh(r1b_mesh_t* mesh, float* mat);
+void r1b_scale_rotate_translate(r1b_mesh_t* mesh, float sx, float sy, float sz, float rx, float ry, float rz, float x, float y, float z);
+r1b_mesh_t r1b_copy_of_mesh(r1b_mesh_t* mesh);
 void r1b_compute_vertex_normals(r1b_mesh_t* mesh);
 void r1b_render_mesh(r1b_im_t* im, r1b_im_t* depth, r1b_mesh_t* mesh, float f, r1b_im_t* pttn, float* light, int wire_val, int shdr, int wire);
+r1b_mesh_t r1b_cube(float sx, float sy, float sz);
+r1b_mesh_t r1b_sphere(float rad, int slices, int stacks);
+r1b_mesh_t r1b_cylinder(float rx, float rz, float h, int slices);
+r1b_mesh_t r1b_cone(float rx, float rz, float h, int slices);
 r1b_im_t r1b_make_kernel(int ksize, int mode);
 void r1b_conv2d(r1b_im_t* im, r1b_im_t* kern, int border) ;
 void r1b_dilate(r1b_im_t* im, r1b_im_t* kern);
@@ -235,8 +241,14 @@ void r1b_destroy_mesh(r1b_mesh_t* mesh);
 void r1b_triangle3d(r1b_im_t* im, r1b_im_t* depth, float f, float x0, float y0, float z0, float x1 ,float y1, float z1, float x2 ,float y2, float z2, r1b_im_t* pttn, float* vals, int mode );
 void r1b_line3d(r1b_im_t* im, r1b_im_t* depth, int depth_read, float f, float x0 ,float y0, float z0, float x1 ,float y1, float z1, float val, int mode);
 void r1b_transform_mesh(r1b_mesh_t* mesh, float* mat);
+void r1b_scale_rotate_translate(r1b_mesh_t* mesh, float sx, float sy, float sz, float rx, float ry, float rz, float x, float y, float z);
+r1b_mesh_t r1b_copy_of_mesh(r1b_mesh_t* mesh);
 void r1b_compute_vertex_normals(r1b_mesh_t* mesh);
 void r1b_render_mesh(r1b_im_t* im, r1b_im_t* depth, r1b_mesh_t* mesh, float f, r1b_im_t* pttn, float* light, int wire_val, int shdr, int wire);
+r1b_mesh_t r1b_cube(float sx, float sy, float sz);
+r1b_mesh_t r1b_sphere(float rad, int slices, int stacks);
+r1b_mesh_t r1b_cylinder(float rx, float rz, float h, int slices);
+r1b_mesh_t r1b_cone(float rx, float rz, float h, int slices);
 r1b_im_t r1b_make_kernel(int ksize, int mode);
 void r1b_conv2d(r1b_im_t* im, r1b_im_t* kern, int border) ;
 void r1b_dilate(r1b_im_t* im, r1b_im_t* kern);
@@ -301,7 +313,13 @@ normalize_mesh=r1b_normalize_mesh
 destroy_mesh=r1b_destroy_mesh
 triangle3d=r1b_triangle3d
 line3d=r1b_line3d
+scale_rotate_translate=r1b_scale_rotate_translate
+copy_of_mesh=r1b_copy_of_mesh
 compute_vertex_normals=r1b_compute_vertex_normals
+cube=r1b_cube
+sphere=r1b_sphere
+cylinder=r1b_cylinder
+cone=r1b_cone
 make_kernel=r1b_make_kernel
 conv2d=r1b_conv2d
 dilate=r1b_dilate

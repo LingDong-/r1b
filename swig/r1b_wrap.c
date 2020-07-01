@@ -3080,8 +3080,14 @@ void r1b_destroy_mesh(r1b_mesh_t* mesh);
 void r1b_triangle3d(r1b_im_t* im, r1b_im_t* depth, float f, float x0, float y0, float z0, float x1 ,float y1, float z1, float x2 ,float y2, float z2, r1b_im_t* pttn, float* vals, int mode );
 void r1b_line3d(r1b_im_t* im, r1b_im_t* depth, int depth_read, float f, float x0 ,float y0, float z0, float x1 ,float y1, float z1, float val, int mode);
 void r1b_transform_mesh(r1b_mesh_t* mesh, float* mat);
+void r1b_scale_rotate_translate(r1b_mesh_t* mesh, float sx, float sy, float sz, float rx, float ry, float rz, float x, float y, float z);
+r1b_mesh_t r1b_copy_of_mesh(r1b_mesh_t* mesh);
 void r1b_compute_vertex_normals(r1b_mesh_t* mesh);
 void r1b_render_mesh(r1b_im_t* im, r1b_im_t* depth, r1b_mesh_t* mesh, float f, r1b_im_t* pttn, float* light, int wire_val, int shdr, int wire);
+r1b_mesh_t r1b_cube(float sx, float sy, float sz);
+r1b_mesh_t r1b_sphere(float rad, int slices, int stacks);
+r1b_mesh_t r1b_cylinder(float rx, float rz, float h, int slices);
+r1b_mesh_t r1b_cone(float rx, float rz, float h, int slices);
 r1b_im_t r1b_make_kernel(int ksize, int mode);
 void r1b_conv2d(r1b_im_t* im, r1b_im_t* kern, int border) ;
 void r1b_dilate(r1b_im_t* im, r1b_im_t* kern);
@@ -7517,6 +7523,122 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_r1b_scale_rotate_translate(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  r1b_mesh_t *arg1 = (r1b_mesh_t *) 0 ;
+  float arg2 ;
+  float arg3 ;
+  float arg4 ;
+  float arg5 ;
+  float arg6 ;
+  float arg7 ;
+  float arg8 ;
+  float arg9 ;
+  float arg10 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  float val2 ;
+  int ecode2 = 0 ;
+  float val3 ;
+  int ecode3 = 0 ;
+  float val4 ;
+  int ecode4 = 0 ;
+  float val5 ;
+  int ecode5 = 0 ;
+  float val6 ;
+  int ecode6 = 0 ;
+  float val7 ;
+  int ecode7 = 0 ;
+  float val8 ;
+  int ecode8 = 0 ;
+  float val9 ;
+  int ecode9 = 0 ;
+  float val10 ;
+  int ecode10 = 0 ;
+  PyObject *swig_obj[10] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "r1b_scale_rotate_translate", 10, 10, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_r1b_mesh_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "r1b_scale_rotate_translate" "', argument " "1"" of type '" "r1b_mesh_t *""'"); 
+  }
+  arg1 = (r1b_mesh_t *)(argp1);
+  ecode2 = SWIG_AsVal_float(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "r1b_scale_rotate_translate" "', argument " "2"" of type '" "float""'");
+  } 
+  arg2 = (float)(val2);
+  ecode3 = SWIG_AsVal_float(swig_obj[2], &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "r1b_scale_rotate_translate" "', argument " "3"" of type '" "float""'");
+  } 
+  arg3 = (float)(val3);
+  ecode4 = SWIG_AsVal_float(swig_obj[3], &val4);
+  if (!SWIG_IsOK(ecode4)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "r1b_scale_rotate_translate" "', argument " "4"" of type '" "float""'");
+  } 
+  arg4 = (float)(val4);
+  ecode5 = SWIG_AsVal_float(swig_obj[4], &val5);
+  if (!SWIG_IsOK(ecode5)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode5), "in method '" "r1b_scale_rotate_translate" "', argument " "5"" of type '" "float""'");
+  } 
+  arg5 = (float)(val5);
+  ecode6 = SWIG_AsVal_float(swig_obj[5], &val6);
+  if (!SWIG_IsOK(ecode6)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode6), "in method '" "r1b_scale_rotate_translate" "', argument " "6"" of type '" "float""'");
+  } 
+  arg6 = (float)(val6);
+  ecode7 = SWIG_AsVal_float(swig_obj[6], &val7);
+  if (!SWIG_IsOK(ecode7)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode7), "in method '" "r1b_scale_rotate_translate" "', argument " "7"" of type '" "float""'");
+  } 
+  arg7 = (float)(val7);
+  ecode8 = SWIG_AsVal_float(swig_obj[7], &val8);
+  if (!SWIG_IsOK(ecode8)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode8), "in method '" "r1b_scale_rotate_translate" "', argument " "8"" of type '" "float""'");
+  } 
+  arg8 = (float)(val8);
+  ecode9 = SWIG_AsVal_float(swig_obj[8], &val9);
+  if (!SWIG_IsOK(ecode9)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode9), "in method '" "r1b_scale_rotate_translate" "', argument " "9"" of type '" "float""'");
+  } 
+  arg9 = (float)(val9);
+  ecode10 = SWIG_AsVal_float(swig_obj[9], &val10);
+  if (!SWIG_IsOK(ecode10)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode10), "in method '" "r1b_scale_rotate_translate" "', argument " "10"" of type '" "float""'");
+  } 
+  arg10 = (float)(val10);
+  r1b_scale_rotate_translate(arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9,arg10);
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_r1b_copy_of_mesh(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  r1b_mesh_t *arg1 = (r1b_mesh_t *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  r1b_mesh_t result;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_r1b_mesh_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "r1b_copy_of_mesh" "', argument " "1"" of type '" "r1b_mesh_t *""'"); 
+  }
+  arg1 = (r1b_mesh_t *)(argp1);
+  result = r1b_copy_of_mesh(arg1);
+  resultobj = SWIG_NewPointerObj((r1b_mesh_t *)memcpy((r1b_mesh_t *)calloc(1,sizeof(r1b_mesh_t)),&result,sizeof(r1b_mesh_t)), SWIGTYPE_p_r1b_mesh_t, SWIG_POINTER_OWN |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_r1b_compute_vertex_normals(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   r1b_mesh_t *arg1 = (r1b_mesh_t *) 0 ;
@@ -7618,6 +7740,174 @@ SWIGINTERN PyObject *_wrap_r1b_render_mesh(PyObject *SWIGUNUSEDPARM(self), PyObj
   arg9 = (int)(val9);
   r1b_render_mesh(arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9);
   resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_r1b_cube(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  float arg1 ;
+  float arg2 ;
+  float arg3 ;
+  float val1 ;
+  int ecode1 = 0 ;
+  float val2 ;
+  int ecode2 = 0 ;
+  float val3 ;
+  int ecode3 = 0 ;
+  PyObject *swig_obj[3] ;
+  r1b_mesh_t result;
+  
+  if (!SWIG_Python_UnpackTuple(args, "r1b_cube", 3, 3, swig_obj)) SWIG_fail;
+  ecode1 = SWIG_AsVal_float(swig_obj[0], &val1);
+  if (!SWIG_IsOK(ecode1)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "r1b_cube" "', argument " "1"" of type '" "float""'");
+  } 
+  arg1 = (float)(val1);
+  ecode2 = SWIG_AsVal_float(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "r1b_cube" "', argument " "2"" of type '" "float""'");
+  } 
+  arg2 = (float)(val2);
+  ecode3 = SWIG_AsVal_float(swig_obj[2], &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "r1b_cube" "', argument " "3"" of type '" "float""'");
+  } 
+  arg3 = (float)(val3);
+  result = r1b_cube(arg1,arg2,arg3);
+  resultobj = SWIG_NewPointerObj((r1b_mesh_t *)memcpy((r1b_mesh_t *)calloc(1,sizeof(r1b_mesh_t)),&result,sizeof(r1b_mesh_t)), SWIGTYPE_p_r1b_mesh_t, SWIG_POINTER_OWN |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_r1b_sphere(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  float arg1 ;
+  int arg2 ;
+  int arg3 ;
+  float val1 ;
+  int ecode1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  int val3 ;
+  int ecode3 = 0 ;
+  PyObject *swig_obj[3] ;
+  r1b_mesh_t result;
+  
+  if (!SWIG_Python_UnpackTuple(args, "r1b_sphere", 3, 3, swig_obj)) SWIG_fail;
+  ecode1 = SWIG_AsVal_float(swig_obj[0], &val1);
+  if (!SWIG_IsOK(ecode1)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "r1b_sphere" "', argument " "1"" of type '" "float""'");
+  } 
+  arg1 = (float)(val1);
+  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "r1b_sphere" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = (int)(val2);
+  ecode3 = SWIG_AsVal_int(swig_obj[2], &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "r1b_sphere" "', argument " "3"" of type '" "int""'");
+  } 
+  arg3 = (int)(val3);
+  result = r1b_sphere(arg1,arg2,arg3);
+  resultobj = SWIG_NewPointerObj((r1b_mesh_t *)memcpy((r1b_mesh_t *)calloc(1,sizeof(r1b_mesh_t)),&result,sizeof(r1b_mesh_t)), SWIGTYPE_p_r1b_mesh_t, SWIG_POINTER_OWN |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_r1b_cylinder(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  float arg1 ;
+  float arg2 ;
+  float arg3 ;
+  int arg4 ;
+  float val1 ;
+  int ecode1 = 0 ;
+  float val2 ;
+  int ecode2 = 0 ;
+  float val3 ;
+  int ecode3 = 0 ;
+  int val4 ;
+  int ecode4 = 0 ;
+  PyObject *swig_obj[4] ;
+  r1b_mesh_t result;
+  
+  if (!SWIG_Python_UnpackTuple(args, "r1b_cylinder", 4, 4, swig_obj)) SWIG_fail;
+  ecode1 = SWIG_AsVal_float(swig_obj[0], &val1);
+  if (!SWIG_IsOK(ecode1)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "r1b_cylinder" "', argument " "1"" of type '" "float""'");
+  } 
+  arg1 = (float)(val1);
+  ecode2 = SWIG_AsVal_float(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "r1b_cylinder" "', argument " "2"" of type '" "float""'");
+  } 
+  arg2 = (float)(val2);
+  ecode3 = SWIG_AsVal_float(swig_obj[2], &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "r1b_cylinder" "', argument " "3"" of type '" "float""'");
+  } 
+  arg3 = (float)(val3);
+  ecode4 = SWIG_AsVal_int(swig_obj[3], &val4);
+  if (!SWIG_IsOK(ecode4)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "r1b_cylinder" "', argument " "4"" of type '" "int""'");
+  } 
+  arg4 = (int)(val4);
+  result = r1b_cylinder(arg1,arg2,arg3,arg4);
+  resultobj = SWIG_NewPointerObj((r1b_mesh_t *)memcpy((r1b_mesh_t *)calloc(1,sizeof(r1b_mesh_t)),&result,sizeof(r1b_mesh_t)), SWIGTYPE_p_r1b_mesh_t, SWIG_POINTER_OWN |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_r1b_cone(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  float arg1 ;
+  float arg2 ;
+  float arg3 ;
+  int arg4 ;
+  float val1 ;
+  int ecode1 = 0 ;
+  float val2 ;
+  int ecode2 = 0 ;
+  float val3 ;
+  int ecode3 = 0 ;
+  int val4 ;
+  int ecode4 = 0 ;
+  PyObject *swig_obj[4] ;
+  r1b_mesh_t result;
+  
+  if (!SWIG_Python_UnpackTuple(args, "r1b_cone", 4, 4, swig_obj)) SWIG_fail;
+  ecode1 = SWIG_AsVal_float(swig_obj[0], &val1);
+  if (!SWIG_IsOK(ecode1)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "r1b_cone" "', argument " "1"" of type '" "float""'");
+  } 
+  arg1 = (float)(val1);
+  ecode2 = SWIG_AsVal_float(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "r1b_cone" "', argument " "2"" of type '" "float""'");
+  } 
+  arg2 = (float)(val2);
+  ecode3 = SWIG_AsVal_float(swig_obj[2], &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "r1b_cone" "', argument " "3"" of type '" "float""'");
+  } 
+  arg3 = (float)(val3);
+  ecode4 = SWIG_AsVal_int(swig_obj[3], &val4);
+  if (!SWIG_IsOK(ecode4)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "r1b_cone" "', argument " "4"" of type '" "int""'");
+  } 
+  arg4 = (int)(val4);
+  result = r1b_cone(arg1,arg2,arg3,arg4);
+  resultobj = SWIG_NewPointerObj((r1b_mesh_t *)memcpy((r1b_mesh_t *)calloc(1,sizeof(r1b_mesh_t)),&result,sizeof(r1b_mesh_t)), SWIGTYPE_p_r1b_mesh_t, SWIG_POINTER_OWN |  0 );
   return resultobj;
 fail:
   return NULL;
@@ -8069,8 +8359,14 @@ static PyMethodDef SwigMethods[] = {
 	 { "r1b_triangle3d", _wrap_r1b_triangle3d, METH_VARARGS, NULL},
 	 { "r1b_line3d", _wrap_r1b_line3d, METH_VARARGS, NULL},
 	 { "r1b_transform_mesh", _wrap_r1b_transform_mesh, METH_VARARGS, NULL},
+	 { "r1b_scale_rotate_translate", _wrap_r1b_scale_rotate_translate, METH_VARARGS, NULL},
+	 { "r1b_copy_of_mesh", _wrap_r1b_copy_of_mesh, METH_O, NULL},
 	 { "r1b_compute_vertex_normals", _wrap_r1b_compute_vertex_normals, METH_O, NULL},
 	 { "r1b_render_mesh", _wrap_r1b_render_mesh, METH_VARARGS, NULL},
+	 { "r1b_cube", _wrap_r1b_cube, METH_VARARGS, NULL},
+	 { "r1b_sphere", _wrap_r1b_sphere, METH_VARARGS, NULL},
+	 { "r1b_cylinder", _wrap_r1b_cylinder, METH_VARARGS, NULL},
+	 { "r1b_cone", _wrap_r1b_cone, METH_VARARGS, NULL},
 	 { "r1b_make_kernel", _wrap_r1b_make_kernel, METH_VARARGS, NULL},
 	 { "r1b_conv2d", _wrap_r1b_conv2d, METH_VARARGS, NULL},
 	 { "r1b_dilate", _wrap_r1b_dilate, METH_VARARGS, NULL},

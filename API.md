@@ -5,8 +5,6 @@ free all resources allocated internally by the library
 ```
 |parameter|description|
 |---|---|
-|`w`|```width ```|
-|`h`|```height ```|
 
 
 

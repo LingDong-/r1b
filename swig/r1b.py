@@ -372,11 +372,29 @@ def r1b_line3d(im, depth, depth_read, f, x0, y0, z0, x1, y1, z1, val, mode):
 def r1b_transform_mesh(mesh, mat):
     return _r1b.r1b_transform_mesh(mesh, mat)
 
+def r1b_scale_rotate_translate(mesh, sx, sy, sz, rx, ry, rz, x, y, z):
+    return _r1b.r1b_scale_rotate_translate(mesh, sx, sy, sz, rx, ry, rz, x, y, z)
+
+def r1b_copy_of_mesh(mesh):
+    return _r1b.r1b_copy_of_mesh(mesh)
+
 def r1b_compute_vertex_normals(mesh):
     return _r1b.r1b_compute_vertex_normals(mesh)
 
 def r1b_render_mesh(im, depth, mesh, f, pttn, light, wire_val, shdr, wire):
     return _r1b.r1b_render_mesh(im, depth, mesh, f, pttn, light, wire_val, shdr, wire)
+
+def r1b_cube(sx, sy, sz):
+    return _r1b.r1b_cube(sx, sy, sz)
+
+def r1b_sphere(rad, slices, stacks):
+    return _r1b.r1b_sphere(rad, slices, stacks)
+
+def r1b_cylinder(rx, rz, h, slices):
+    return _r1b.r1b_cylinder(rx, rz, h, slices)
+
+def r1b_cone(rx, rz, h, slices):
+    return _r1b.r1b_cone(rx, rz, h, slices)
 
 def r1b_make_kernel(ksize, mode):
     return _r1b.r1b_make_kernel(ksize, mode)
@@ -457,7 +475,13 @@ normalize_mesh=r1b_normalize_mesh
 destroy_mesh=r1b_destroy_mesh
 triangle3d=r1b_triangle3d
 line3d=r1b_line3d
+scale_rotate_translate=r1b_scale_rotate_translate
+copy_of_mesh=r1b_copy_of_mesh
 compute_vertex_normals=r1b_compute_vertex_normals
+cube=r1b_cube
+sphere=r1b_sphere
+cylinder=r1b_cylinder
+cone=r1b_cone
 make_kernel=r1b_make_kernel
 conv2d=r1b_conv2d
 dilate=r1b_dilate

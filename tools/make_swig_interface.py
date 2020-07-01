@@ -169,8 +169,8 @@ NULL = nullptr()
 """
 # print(code)
 
-open("../py/r1b.i",'w').write(code)
+open("../swig/r1b.i",'w').write(code)
 
 
-os.system("cd ../py; sh compile.sh")
+os.system("cd ../swig; sh compile.sh")
 

@@ -332,8 +332,6 @@ void r1b_make_tmp1(int w, int h){
 
 /**
  * @brief free all resources allocated internally by the library
- * @param w  width
- * @param h  height
  */
 void r1b_cleanup(){
   if (r1b_tmp0){

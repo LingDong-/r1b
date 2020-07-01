@@ -9657,8 +9657,6 @@ void r1b_make_tmp1(int w, int h){
 
 /**
  * @brief free all resources allocated internally by the library
- * @param w  width
- * @param h  height
  */
 void r1b_cleanup(){
   if (r1b_tmp0){
@@ -10664,7 +10662,7 @@ void r1b_triangle(r1b_im_t* im,float x0 ,float y0 ,float x1 ,float y1 ,float x2 
 
   int y; for (y=ymin; y <= ymax; y++){
     int x; for (x=xmin; x <= xmax; x++){
-      if (R1B_PT_IN_TRI((float)x+0.5,(float)y+0.5,x0,y0,x1,y1,x2,y2)){
+      if (R1B_PT_IN_TRI((float)x,(float)y,x0,y0,x1,y1,x2,y2)){
         float v = pttn->data[(y % pttn->h) * pttn->w + (x % pttn->w)];
         r1b_set(im,x,y,v,mode);
       }
@@ -10710,10 +10708,10 @@ void r1b_rect(r1b_im_t* im,float x0 ,float y0 ,float x1 ,float y1 , r1b_im_t* pt
  */
 void r1b_line(r1b_im_t* im, float x0 ,float y0 ,float x1 ,float y1, float val, int mode){
 
-  int sx0 = (int)round(x0-0.5);
-  int sy0 = (int)round(y0-0.5);
-  int sx1 = (int)round(x1-0.5);
-  int sy1 = (int)round(y1-0.5);
+  int sx0 = (int)round(x0);
+  int sy0 = (int)round(y0);
+  int sx1 = (int)round(x1);
+  int sy1 = (int)round(y1);
   int dx  = sx1 > sx0 ? 1 : -1; // x increment
   int dy  = sy1 > sy0 ? 1 : -1; // y increment
   
@@ -11303,7 +11301,7 @@ void r1b_ellipse(r1b_im_t* im, float cx, float cy, float rx, float ry, float ang
         fx = cx + (gx * costh - gy * sinth);
         fy = cy + (gx * sinth + gy * costh);
       }
-      if R1B_PT_IN_ELL(cx,cy,fx+0.5,fy+0.5,rx,ry){
+      if R1B_PT_IN_ELL(cx,cy,fx,fy,rx,ry){
         float v = pttn->data[(y % pttn->h) * pttn->w + (x % pttn->w)];
         r1b_set(im,x,y,v,mode);
       }  
@@ -11325,8 +11323,8 @@ void r1b_ellipse(r1b_im_t* im, float cx, float cy, float rx, float ry, float ang
  */
 void r1b_line_ellipse(r1b_im_t* im, float cx, float cy, float rx, float ry, float ang, int detail, float val, int mode){
   
-  float costh = cos(ang);
-  float sinth = sin(ang);
+  float costh = cos(-ang);
+  float sinth = sin(-ang);
   float px, py;
 
   int i; for (i=0; i < detail+1; i ++){
@@ -11638,9 +11636,9 @@ void r1b_triangle3d(r1b_im_t* im, r1b_im_t* depth, float f, float x0, float y0, 
   int y; for (y=ymin; y <= ymax; y++){
     int x; for (x=xmin; x <= xmax; x++){
 
-      float det= R1B_BARY_DET(x+0.5,y+0.5,xx0,yy0,xx1,yy1,xx2,yy2);
-      float u  = R1B_BARY_U(  x+0.5,y+0.5,xx0,yy0,xx1,yy1,xx2,yy2)/det;
-      float v  = R1B_BARY_V(  x+0.5,y+0.5,xx0,yy0,xx1,yy1,xx2,yy2)/det;
+      float det= R1B_BARY_DET(x,y,xx0,yy0,xx1,yy1,xx2,yy2);
+      float u  = R1B_BARY_U(  x,y,xx0,yy0,xx1,yy1,xx2,yy2)/det;
+      float v  = R1B_BARY_V(  x,y,xx0,yy0,xx1,yy1,xx2,yy2)/det;
       float w  = (1-u-v);
 
       if (!(0 <= u && u <= 1 && 0 <= v && v<= 1 && 0 <= w && w <= 1)){
@@ -11692,10 +11690,10 @@ void r1b_line3d(r1b_im_t* im, r1b_im_t* depth, int depth_read, float f, float x0
   float xx1 = v1[0]+im->w/2;
   float yy1 =-v1[1]+im->h/2;
 
-  int sx0 = (int)round(xx0-0.5);
-  int sy0 = (int)round(yy0-0.5);
-  int sx1 = (int)round(xx1-0.5);
-  int sy1 = (int)round(yy1-0.5);
+  int sx0 = (int)round(xx0);
+  int sy0 = (int)round(yy0);
+  int sx1 = (int)round(xx1);
+  int sy1 = (int)round(yy1);
   int dx  = sx1 > sx0 ? 1 : -1; // x increment
   int dy  = sy1 > sy0 ? 1 : -1; // y increment
   
@@ -11756,6 +11754,66 @@ void r1b_transform_mesh(r1b_mesh_t* mesh, float* mat){
     mesh->Y[i] = v[1];
     mesh->Z[i] = v[2];
   }
+}
+
+/**
+ * @brief scale mesh, apply rotation by euler angles (x-y-z order) and translate mesh
+ * 
+ * a simplified interface to r1b_transform_mesh that covers many use cases.
+ * @param mesh pointer to mesh
+ * @param sx   scale along x-axis
+ * @param sy   scale along y-axis
+ * @param sz   scale along z-axis
+ * @param rx   rotation around x-axis
+ * @param ry   rotation around y-axis
+ * @param rz   rotation around z-axis
+ * @param x    translation along x-axis
+ * @param y    translation along y-axis
+ * @param z    translation along z-axis
+ */
+void r1b_scale_rotate_translate(r1b_mesh_t* mesh, float sx, float sy, float sz, float rx, float ry, float rz, float x, float y, float z){
+  float scl[]  = R1B_MAT_SCAL(sx,sy,sz);
+  float rotx[] = R1B_MAT_ROTX(rx);
+  float roty[] = R1B_MAT_ROTY(ry);
+  float rotz[] = R1B_MAT_ROTZ(rz);
+
+  float rotxy[]= R1B_MAT_MULT(roty,rotx);
+  float rot[]  = R1B_MAT_MULT(rotz,rotxy);
+  float trl[]  = R1B_MAT_TRSL(x,y,z);
+  float tfm[]  = R1B_MAT_MULT(trl,rot);
+
+  r1b_transform_mesh(mesh, scl);
+  r1b_transform_mesh(mesh, tfm);
+}
+
+/**
+ * @brief make a deep clone of given mesh
+ * 
+ * @param mesh pointer to mesh
+ * @return     the clone
+ */
+r1b_mesh_t r1b_copy_of_mesh(r1b_mesh_t* mesh){
+  r1b_mesh_t dst;
+  dst.n_vtx = mesh->n_vtx;
+  dst.n_tri = mesh->n_tri;
+  dst.X =  (float*)malloc(sizeof(float)*dst.n_vtx);
+  dst.Y =  (float*)malloc(sizeof(float)*dst.n_vtx);
+  dst.Z =  (float*)malloc(sizeof(float)*dst.n_vtx);
+  dst.tris = (int*)malloc(sizeof(int)*3*dst.n_tri);
+
+  memcpy(dst.X,   mesh->X,   sizeof(float)*dst.n_vtx);
+  memcpy(dst.Y,   mesh->Y,   sizeof(float)*dst.n_vtx);
+  memcpy(dst.Z,   mesh->Z,   sizeof(float)*dst.n_vtx);
+  memcpy(dst.tris,mesh->tris,sizeof(int)*3*dst.n_tri);
+
+  if (mesh->norms){
+    dst.norms = (float*)malloc(sizeof(float)*3*dst.n_vtx);
+    memcpy(dst.norms,mesh->norms,sizeof(float)*3*dst.n_vtx);
+  }else{
+    dst.norms = NULL;
+  }
+
+  return dst;
 }
 
 #define R1B_V3_CROSS(a1,a2,a3,b1,b2,b3) {(a2)*(b3)-(a3)*(b2),(a3)*(b1)-(a1)*(b3),(a1)*(b2)-(a2)*(b1)}
@@ -11820,12 +11878,12 @@ void r1b_compute_vertex_normals(r1b_mesh_t* mesh){
  * @param f         focal length of the camera
  * @param pttn      fill pattern, can be NULL depending on the shader specified
  * @param light     4-array: the first 3 are direction of the light, 4th is global illumination. can be NULL depending on shader specified
+ * @param wire_val  value (color) of the wireframe. might be unused depending on the shader specified
  * @param shdr      shader type to use, one of:
  *                  R1B_SHDR_NONE:   no shading will be done, if wireframe is also off, you will not be able to see anything;
  *                  R1B_SHDR_FLAT:   flat shading, use pattern fill to evenly fill all faces;
  *                  R1B_SHDR_NDOTL:  n-dot-l diffuse shading, quantized to 5 levels and filled with patterns of different shades;
  *                  R1B_SHDR_NDOTLF: n-dot-l shading but without quantization, returning grayscale, on which dithering can be further applied
- * @param wire_val  value (color) of the wireframe. might be unused depending on the shader specified
  * @param wire      type of wireframe, one of:
  *                  R1B_WIRE_FRONT: wireframe can be occluded;
  *                  R1B_WIRE_ALL:   all wireframes are drawn;
@@ -11909,6 +11967,7 @@ void r1b_render_mesh(r1b_im_t* im, r1b_im_t* depth, r1b_mesh_t* mesh, float f, r
  * @param sx  x dimension
  * @param sy  y dimension
  * @param sz  z dimension
+ * @return    a new cube mesh
  */
 r1b_mesh_t r1b_cube(float sx, float sy, float sz){
   float rx = sx/2;
@@ -11973,6 +12032,7 @@ r1b_mesh_t r1b_cube(float sx, float sy, float sz){
  * @param rad      radius
  * @param slices   number of segments on x-z plane 
  * @param stacks   number of segments on y axis
+ * @return         a new sphere mesh
  */
 r1b_mesh_t r1b_sphere(float rad, int slices, int stacks){
   r1b_mesh_t mesh;
@@ -12020,6 +12080,7 @@ r1b_mesh_t r1b_sphere(float rad, int slices, int stacks){
  * @param rz       radius on z axis
  * @param h        height
  * @param slices   number of segments
+ * @return         a new cylinder mesh
  */
 r1b_mesh_t r1b_cylinder(float rx, float rz, float h, int slices){
   r1b_mesh_t mesh;
@@ -12064,6 +12125,7 @@ r1b_mesh_t r1b_cylinder(float rx, float rz, float h, int slices){
  * @param rz       radius on z axis
  * @param h        height
  * @param slices   number of segments
+ * @return         a new cone mesh
  */
 r1b_mesh_t r1b_cone(float rx, float rz, float h, int slices){
   r1b_mesh_t mesh;
@@ -12136,7 +12198,7 @@ r1b_im_t r1b_make_kernel(int ksize, int mode){
       }
     }
   }else if (mode == R1B_KERN_ELLIPSE){
-    r1b_ellipse(&im, (ksize-1)/2+0.5, (ksize-1)/2+0.5, (ksize-1)/2+0.5, (ksize-1)/2+0.5, 0, R1B_PATTERN(SOLID), R1B_BLIT_SET);
+    r1b_ellipse(&im, (ksize-1)/2, (ksize-1)/2, (ksize-1)/2, (ksize-1)/2, 0, R1B_PATTERN(SOLID), R1B_BLIT_SET);
   }else if (mode == R1B_KERN_CROSS){
     int i; for (i = 0; i < ksize; i++){
       im.data[i*ksize+ksize/2]=1;
