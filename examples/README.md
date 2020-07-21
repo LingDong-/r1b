@@ -97,7 +97,7 @@ Render a long scroll of Chinese text
 
 ## Python
 
-### [mesh.py](mesh.py)
+### [mesh.py](py/mesh.py)
 
 Python version of mesh.c
 
@@ -106,7 +106,7 @@ Python version of mesh.c
 ------------------------
 
 
-### [wiki.py](wiki.py)
+### [wiki.py](py/wiki.py)
 
 Pull wikipedia pages about historical figures and print the intro card.
 
